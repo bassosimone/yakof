@@ -155,6 +155,7 @@ def main():
         ),
         conditions={},  # No special conditions
         ensemble_parameters={
+            "base_service_capacity": phasespace.NormalDistribution(4, 1),
             "seat_turnover_rate": phasespace.NormalDistribution(1.4, 0.1),
             "sitin_service_rate": phasespace.NormalDistribution(10, 1),
             "takeaway_service_rate": phasespace.NormalDistribution(40, 4),
