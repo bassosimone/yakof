@@ -60,7 +60,6 @@ class EnumValue(graph.constant):
     This type exists primarily to make the type system more precise when
     dealing with enum values in the computation graph.
     """
-    pass
 
 
 class ModelEnum:

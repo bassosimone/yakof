@@ -30,7 +30,10 @@ def build_cafe_model():
     # Weather impacts on seating!
     m.define_placeholder_enum("weather", "sunny", "rainy")
 
-    # Seating capacity
+    # Time of day impact on the service
+    m.define_placeholder_enum("time", "morning", "lunch", "afternoon", "evening")
+
+    # Seating capacity (weather dependent)
     m.tensors.indoor_seating = m.placeholder(
         default_value=10,
         description="Number of indoor seats",
@@ -49,23 +52,43 @@ def build_cafe_model():
         (True, m.tensors.indoor_seating),
     )
 
-    # Service capacity
-    m.tensors.service_capacity = m.placeholder(
+    # Service capacity (time-dependent!)
+    m.tensors.base_service_capacity = m.placeholder(
         default_value=4,
         description="Number of servers in the café",
         unit="servers",
     )
+    m.tensors.service_capacity = graph.multi_clause_where(
+        (m.tensors.time == m.enums.time.morning, m.tensors.base_service_capacity * 2),
+        (m.tensors.time == m.enums.time.lunch, m.tensors.base_service_capacity * 3),
+        (m.tensors.time == m.enums.time.afternoon, m.tensors.base_service_capacity),
+        (True, m.tensors.base_service_capacity * 0.5),
+    )
 
-    # Service rates
-    m.tensors.takeaway_service_rate = m.placeholder(
+    # Service rates (also depend on whether we are at rush hours)
+    m.tensors.base_takeaway_service_rate = m.placeholder(
         default_value=40,
         description="Number of takeaway customers a server can handle per hour",
         unit="customers/hour",
     )
-    m.tensors.sitin_service_rate = m.placeholder(
+    m.tensors.base_sitin_service_rate = m.placeholder(
         default_value=10,
         description="Number of sit-in customers a server can handle per hour",
         unit="customers/hour",
+    )
+
+    # Service rates vary by time (servers work faster during rush hours)
+    m.tensors.efficiency_factor = graph.multi_clause_where(
+        (m.tensors.time == m.enums.time.morning, 1.2),
+        (m.tensors.time == m.enums.time.lunch, 1.3),
+        (m.tensors.time == m.enums.time.afternoon, 1.0),
+        (True, 0.9),
+    )
+    m.tensors.takeaway_service_rate = (
+        m.tensors.base_takeaway_service_rate * m.tensors.efficiency_factor
+    )
+    m.tensors.sitin_service_rate = (
+        m.tensors.base_sitin_service_rate * m.tensors.efficiency_factor
     )
 
     # Seating utilization factor
@@ -135,10 +158,20 @@ def main():
             "seat_turnover_rate": phasespace.NormalDistribution(1.4, 0.1),
             "sitin_service_rate": phasespace.NormalDistribution(10, 1),
             "takeaway_service_rate": phasespace.NormalDistribution(40, 4),
-            "weather": phasespace.DiscreteDistribution({
-                model.enums.weather.sunny: 0.8,
-                model.enums.weather.rainy: 0.2,
-            }),
+            "time": phasespace.DiscreteDistribution(
+                (
+                    model.enums.time.morning,
+                    model.enums.time.lunch,
+                    model.enums.time.afternoon,
+                    model.enums.time.evening,
+                )
+            ),
+            "weather": phasespace.DiscreteDistribution(
+                {
+                    model.enums.weather.sunny: 0.8,
+                    model.enums.weather.rainy: 0.2,
+                }
+            ),
         },
         observables=observables,
         n_samples=1000,
