@@ -144,7 +144,7 @@ def _format(node: graph.Tensor, toplev: bool) -> str:
         return f"mean({_format(node.x, False)}, axis={node.axis})"
 
     if isinstance(node, graph.multi_clause_where):
-        cases = [f"({_format(c, False)}, {_format(v, False)})" for c,v in node.cases]
+        cases = [f"({_format(c, False)}, {_format(v, False)})" for c, v in node.cases]
         return f"multi_clause_where({', '.join(cases)})"
 
     # TODO(bassosimone): add more node types here if we see
