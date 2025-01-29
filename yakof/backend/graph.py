@@ -524,6 +524,7 @@ class cond(multi_clause_where):
     pass
 
 
+@deprecated("uniform_rvs should be invoked before instantiating the model")
 class uniform_rvs(Tensor):
     """Generate uniform random values."""
 
@@ -562,6 +563,7 @@ class uniform_cdf(Tensor):
         return DType.FLOAT64
 
 
+@deprecated("normal_rvs should be invoked before instantiating the model")
 class normal_rvs(Tensor):
     """Generate normal (Gaussian) random values."""
 
