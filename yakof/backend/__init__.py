@@ -53,7 +53,7 @@ The module is organized as follows:
 
 4. `tensorflow_engine` implements evaluation using TensorFlow.
 
-5. `orientation.py` contains oriented tensors (which helps to ensure
+5. `oriented.py` contains oriented tensors (which helps to ensure
 one can only operate on homogeneus tensors).
 
 5. `pretty.py` implements pretty-formatting the computation graph.
@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
 from . import graph
 from . import engine
 from . import numpy_engine
-from . import orientation
+from . import oriented
 from . import pretty
 
-__all__ = ["graph", "engine", "numpy_engine", "orientation", "pretty"]
+__all__ = ["graph", "engine", "numpy_engine", "oriented", "pretty"]

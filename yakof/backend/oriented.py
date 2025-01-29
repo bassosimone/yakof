@@ -74,69 +74,69 @@ class Tensor[O]:
 
     # Arithmetic operators
     def __add__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.add(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.add(self.t, self.ensure_tensor(other).t))
 
     def __radd__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.add(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.add(self.ensure_tensor(other).t, self.t))
 
     def __sub__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.subtract(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.subtract(self.t, self.ensure_tensor(other).t))
 
     def __rsub__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.subtract(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.subtract(self.ensure_tensor(other).t, self.t))
 
     def __mul__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.multiply(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.multiply(self.t, self.ensure_tensor(other).t))
 
     def __rmul__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.multiply(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.multiply(self.ensure_tensor(other).t, self.t))
 
     def __truediv__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.divide(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.divide(self.t, self.ensure_tensor(other).t))
 
     def __rtruediv__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.divide(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.divide(self.ensure_tensor(other).t, self.t))
 
     # Comparison operators
     def __eq__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:  # type: ignore
-        return Tensor[O](graph.equal(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.equal(self.t, self.ensure_tensor(other).t))
 
     def __ne__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:  # type: ignore
-        return Tensor[O](graph.not_equal(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.not_equal(self.t, self.ensure_tensor(other).t))
 
     def __lt__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.less(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.less(self.t, self.ensure_tensor(other).t))
 
     def __le__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.less_equal(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.less_equal(self.t, self.ensure_tensor(other).t))
 
     def __gt__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.greater(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.greater(self.t, self.ensure_tensor(other).t))
 
     def __ge__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.greater_equal(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.greater_equal(self.t, self.ensure_tensor(other).t))
 
     # Logical operators
     def __and__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.logical_and(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.logical_and(self.t, self.ensure_tensor(other).t))
 
     def __rand__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.logical_and(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.logical_and(self.ensure_tensor(other).t, self.t))
 
     def __or__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.logical_or(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.logical_or(self.t, self.ensure_tensor(other).t))
 
     def __ror__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.logical_or(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.logical_or(self.ensure_tensor(other).t, self.t))
 
     def __xor__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.logical_xor(self.t, self.ensure_tensor(other).t))
+        return type(self)(graph.logical_xor(self.t, self.ensure_tensor(other).t))
 
     def __rxor__(self, other: Tensor[O] | ScalarValue) -> Tensor[O]:
-        return Tensor[O](graph.logical_xor(self.ensure_tensor(other).t, self.t))
+        return type(self)(graph.logical_xor(self.ensure_tensor(other).t, self.t))
 
     def __invert__(self) -> Tensor[O]:
-        return Tensor[O](graph.logical_not(self.t))
+        return type(self)(graph.logical_not(self.t))
 
 
 class Field[O]:
@@ -155,33 +155,19 @@ class Field[O]:
     def __init__(self):
         self._tensors: Dict[str, Tensor[O]] = {}
 
-    def __setattr__(self, name: str, value: Tensor[O]):
+    def __setattr__(self, name: str, value: Tensor[O] | graph.Tensor):
         if name.startswith("_"):
             # Use parent class's __setattr__ for private attributes
             super().__setattr__(name, value)
             return
+        if isinstance(value, graph.Tensor):
+            value = Tensor[O](value)
         self._tensors[name] = value
+        value.t.name = name
         super().__setattr__(name, value)
 
     def __getattr__(self, name: str) -> Tensor[O]:
         raise AttributeError(f"{type(self)} has no attribute {name}")
-
-    # Tensor creation methods
-    def constant(self, value: ScalarValue, shape: Shape | None = None) -> Tensor[O]:
-        """Create a constant tensor with this field's orientation."""
-        return Tensor[O](graph.constant(value, shape))
-
-    def placeholder(
-        self,
-        name: str = "",
-        dtype: DType | None = None,
-        default_value: Tensor[O] | ScalarValue | None = None,
-    ) -> Tensor[O]:
-        """Create a placeholder tensor with this field's orientation."""
-        graph_default = (
-            default_value.t if isinstance(default_value, Tensor) else default_value
-        )
-        return Tensor[O](graph.placeholder(name, dtype, graph_default))
 
     # Tensor operations
     def reshape(self, tensor: Tensor[O], shape: Shape) -> Tensor[O]:
