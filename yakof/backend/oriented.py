@@ -164,7 +164,7 @@ class Field[O]:
     def __init__(self, registry: TensorRegistry):
         self._registry = registry
 
-    def __setattr__(self, name: str, value: Tensor[O] | graph.Tensor):
+    def __setattr__(self, name: str, value: Tensor[O]):
         if name.startswith("_"):
             # Use parent class's __setattr__ for private attributes
             super().__setattr__(name, value)
