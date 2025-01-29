@@ -147,6 +147,12 @@ def _format(node: graph.Tensor, toplev: bool) -> str:
         cases = [f"({_format(c, False)}, {_format(v, False)})" for c, v in node.cases]
         return f"multi_clause_where({', '.join(cases)})"
 
+    elif isinstance(node, graph.exp):
+        return f"exp({_format(node.x, False)})"
+
+    elif isinstance(node, (graph.power, graph.pow)):
+        return f"power({_format(node.x, False)}, {_format(node.y, False)})"
+
     # TODO(bassosimone): add more node types here if we see
     # that pretty printing them leads to `unknown`.
 

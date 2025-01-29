@@ -285,3 +285,23 @@ class Field[O]:
                 Tensor[O].ensure_tensor(y).t,
             )
         )
+
+    def exp(self, x: Tensor[O] | ScalarValue) -> Tensor[O]:
+        """Element-wise exponential."""
+        return Tensor[O](graph.exp(Tensor[O].ensure_tensor(x).t))
+
+    def power(
+        self, x: Tensor[O] | ScalarValue, y: Tensor[O] | ScalarValue
+    ) -> Tensor[O]:
+        """Element-wise power function."""
+        return Tensor[O](
+            graph.power(Tensor[O].ensure_tensor(x).t, Tensor[O].ensure_tensor(y).t)
+        )
+
+    def pow(self, x: Tensor[O] | ScalarValue, y: Tensor[O] | ScalarValue) -> Tensor[O]:
+        """Alias for power for compatibility with NumPy."""
+        return self.power(x, y)
+
+    def log(self, tensor: Tensor[O] | ScalarValue) -> Tensor[O]:
+        """Element-wise logarithm while preserving orientation."""
+        return Tensor[O](graph.log(Tensor[O].ensure_tensor(tensor).t))

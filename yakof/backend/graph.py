@@ -637,3 +637,44 @@ class reduce_mean(Tensor):
         if self.x.dtype in (DType.INT32, DType.INT64):
             return DType.FLOAT64
         return self.x.dtype
+
+
+class exp(Tensor):
+    """Element-wise exponential."""
+
+    def __init__(self, x: Tensor | ScalarValue):
+        super().__init__()
+        self.x = ensure_tensor(x)
+
+    @property
+    def dtype(self) -> DType:
+        return self.x.dtype
+
+
+class power(Tensor):
+    """Element-wise power function."""
+
+    def __init__(self, x: Tensor | ScalarValue, y: Tensor | ScalarValue):
+        super().__init__()
+        self.x = ensure_tensor(x)
+        self.y = ensure_tensor(y)
+
+    @property
+    def dtype(self) -> DType:
+        return promote_dtypes(self.x.dtype, self.y.dtype)
+
+
+class pow(power):
+    """Alias for power for compatibility with NumPy."""
+
+
+class log(Tensor):
+    """Element-wise natural logarithm."""
+
+    def __init__(self, x: Tensor | ScalarValue):
+        super().__init__()
+        self.x = ensure_tensor(x)
+
+    @property
+    def dtype(self) -> DType:
+        return self.x.dtype

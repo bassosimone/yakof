@@ -289,6 +289,17 @@ def _evaluate(
         elif isinstance(node, graph.reduce_mean):
             result = np.mean(_evaluate(node.x, bindings, cache), axis=node.axis)
 
+        elif isinstance(node, graph.exp):
+            result = np.exp(_evaluate(node.x, bindings, cache))
+
+        elif isinstance(node, (graph.power, graph.pow)):
+            result = np.power(
+                _evaluate(node.x, bindings, cache), _evaluate(node.y, bindings, cache)
+            )
+
+        elif isinstance(node, graph.log):
+            result = np.log(_evaluate(node.x, bindings, cache))
+
         else:
             raise TypeError(f"Unknown node type: {type(node)}")
 
