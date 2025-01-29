@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
-from typing import Dict, Generic
+from typing import Dict, Generic, Protocol, runtime_checkable
 from . import graph
 
 # Basic types inherited from graph module
@@ -139,6 +139,15 @@ class Tensor[O]:
         return type(self)(graph.logical_not(self.t))
 
 
+@runtime_checkable
+class TensorRegistry(Protocol):
+    """A registry for tensors keeping track of their insertion order.
+
+    The tensor passed to append_tensor SHOULD have its name set."""
+
+    def append_tensor(self, tensor: graph.Tensor) -> None: ...
+
+
 class Field[O]:
     """
     A field that acts as both a factory and container for tensors of a specific orientation.
@@ -152,8 +161,8 @@ class Field[O]:
            Typically an empty class like Horizontal or Vertical.
     """
 
-    def __init__(self):
-        self._tensors: Dict[str, Tensor[O]] = {}
+    def __init__(self, registry: TensorRegistry):
+        self._registry = registry
 
     def __setattr__(self, name: str, value: Tensor[O] | graph.Tensor):
         if name.startswith("_"):
@@ -162,8 +171,8 @@ class Field[O]:
             return
         if isinstance(value, graph.Tensor):
             value = Tensor[O](value)
-        self._tensors[name] = value
         value.t.name = name
+        self._registry.append_tensor(value.t)  # AFTER value.t.name
         super().__setattr__(name, value)
 
     def __getattr__(self, name: str) -> Tensor[O]:
