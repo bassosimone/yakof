@@ -148,17 +148,17 @@ class TensorRegistry(Protocol):
     def append_tensor(self, tensor: graph.Tensor) -> None: ...
 
 
-class Field[O]:
+class TensorSpace[O]:
     """
-    A field that acts as both a factory and container for tensors of a specific orientation.
+    Acts as both a factory and container for tensors of a specific orientation.
 
-    The field ensures type safety by only allowing operations between tensors
+    The tensor space ensures type safety by only allowing operations between tensors
     of the same orientation. It can also store tensors as attributes for
     convenient access and management.
 
     Type parameter:
-        O: A type used as a marker for the orientation of all tensors in this field.
-           Typically an empty class like Horizontal or Vertical.
+        O: A type used as a marker for the orientation of all tensors in this space.
+           Typically an empty class named, e.g., Horizontal or Vertical.
     """
 
     def __init__(self, registry: TensorRegistry):
