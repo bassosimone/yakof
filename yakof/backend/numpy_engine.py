@@ -118,13 +118,17 @@ def _get_operands(node: graph.Tensor) -> dict[str, graph.Tensor]:
 
 
 def _evaluate(
-    node: graph.Tensor, bindings: Bindings, cache: Cache, debug: bool = False
+    node: graph.Tensor,
+    bindings: Bindings,
+    cache: Cache,
+    debug: bool = False,
+    step: bool = False,
 ) -> Array:
     """Core evaluation function - pure and explicit."""
 
     # Check cache first
     if (cached := cache.get(node)) is not None:
-        if debug and node.name:
+        if debug:
             print(f"\n--- begin cached eval trace ---")
             print(f"→ Formula: {node.name}")
             print(f"→ Using cached value")
@@ -133,7 +137,7 @@ def _evaluate(
         return cached
 
     # Pre-evaluation debug info
-    if debug and node.name:
+    if debug:
         operands = _get_operands(node)
         print(f"\n--- begin eval trace ---")
         print(f"→ Formula: {node.name}")
@@ -145,6 +149,8 @@ def _evaluate(
             }
             print(f"→ Operand shapes: {shapes}")
         print(f"→ Beginning evaluation...")
+        if step:
+            input("Press Enter to continue...")
 
     # Evaluate node
     try:
@@ -304,13 +310,13 @@ def _evaluate(
             raise TypeError(f"Unknown node type: {type(node)}")
 
     except Exception as e:
-        if debug and node.name:
+        if debug:
             print(f"→ Evaluation failed: {str(e)}")
             print(f"--- end eval trace (failed) ---")
         raise
 
     # Post-evaluation debug info
-    if debug and node.name:
+    if debug:
         print(f"→ Evaluation succeeded")
         print(f"→ Result shape: {result.shape}")
         print(f"→ Result:\n{result}")
@@ -352,17 +358,19 @@ class PartialEvaluationContext:
         cache: Cache | None = None,
         debug: bool = False,
         bindings: Bindings | None = None,
+        step: bool = False,
     ):
         self.bindings = bindings or {}
         self.cache = cache or NullCache()
         self.debug = debug
+        self.step = step
 
     def evaluate(self, tensor: graph.Tensor) -> Array:
         """
         Evaluates a specific tensor. Depending on the caching policy
         tensors may be evaluated each time or just once.
         """
-        return _evaluate(tensor, self.bindings, self.cache, self.debug)
+        return _evaluate(tensor, self.bindings, self.cache, self.debug, self.step)
 
     def evaluate_iterator(self, tensors: Iterator[graph.Tensor]):
         """Like evaluate but operates on an iterator on tensors."""
