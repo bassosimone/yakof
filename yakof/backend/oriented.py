@@ -179,26 +179,6 @@ class Field[O]:
         raise AttributeError(f"{type(self)} has no attribute {name}")
 
     # Tensor operations
-    def reshape(self, tensor: Tensor[O], shape: Shape) -> Tensor[O]:
-        """Reshape tensor while preserving orientation."""
-        return Tensor[O](graph.reshape(tensor.t, shape))
-
-    def expand_dims(self, tensor: Tensor[O], axis: Axis) -> Tensor[O]:
-        """Insert new axis while preserving orientation."""
-        return Tensor[O](graph.expand_dims(tensor.t, axis))
-
-    def squeeze(self, tensor: Tensor[O], axis: Axis | None = None) -> Tensor[O]:
-        """Remove axes of size 1 while preserving orientation."""
-        return Tensor[O](graph.squeeze(tensor.t, axis))
-
-    def reduce_sum(self, tensor: Tensor[O], axis: Axis | None = None) -> Tensor[O]:
-        """Sum tensor elements while preserving orientation."""
-        return Tensor[O](graph.reduce_sum(tensor.t, axis))
-
-    def reduce_mean(self, tensor: Tensor[O], axis: Axis | None = None) -> Tensor[O]:
-        """Compute mean along specified axes while preserving orientation."""
-        return Tensor[O](graph.reduce_mean(tensor.t, axis))
-
     def where(
         self,
         condition: Tensor[O] | ScalarValue,
@@ -222,21 +202,6 @@ class Field[O]:
         return Tensor[O](graph.multi_clause_where(*wrapped_cases))
 
     # Distribution functions
-    def uniform_rvs(
-        self,
-        shape: Shape,
-        loc: Tensor[O] | ScalarValue = 0.0,
-        scale: Tensor[O] | ScalarValue = 1.0,
-    ) -> Tensor[O]:
-        """Generate uniform random values."""
-        return Tensor[O](
-            graph.uniform_rvs(
-                shape,
-                Tensor[O].ensure_tensor(loc).t,
-                Tensor[O].ensure_tensor(scale).t,
-            )
-        )
-
     def uniform_cdf(
         self,
         x: Tensor[O] | ScalarValue,
@@ -247,21 +212,6 @@ class Field[O]:
         return Tensor[O](
             graph.uniform_cdf(
                 Tensor[O].ensure_tensor(x).t,
-                Tensor[O].ensure_tensor(loc).t,
-                Tensor[O].ensure_tensor(scale).t,
-            )
-        )
-
-    def normal_rvs(
-        self,
-        shape: Shape,
-        loc: Tensor[O] | ScalarValue = 0.0,
-        scale: Tensor[O] | ScalarValue = 1.0,
-    ) -> Tensor[O]:
-        """Generate normal random values."""
-        return Tensor[O](
-            graph.normal_rvs(
-                shape,
                 Tensor[O].ensure_tensor(loc).t,
                 Tensor[O].ensure_tensor(scale).t,
             )
