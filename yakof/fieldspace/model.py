@@ -37,12 +37,12 @@ class FieldWise:
     """Orientation for `time x ensemble` data."""
 
 
-def lift_time_to_field(tensor: oriented.Tensor[TimeWise]) -> oriented.Tensor[FieldWise]:
+def expand_time_to_field(tensor: oriented.Tensor[TimeWise]) -> oriented.Tensor[FieldWise]:
     """Lift time tensor to field space by adding ensemble dimension."""
     return oriented.Tensor[FieldWise](graph.expand_dims(tensor.t, axis=ENSEMBLE_AXIS))
 
 
-def lift_ensemble_to_field(
+def expand_ensemble_to_field(
     tensor: oriented.Tensor[EnsembleWise],
 ) -> oriented.Tensor[FieldWise]:
     """Lift ensemble tensor to field space by adding time dimension."""
@@ -105,7 +105,7 @@ def ensemble_placeholder(
     )
 
 
-def lift_scalar_to_field(
+def expand_scalar_to_field(
     tensor: oriented.Tensor[ScalarWise],
 ) -> oriented.Tensor[FieldWise]:
     """Lift scalar to field space by broadcasting to both ensemble and time dimensions."""

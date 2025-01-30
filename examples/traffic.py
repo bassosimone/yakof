@@ -119,20 +119,20 @@ def build_combined_model() -> fieldspace.Model:
     # --- Field Space Calculations ---
 
     # Lift time series to field space
-    m.field.base_demand = fieldspace.lift_time_to_field(m.time.base_demand)
-    m.field.price = fieldspace.lift_time_to_field(m.time.price)
-    m.field.is_peak = fieldspace.lift_time_to_field(m.time.is_peak)
-    m.field.is_early_window = fieldspace.lift_time_to_field(m.time.is_early_window)
-    m.field.is_late_window = fieldspace.lift_time_to_field(m.time.is_late_window)
-    m.field.early_window_size = fieldspace.lift_scalar_to_field(
+    m.field.base_demand = fieldspace.expand_time_to_field(m.time.base_demand)
+    m.field.price = fieldspace.expand_time_to_field(m.time.price)
+    m.field.is_peak = fieldspace.expand_time_to_field(m.time.is_peak)
+    m.field.is_early_window = fieldspace.expand_time_to_field(m.time.is_early_window)
+    m.field.is_late_window = fieldspace.expand_time_to_field(m.time.is_late_window)
+    m.field.early_window_size = fieldspace.expand_scalar_to_field(
         m.scalar.early_window_size
     )
-    m.field.late_window_size = fieldspace.lift_scalar_to_field(
+    m.field.late_window_size = fieldspace.expand_scalar_to_field(
         m.scalar.late_window_size
     )
 
     # Lift ensemble values to field space
-    m.field.price_sensitivity = fieldspace.lift_ensemble_to_field(
+    m.field.price_sensitivity = fieldspace.expand_ensemble_to_field(
         m.ensemble.price_sensitivity
     )
 
@@ -169,12 +169,12 @@ def build_combined_model() -> fieldspace.Model:
     )
 
     # Distribute to shoulder periods
-    m.field.total_early = fieldspace.lift_ensemble_to_field(m.ensemble.total_early)
+    m.field.total_early = fieldspace.expand_ensemble_to_field(m.ensemble.total_early)
     m.field.early_addition = m.field.where(
         m.field.is_early_window, m.field.total_early / m.field.early_window_size, 0.0
     )
 
-    m.field.total_late = fieldspace.lift_ensemble_to_field(m.ensemble.total_late)
+    m.field.total_late = fieldspace.expand_ensemble_to_field(m.ensemble.total_late)
     m.field.late_addition = m.field.where(
         m.field.is_late_window, m.field.total_late / m.field.late_window_size, 0.0
     )
