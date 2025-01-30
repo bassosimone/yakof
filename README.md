@@ -2,8 +2,10 @@
 
 ![Yes, it's literally a kettle of fish!](yakof.png)
 
-YAKOF demonstrates improved typing and tensor manipulation for sustainability modeling.
-See [DESIGN.md](DESIGN.md) for the detailed architecture and rationale.
+YAKOF demonstrates improved typing and tensor manipulation for sustainability modeling,
+and specifically for the [Fondazione Bruno Kessler's](https://fbk.eu) [DT Model](
+https://github.com/tn-aixpa/dt-model) model. See [DESIGN.md](DESIGN.md) for the detailed
+architecture and rationale.
 
 ## Quick Start
 
