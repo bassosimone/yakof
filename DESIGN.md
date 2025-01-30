@@ -3,7 +3,8 @@
 ## Overview
 
 YAKOF is a technology demonstrator showing how we could evolve the existing
-dt-model package. The key improvements demonstrated are:
+[dt-model](https://github.com/tn-aixpa/dt-model) package. The key improvements
+demonstrated are:
 
 1. Replacement of SymPy with a focused AST framework
 2. Type-safe parameter space modeling
