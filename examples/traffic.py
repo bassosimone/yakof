@@ -270,7 +270,7 @@ def visualize_results(
     ax4.set_ylim(ylim)
 
     price = ctx.evaluate(model.time.price.t)
-    ax5.plot(timestamps[plot_mask], price[plot_mask], 'r-', linewidth=2)
+    ax5.plot(timestamps[plot_mask], price[plot_mask], "r-", linewidth=2)
     ax5.set_title("Price Pattern")
     ax5.set_ylabel("Price (€)")
     ax5.grid(True, alpha=0.3)
