@@ -25,8 +25,9 @@ found that rolling our own DSL allowed us to more easily integrate with NumPy
 concepts, with benefits such as automated handling of dimensions. Additionally,
 this DSL does not have the performance penalty caused by sympy.lambdify, even
 though there is a penalty caused by evaluating the DSL's AST. However, because
-the bottleneck is numerical computation, this overhead seems to be small
-compared to the flexibility benefits we gained.
+the bottleneck is numerical computation, according to some benchmarks in the
+examples directory this overhead seems to be very small and is outweighed by
+all the benefits we gained.
 
 Overall, the goal of this module is to provide a solid low-level foundation
 for writing sustainability models at low-level. Also, higher-level modules should
