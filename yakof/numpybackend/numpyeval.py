@@ -95,10 +95,6 @@ def evaluate(node: numpyir.Node, bindings: Bindings) -> np.ndarray:
         default = evaluate(node.clauses[-1][1], bindings)
         return np.select(conditions, values, default=default)
 
-    # Shape operations
-    if isinstance(node, numpyir.reshape):
-        return evaluate(node.node, bindings).reshape(node.shape)
-
     # Axis operations
     if isinstance(node, numpyir.AxisOp):
         operand = evaluate(node.node, bindings)

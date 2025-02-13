@@ -338,10 +338,6 @@ def transform(node: numpyir.Node, program: Program) -> Register:
             )
         )
 
-    # Shape operations
-    if isinstance(node, numpyir.reshape):
-        return __add(reshape(transform(node.node, program), node.shape))
-
     # Axis operations
     if isinstance(node, numpyir.AxisOp):
         register = transform(node.node, program)

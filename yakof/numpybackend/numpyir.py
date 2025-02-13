@@ -213,19 +213,6 @@ class multi_clause_where(Node):
 # Shape-changing operations
 
 
-class reshape(Node):
-    """Reshapes a tensor into a new shape.
-
-    Args:
-        tensor: Input tensor
-        shape: New shape for the tensor
-    """
-
-    def __init__(self, node: Node, shape: graph.Shape) -> None:
-        self.node = node
-        self.shape = shape
-
-
 class AxisOp(Node):
     """Base class for axis manipulation operations.
 
@@ -326,10 +313,6 @@ def transform(gr_node: graph.Node) -> Node:
         return multi_clause_where(
             *((transform(cond), transform(value)) for cond, value in gr_node.clauses)
         )
-
-    # Shape operations
-    if isinstance(gr_node, graph.reshape):
-        return reshape(transform(gr_node.node), gr_node.shape)
 
     # Axis operations
     if isinstance(gr_node, graph.AxisOp):

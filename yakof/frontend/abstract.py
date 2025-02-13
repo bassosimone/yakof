@@ -212,13 +212,13 @@ class TensorSpace[B]:
         return type(t1)(graph.maximum(t1.t, t2.t))
 
     def where[
-        C: Basis
-    ](self, cond: Tensor[C], then: Tensor[B], otherwise: Tensor[B],) -> Tensor[B]:
+        C
+    ](self, cond: Tensor[C], then: Tensor[B], otherwise: Tensor[B]) -> Tensor[B]:
         """Select elements based on condition."""
         return type(then)(graph.where(cond.t, then.t, otherwise.t))
 
     def multi_clause_where[
-        C: Basis
+        C
     ](
         self,
         clauses: Sequence[tuple[Tensor[C], Tensor[B]]],
