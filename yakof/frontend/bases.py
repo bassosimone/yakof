@@ -9,11 +9,13 @@ defined by the abstract module of this package.
 Single axes are named using single letters (X, Y, Z, U, V, W).
 Compound bases use concatenated letters (XY, XYZ, etc.).
 
-Example:
+Example
+-------
+
     >>> from yakof.frontend import abstract, bases
     >>>
-    >>> space = abstract.TensorSpace(bases.XY)
-    >>> a = space.placeholder("a")  # tensor in R^2
+    >>> space = abstract.TensorSpace(bases.X)
+    >>> a = space.placeholder("a")  # tensor in R^1
 
 
 Axis Numbering Convention

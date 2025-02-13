@@ -20,8 +20,9 @@ The virtual machine approach provides several benefits:
    - Explicit memory management
    - Protected internal state
 
-Design Decisions:
----------------
+Design Decisions
+----------------
+
 1. Register-based:
    - Easier to optimize than stack-based
    - Natural fit for tensor operations

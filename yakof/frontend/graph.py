@@ -4,7 +4,8 @@ Computation Graph Building
 
 This module allows to build an abstract computation graph using TensorFlow-like
 computation primitives and concepts. These primitives and concepts are similar to
-NumPy primitives, but we picked up TensorFlow ones when they disagree.
+NumPy primitives, but we picked up TensorFlow ones when they disagree. For
+probability distributions, instead, we follow SciPy conventions.
 
 This module provides:
 
@@ -13,7 +14,7 @@ This module provides:
 3. Comparison operations (equal, not_equal, less, less_equal, greater, greater_equal)
 4. Logical operations (and, or, xor, not)
 5. Mathematical operations (exp, power, log)
-6. Shape manipulation operations (reshape, expand_dims, squeeze)
+6. Shape manipulation operations (expand_dims, squeeze)
 7. Reduction operations (sum, mean)
 
 The nodes form a directed acyclic graph (DAG) that represents computations
@@ -55,17 +56,29 @@ Design Decisions
 2. Snake Case Operation Names:
    - Match NumPy/TensorFlow conventions
    - Improve readability in mathematical context
-   - Enable direct mapping to backend operations
 
 3. Node Identity:
    - Nodes are identified by their instance identity
    - Enables graph traversal and transformation
-   - Supports future optimization passes
+
+See Also
+--------
+
+yakof.frontend
+    Provides an overview for the tensor language frontend.
+
+yakof.frontend.abstract
+    Abstract tensor operations built on top of yakof.frontend.graph.
+
+yakof.frontend.bases
+    Basis definitions for tensor spaces to be used along with yakof.frontend.abstract.
 """
 
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+
+from typing import Sequence
 
 
 Axis = int | tuple[int, ...]
@@ -74,12 +87,12 @@ Axis = int | tuple[int, ...]
 Scalar = bool | float | int
 """Type alias for supported scalar value types."""
 
-Shape = tuple[int, ...]
-"""Type alias for tensor shape specifications."""
-
 
 class Node:
     """Base class for all computation graph nodes."""
+
+    def __init__(self, name: str = "") -> None:
+        self.name = name
 
     def __hash__(self) -> int:
         return id(self)  # hashing by identity
@@ -92,7 +105,8 @@ class constant(Node):
         value: The scalar value to store in this node.
     """
 
-    def __init__(self, value: Scalar) -> None:
+    def __init__(self, value: Scalar, name: str = "") -> None:
+        super().__init__(name)
         self.value = value
 
 
@@ -100,12 +114,12 @@ class placeholder(Node):
     """Named placeholder for a value to be provided during evaluation.
 
     Args:
-        default_value: Optional default scalar value to use for the placeholder
-        if no type is provided at evaluation time.
+        default_value: Optional default scalar value to use for the
+        placeholder if no type is provided at evaluation time.
     """
 
     def __init__(self, name: str, default_value: Scalar | None = None) -> None:
-        self.name = name
+        super().__init__(name)
         self.default_value = default_value
 
 
@@ -118,6 +132,7 @@ class BinaryOp(Node):
     """
 
     def __init__(self, left: Node, right: Node) -> None:
+        super().__init__()
         self.left = left
         self.right = right
 
@@ -191,6 +206,7 @@ class UnaryOp(Node):
     """
 
     def __init__(self, node: Node) -> None:
+        super().__init__()
         self.node = node
 
 
@@ -234,6 +250,7 @@ class where(Node):
     """
 
     def __init__(self, condition: Node, then: Node, otherwise: Node) -> None:
+        super().__init__()
         self.condition = condition
         self.then = then
         self.otherwise = otherwise
@@ -244,26 +261,18 @@ class multi_clause_where(Node):
 
     Args:
         clauses: List of (condition, value) pairs
+        default_value: Value to use when no condition is met
     """
 
-    def __init__(self, *clauses: tuple[Node, Node]) -> None:
+    def __init__(
+        self, clauses: Sequence[tuple[Node, Node]], default_value: Node
+    ) -> None:
+        super().__init__()
         self.clauses = clauses
+        self.default_value = default_value
 
 
 # Shape-changing operations
-
-
-class reshape(Node):
-    """Reshapes a tensor into a new shape.
-
-    Args:
-        tensor: Input tensor
-        shape: New shape for the tensor
-    """
-
-    def __init__(self, node: Node, shape: Shape) -> None:
-        self.node = node
-        self.shape = shape
 
 
 class AxisOp(Node):
@@ -275,6 +284,7 @@ class AxisOp(Node):
     """
 
     def __init__(self, node: Node, axis: Axis) -> None:
+        super().__init__()
         self.node = node
         self.axis = axis
 
@@ -293,3 +303,26 @@ class reduce_sum(AxisOp):
 
 class reduce_mean(AxisOp):
     """Computes mean of tensor elements along specified axes."""
+
+
+# Probability distributions
+
+
+class normal_cdf(Node):
+    """Compute CDF of normal distribution."""
+
+    def __init__(self, x: Node, loc: Node, scale: Node) -> None:
+        super().__init__()
+        self.x = x
+        self.loc = loc
+        self.scale = scale
+
+
+class uniform_cdf(Node):
+    """Compute CDF of uniform distribution."""
+
+    def __init__(self, x: Node, loc: Node, scale: Node) -> None:
+        super().__init__()
+        self.x = x
+        self.loc = loc
+        self.scale = scale
