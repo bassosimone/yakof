@@ -176,7 +176,19 @@ class TensorSpace[B]:
     def placeholder(
         self, name: str = "", default_value: graph.Scalar | None = None
     ) -> Tensor[B]:
-        """Creates a placeholder tensor."""
+        """Creates a placeholder tensor.
+
+        The name parameter is optional to allow using autonaming.context():
+
+            >>> with autonaming.context():
+            ...     x = space.placeholder()  # automatically named 'x'
+
+        But must be explicitly provided otherwise:
+
+            >>> y = space.placeholder("y")  # explicitly named
+
+        Regardless, a placeholder with no name cannot be used in the graph.
+        """
         return Tensor[B](graph.placeholder(name, default_value))
 
     def constant(self, value: graph.Scalar, name: str = "") -> Tensor[B]:
