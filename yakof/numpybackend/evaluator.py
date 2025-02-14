@@ -2,7 +2,7 @@
 NumPy evaluator
 ===============
 
-Evaluates a `semtree.Node` by calling the corresponding NumPy
+Evaluates a `hir.Node` by calling the corresponding NumPy
 functions and producing a `numpy.ndarray` as output.
 """
 
@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import semtree
+from . import hir
 from ..frontend import graph
 
 
@@ -20,13 +20,13 @@ Bindings = dict[str, np.ndarray]
 """Type alias for a dictionary of variable bindings."""
 
 
-def evaluate(node: semtree.Node, bindings: Bindings) -> np.ndarray:
-    """Evaluates a `semtree.Node` to an `numpy.ndarray`."""
+def evaluate(node: hir.Node, bindings: Bindings) -> np.ndarray:
+    """Evaluates a `hir.Node` to an `numpy.ndarray`."""
 
-    if isinstance(node, semtree.constant):
+    if isinstance(node, hir.constant):
         return node.value
 
-    if isinstance(node, semtree.placeholder):
+    if isinstance(node, hir.placeholder):
         if node.name not in bindings:
             if node.default_value is not None:
                 return np.asarray(node.default_value)
@@ -36,26 +36,26 @@ def evaluate(node: semtree.Node, bindings: Bindings) -> np.ndarray:
         return bindings[node.name]
 
     # Binary operations
-    if isinstance(node, semtree.BinaryOp):
+    if isinstance(node, hir.BinaryOp):
         left = evaluate(node.left, bindings)
         right = evaluate(node.right, bindings)
 
         ops = {
-            semtree.add: np.add,
-            semtree.subtract: np.subtract,
-            semtree.multiply: np.multiply,
-            semtree.divide: np.divide,
-            semtree.equal: np.equal,
-            semtree.not_equal: np.not_equal,
-            semtree.less: np.less,
-            semtree.less_equal: np.less_equal,
-            semtree.greater: np.greater,
-            semtree.greater_equal: np.greater_equal,
-            semtree.logical_and: np.logical_and,
-            semtree.logical_or: np.logical_or,
-            semtree.logical_xor: np.logical_xor,
-            semtree.power: np.power,
-            semtree.maximum: np.maximum,
+            hir.add: np.add,
+            hir.subtract: np.subtract,
+            hir.multiply: np.multiply,
+            hir.divide: np.divide,
+            hir.equal: np.equal,
+            hir.not_equal: np.not_equal,
+            hir.less: np.less,
+            hir.less_equal: np.less_equal,
+            hir.greater: np.greater,
+            hir.greater_equal: np.greater_equal,
+            hir.logical_and: np.logical_and,
+            hir.logical_or: np.logical_or,
+            hir.logical_xor: np.logical_xor,
+            hir.power: np.power,
+            hir.maximum: np.maximum,
         }
 
         try:
@@ -64,13 +64,13 @@ def evaluate(node: semtree.Node, bindings: Bindings) -> np.ndarray:
             raise TypeError(f"evaluator: unknown binary operation: {type(node)}")
 
     # Unary operations
-    if isinstance(node, semtree.UnaryOp):
+    if isinstance(node, hir.UnaryOp):
         operand = evaluate(node.node, bindings)
 
         ops = {
-            semtree.logical_not: np.logical_not,
-            semtree.exp: np.exp,
-            semtree.log: np.log,
+            hir.logical_not: np.logical_not,
+            hir.exp: np.exp,
+            hir.log: np.log,
         }
 
         try:
@@ -79,14 +79,14 @@ def evaluate(node: semtree.Node, bindings: Bindings) -> np.ndarray:
             raise TypeError(f"evaluator: unknown unary operation: {type(node)}")
 
     # Conditional operations
-    if isinstance(node, semtree.where):
+    if isinstance(node, hir.where):
         return np.where(
             evaluate(node.condition, bindings),
             evaluate(node.then, bindings),
             evaluate(node.otherwise, bindings),
         )
 
-    if isinstance(node, semtree.multi_clause_where):
+    if isinstance(node, hir.multi_clause_where):
         conditions = []
         values = []
         for cond, value in node.clauses[:-1]:
@@ -96,13 +96,13 @@ def evaluate(node: semtree.Node, bindings: Bindings) -> np.ndarray:
         return np.select(conditions, values, default=default)
 
     # Axis operations
-    if isinstance(node, semtree.AxisOp):
+    if isinstance(node, hir.AxisOp):
         operand = evaluate(node.node, bindings)
 
         ops = {
-            semtree.expand_dims: lambda x: np.expand_dims(x, node.axis),
-            semtree.reduce_sum: lambda x: np.sum(x, axis=node.axis),
-            semtree.reduce_mean: lambda x: np.mean(x, axis=node.axis),
+            hir.expand_dims: lambda x: np.expand_dims(x, node.axis),
+            hir.reduce_sum: lambda x: np.sum(x, axis=node.axis),
+            hir.reduce_mean: lambda x: np.mean(x, axis=node.axis),
         }
 
         try:

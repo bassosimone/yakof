@@ -1,8 +1,8 @@
 """
-NumPy Semantic Tree
-===================
+NumPy High-Level Intermediate Representation (HIR)
+==================================================
 
-The semtree serves several purposes:
+The HIR serves several purposes:
 
 1. Backend Specificity:
    - Represents operations in terms of NumPy primitives
@@ -19,11 +19,11 @@ The semtree serves several purposes:
      * Common subexpression elimination
      * Dead code elimination
 
-Why a Separate SemTree?
------------------------
+Why a Separate HIR?
+-------------------
 
 While the frontend graph could be evaluated directly, having a
-NumPy-specific semtree enables:
+NumPy-specific HIR enables:
 
 - Cleaner separation of concerns
 - Potential backend-specific optimizations
@@ -286,7 +286,7 @@ def transform(gr_node: graph.Node) -> Node:
         try:
             return ops[type(gr_node)](left, right)
         except KeyError:
-            raise TypeError(f"semtree: unknown binary operation: {type(gr_node)}")
+            raise TypeError(f"hir: unknown binary operation: {type(gr_node)}")
 
     # Unary operations
     if isinstance(gr_node, graph.UnaryOp):
@@ -301,7 +301,7 @@ def transform(gr_node: graph.Node) -> Node:
         try:
             return ops[type(gr_node)](np_node)
         except KeyError:
-            raise TypeError(f"semtree: unknown unary operation: {type(gr_node)}")
+            raise TypeError(f"hir: unknown unary operation: {type(gr_node)}")
 
     # Conditional operations
     if isinstance(gr_node, graph.where):
@@ -329,6 +329,6 @@ def transform(gr_node: graph.Node) -> Node:
         try:
             return ops[type(gr_node)](np_node, gr_node.axis)
         except KeyError:
-            raise TypeError(f"semtree: unknown axis operation: {type(gr_node)}")
+            raise TypeError(f"hir: unknown axis operation: {type(gr_node)}")
 
-    raise TypeError(f"semtree: unknown node type: {type(gr_node)}")
+    raise TypeError(f"hir: unknown node type: {type(gr_node)}")

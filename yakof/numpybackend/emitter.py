@@ -2,7 +2,7 @@
 NumPy Linear Format Emitter
 ===========================
 
-Visitor for NumPy SemTree that lowers to linear format with
+Visitor for NumPy HIR that lowers to linear format with
 explicit dependency on virtual registers.
 
 Register Allocation Strategy
@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import semtree
+from . import hir
 from ..frontend import graph
 
 
@@ -244,17 +244,17 @@ class Program:
         self.operations: list[Operation] = []
 
 
-def emit(node: semtree.Node, program: Program) -> Register:
-    """Transforms the NumPy SemTree into a linear, register-based NumPy program."""
+def emit(node: hir.Node, program: Program) -> Register:
+    """Transforms the NumPy HIR into a linear, register-based NumPy program."""
 
     def __add(op: Operation) -> Register:
         program.operations.append(op)
         return len(program.operations) - 1
 
-    if isinstance(node, semtree.constant):
+    if isinstance(node, hir.constant):
         return __add(constant(node.value))
 
-    if isinstance(node, semtree.placeholder):
+    if isinstance(node, hir.placeholder):
         return __add(
             placeholder(
                 node.name,
@@ -263,26 +263,26 @@ def emit(node: semtree.Node, program: Program) -> Register:
         )
 
     # Binary operations
-    if isinstance(node, semtree.BinaryOp):
+    if isinstance(node, hir.BinaryOp):
         left = emit(node.left, program)
         right = emit(node.right, program)
 
         ops = {
-            semtree.add: add,
-            semtree.subtract: subtract,
-            semtree.multiply: multiply,
-            semtree.divide: divide,
-            semtree.equal: equal,
-            semtree.not_equal: not_equal,
-            semtree.less: less,
-            semtree.less_equal: less_equal,
-            semtree.greater: greater,
-            semtree.greater_equal: greater_equal,
-            semtree.logical_and: logical_and,
-            semtree.logical_or: logical_or,
-            semtree.logical_xor: logical_xor,
-            semtree.power: power,
-            semtree.maximum: maximum,
+            hir.add: add,
+            hir.subtract: subtract,
+            hir.multiply: multiply,
+            hir.divide: divide,
+            hir.equal: equal,
+            hir.not_equal: not_equal,
+            hir.less: less,
+            hir.less_equal: less_equal,
+            hir.greater: greater,
+            hir.greater_equal: greater_equal,
+            hir.logical_and: logical_and,
+            hir.logical_or: logical_or,
+            hir.logical_xor: logical_xor,
+            hir.power: power,
+            hir.maximum: maximum,
         }
 
         try:
@@ -291,13 +291,13 @@ def emit(node: semtree.Node, program: Program) -> Register:
             raise TypeError(f"emitter: unknown binary operation: {type(node)}")
 
     # Unary operations
-    if isinstance(node, semtree.UnaryOp):
+    if isinstance(node, hir.UnaryOp):
         register = emit(node.node, program)
 
         ops = {
-            semtree.logical_not: logical_not,
-            semtree.exp: exp,
-            semtree.log: log,
+            hir.logical_not: logical_not,
+            hir.exp: exp,
+            hir.log: log,
         }
 
         try:
@@ -306,7 +306,7 @@ def emit(node: semtree.Node, program: Program) -> Register:
             raise TypeError(f"emitter: unknown unary operation: {type(node)}")
 
     # Conditional operations
-    if isinstance(node, semtree.where):
+    if isinstance(node, hir.where):
         return __add(
             where(
                 emit(node.condition, program),
@@ -315,7 +315,7 @@ def emit(node: semtree.Node, program: Program) -> Register:
             )
         )
 
-    if isinstance(node, semtree.multi_clause_where):
+    if isinstance(node, hir.multi_clause_where):
         return __add(
             multi_clause_where(
                 *(
@@ -326,13 +326,13 @@ def emit(node: semtree.Node, program: Program) -> Register:
         )
 
     # Axis operations
-    if isinstance(node, semtree.AxisOp):
+    if isinstance(node, hir.AxisOp):
         register = emit(node.node, program)
 
         ops = {
-            semtree.expand_dims: expand_dims,
-            semtree.reduce_sum: reduce_sum,
-            semtree.reduce_mean: reduce_mean,
+            hir.expand_dims: expand_dims,
+            hir.reduce_sum: reduce_sum,
+            hir.reduce_mean: reduce_mean,
         }
 
         try:
