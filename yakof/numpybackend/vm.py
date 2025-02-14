@@ -45,13 +45,13 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import numpylower
+from . import emitter
 
 
 Bindings = dict[str, np.ndarray]
 """Type alias for a dictionary of variable bindings."""
 
-RegisterFile = dict[numpylower.Register, np.ndarray]
+RegisterFile = dict[emitter.Register, np.ndarray]
 """Type alias for register storage."""
 
 
@@ -67,8 +67,8 @@ class VirtualMachine:
 
     def execute(
         self,
-        program: numpylower.Program,
-        target_register: numpylower.Register,
+        program: emitter.Program,
+        target_register: emitter.Register,
         bindings: Bindings,
     ) -> np.ndarray:
         """
@@ -91,76 +91,76 @@ class VirtualMachine:
 
         return self.registers[target_register]
 
-    def _execute_operation(self, op: numpylower.Operation, bindings: Bindings) -> None:
+    def _execute_operation(self, op: emitter.Operation, bindings: Bindings) -> None:
         """Execute single operation and store result in appropriate register."""
 
-        if isinstance(op, numpylower.constant):
+        if isinstance(op, emitter.constant):
             self.registers[len(self.registers)] = op.value
             return
 
-        if isinstance(op, numpylower.placeholder):
+        if isinstance(op, emitter.placeholder):
             if op.name not in bindings:
                 if op.default_value is not None:
                     self.registers[len(self.registers)] = op.default_value
                     return
                 raise ValueError(
-                    f"numpyvm: no value provided for placeholder '{op.name}'"
+                    f"vm: no value provided for placeholder '{op.name}'"
                 )
             self.registers[len(self.registers)] = bindings[op.name]
             return
 
         # Binary operations
-        if isinstance(op, numpylower.BinaryOp):
+        if isinstance(op, emitter.BinaryOp):
             left = self.registers[op.left]
             right = self.registers[op.right]
 
             ops = {
-                numpylower.add: np.add,
-                numpylower.subtract: np.subtract,
-                numpylower.multiply: np.multiply,
-                numpylower.divide: np.divide,
-                numpylower.equal: np.equal,
-                numpylower.not_equal: np.not_equal,
-                numpylower.less: np.less,
-                numpylower.less_equal: np.less_equal,
-                numpylower.greater: np.greater,
-                numpylower.greater_equal: np.greater_equal,
-                numpylower.logical_and: np.logical_and,
-                numpylower.logical_or: np.logical_or,
-                numpylower.logical_xor: np.logical_xor,
-                numpylower.power: np.power,
-                numpylower.maximum: np.maximum,
+                emitter.add: np.add,
+                emitter.subtract: np.subtract,
+                emitter.multiply: np.multiply,
+                emitter.divide: np.divide,
+                emitter.equal: np.equal,
+                emitter.not_equal: np.not_equal,
+                emitter.less: np.less,
+                emitter.less_equal: np.less_equal,
+                emitter.greater: np.greater,
+                emitter.greater_equal: np.greater_equal,
+                emitter.logical_and: np.logical_and,
+                emitter.logical_or: np.logical_or,
+                emitter.logical_xor: np.logical_xor,
+                emitter.power: np.power,
+                emitter.maximum: np.maximum,
             }
 
             try:
                 self.registers[len(self.registers)] = ops[type(op)](left, right)
             except KeyError:
-                raise TypeError(f"numpyvm: unknown binary operation: {type(op)}")
+                raise TypeError(f"vm: unknown binary operation: {type(op)}")
 
         # Unary operations
-        if isinstance(op, numpylower.UnaryOp):
+        if isinstance(op, emitter.UnaryOp):
             operand = self.registers[op.register]
 
             ops = {
-                numpylower.logical_not: np.logical_not,
-                numpylower.exp: np.exp,
-                numpylower.log: np.log,
+                emitter.logical_not: np.logical_not,
+                emitter.exp: np.exp,
+                emitter.log: np.log,
             }
 
             try:
                 self.registers[len(self.registers)] = ops[type(op)](operand)
             except KeyError:
-                raise TypeError(f"numpyvm: unknown unary operation: {type(op)}")
+                raise TypeError(f"vm: unknown unary operation: {type(op)}")
 
         # Conditional operations
-        if isinstance(op, numpylower.where):
+        if isinstance(op, emitter.where):
             self.registers[len(self.registers)] = np.where(
                 self.registers[op.condition],
                 self.registers[op.then],
                 self.registers[op.otherwise],
             )
 
-        if isinstance(op, numpylower.multi_clause_where):
+        if isinstance(op, emitter.multi_clause_where):
             conditions = []
             values = []
             for cond_reg, value_reg in op.clauses[:-1]:
@@ -171,23 +171,17 @@ class VirtualMachine:
                 conditions, values, default=default
             )
 
-        # Shape operations
-        if isinstance(op, numpylower.reshape):
-            self.registers[len(self.registers)] = self.registers[
-                op.register
-            ].reshape(op.shape)
-
         # Axis operations
-        if isinstance(op, numpylower.AxisOp):
+        if isinstance(op, emitter.AxisOp):
             operand = self.registers[op.register]
 
             ops = {
-                numpylower.expand_dims: lambda x: np.expand_dims(x, op.axis),
-                numpylower.reduce_sum: lambda x: np.sum(x, axis=op.axis),
-                numpylower.reduce_mean: lambda x: np.mean(x, axis=op.axis),
+                emitter.expand_dims: lambda x: np.expand_dims(x, op.axis),
+                emitter.reduce_sum: lambda x: np.sum(x, axis=op.axis),
+                emitter.reduce_mean: lambda x: np.mean(x, axis=op.axis),
             }
 
             try:
                 self.registers[len(self.registers)] = ops[type(op)](operand)
             except KeyError:
-                raise TypeError(f"numpyvm: unknown axis operation: {type(op)}")
+                raise TypeError(f"vm: unknown axis operation: {type(op)}")

@@ -1,8 +1,8 @@
 """
-NumPy Intermediate Representation
-=================================
+NumPy Semantic Tree
+===================
 
-This IR serves several purposes:
+The semtree serves several purposes:
 
 1. Backend Specificity:
    - Represents operations in terms of NumPy primitives
@@ -19,14 +19,16 @@ This IR serves several purposes:
      * Common subexpression elimination
      * Dead code elimination
 
-Why a Separate IR?
------------------
+Why a Separate SemTree?
+-----------------------
+
 While the frontend graph could be evaluated directly, having a
-NumPy-specific IR enables:
-- Backend-specific optimizations
+NumPy-specific semtree enables:
+
 - Cleaner separation of concerns
-- Future support for multiple backends
-- More efficient lowering to linear form
+- Potential backend-specific optimizations
+- Seamless support of multiple backends
+- More streamlined lowering to linear form
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -284,7 +286,7 @@ def transform(gr_node: graph.Node) -> Node:
         try:
             return ops[type(gr_node)](left, right)
         except KeyError:
-            raise TypeError(f"numpyir: unknown binary operation: {type(gr_node)}")
+            raise TypeError(f"semtree: unknown binary operation: {type(gr_node)}")
 
     # Unary operations
     if isinstance(gr_node, graph.UnaryOp):
@@ -299,7 +301,7 @@ def transform(gr_node: graph.Node) -> Node:
         try:
             return ops[type(gr_node)](np_node)
         except KeyError:
-            raise TypeError(f"numpyir: unknown unary operation: {type(gr_node)}")
+            raise TypeError(f"semtree: unknown unary operation: {type(gr_node)}")
 
     # Conditional operations
     if isinstance(gr_node, graph.where):
@@ -327,6 +329,6 @@ def transform(gr_node: graph.Node) -> Node:
         try:
             return ops[type(gr_node)](np_node, gr_node.axis)
         except KeyError:
-            raise TypeError(f"numpyir: unknown axis operation: {type(gr_node)}")
+            raise TypeError(f"semtree: unknown axis operation: {type(gr_node)}")
 
-    raise TypeError(f"numpyir: unknown node type: {type(gr_node)}")
+    raise TypeError(f"semtree: unknown node type: {type(gr_node)}")

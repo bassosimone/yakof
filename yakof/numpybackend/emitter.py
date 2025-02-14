@@ -1,8 +1,8 @@
 """
-NumPy IR lowering
-=================
+NumPy Linear Format Emitter
+===========================
 
-Visitor for NumPy IR that lowers to linear format with
+Visitor for NumPy SemTree that lowers to linear format with
 explicit dependency on virtual registers.
 
 Register Allocation Strategy
@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import numpyir
+from . import semtree
 from ..frontend import graph
 
 
@@ -207,20 +207,7 @@ class multi_clause_where(Operation):
         self.clauses = clauses
 
 
-# Shape-changing operations
-
-
-class reshape(Operation):
-    """Reshapes a tensor into a new shape.
-
-    Args:
-        tensor: Input tensor
-        shape: New shape for the tensor
-    """
-
-    def __init__(self, register: Register, shape: graph.Shape) -> None:
-        self.register = register
-        self.shape = shape
+# Axis operations
 
 
 class AxisOp(Operation):
@@ -257,17 +244,17 @@ class Program:
         self.operations: list[Operation] = []
 
 
-def transform(node: numpyir.Node, program: Program) -> Register:
-    """Transforms the NumPy IR into a linear NumPy program."""
+def emit(node: semtree.Node, program: Program) -> Register:
+    """Transforms the NumPy SemTree into a linear, register-based NumPy program."""
 
     def __add(op: Operation) -> Register:
         program.operations.append(op)
         return len(program.operations) - 1
 
-    if isinstance(node, numpyir.constant):
+    if isinstance(node, semtree.constant):
         return __add(constant(node.value))
 
-    if isinstance(node, numpyir.placeholder):
+    if isinstance(node, semtree.placeholder):
         return __add(
             placeholder(
                 node.name,
@@ -276,81 +263,81 @@ def transform(node: numpyir.Node, program: Program) -> Register:
         )
 
     # Binary operations
-    if isinstance(node, numpyir.BinaryOp):
-        left = transform(node.left, program)
-        right = transform(node.right, program)
+    if isinstance(node, semtree.BinaryOp):
+        left = emit(node.left, program)
+        right = emit(node.right, program)
 
         ops = {
-            numpyir.add: add,
-            numpyir.subtract: subtract,
-            numpyir.multiply: multiply,
-            numpyir.divide: divide,
-            numpyir.equal: equal,
-            numpyir.not_equal: not_equal,
-            numpyir.less: less,
-            numpyir.less_equal: less_equal,
-            numpyir.greater: greater,
-            numpyir.greater_equal: greater_equal,
-            numpyir.logical_and: logical_and,
-            numpyir.logical_or: logical_or,
-            numpyir.logical_xor: logical_xor,
-            numpyir.power: power,
-            numpyir.maximum: maximum,
+            semtree.add: add,
+            semtree.subtract: subtract,
+            semtree.multiply: multiply,
+            semtree.divide: divide,
+            semtree.equal: equal,
+            semtree.not_equal: not_equal,
+            semtree.less: less,
+            semtree.less_equal: less_equal,
+            semtree.greater: greater,
+            semtree.greater_equal: greater_equal,
+            semtree.logical_and: logical_and,
+            semtree.logical_or: logical_or,
+            semtree.logical_xor: logical_xor,
+            semtree.power: power,
+            semtree.maximum: maximum,
         }
 
         try:
             return __add(ops[type(node)](left, right))
         except KeyError:
-            raise TypeError(f"numpylower: unknown binary operation: {type(node)}")
+            raise TypeError(f"emitter: unknown binary operation: {type(node)}")
 
     # Unary operations
-    if isinstance(node, numpyir.UnaryOp):
-        register = transform(node.node, program)
+    if isinstance(node, semtree.UnaryOp):
+        register = emit(node.node, program)
 
         ops = {
-            numpyir.logical_not: logical_not,
-            numpyir.exp: exp,
-            numpyir.log: log,
+            semtree.logical_not: logical_not,
+            semtree.exp: exp,
+            semtree.log: log,
         }
 
         try:
             return __add(ops[type(node)](register))
         except KeyError:
-            raise TypeError(f"numpylower: unknown unary operation: {type(node)}")
+            raise TypeError(f"emitter: unknown unary operation: {type(node)}")
 
     # Conditional operations
-    if isinstance(node, numpyir.where):
+    if isinstance(node, semtree.where):
         return __add(
             where(
-                transform(node.condition, program),
-                transform(node.then, program),
-                transform(node.otherwise, program),
+                emit(node.condition, program),
+                emit(node.then, program),
+                emit(node.otherwise, program),
             )
         )
 
-    if isinstance(node, numpyir.multi_clause_where):
+    if isinstance(node, semtree.multi_clause_where):
         return __add(
             multi_clause_where(
                 *(
-                    (transform(cond, program), transform(value, program))
+                    (emit(cond, program), emit(value, program))
                     for cond, value in node.clauses
                 )
             )
         )
 
     # Axis operations
-    if isinstance(node, numpyir.AxisOp):
-        register = transform(node.node, program)
+    if isinstance(node, semtree.AxisOp):
+        register = emit(node.node, program)
 
         ops = {
-            numpyir.expand_dims: expand_dims,
-            numpyir.reduce_sum: reduce_sum,
-            numpyir.reduce_mean: reduce_mean,
+            semtree.expand_dims: expand_dims,
+            semtree.reduce_sum: reduce_sum,
+            semtree.reduce_mean: reduce_mean,
         }
 
         try:
             return __add(ops[type(node)](register, node.axis))
         except KeyError:
-            raise TypeError(f"numpylower: unknown axis operation: {type(node)}")
+            raise TypeError(f"emitter: unknown axis operation: {type(node)}")
 
-    raise TypeError(f"numpylower: unknown node type: {type(node)}")
+    raise TypeError(f"emitter: unknown node type: {type(node)}")
