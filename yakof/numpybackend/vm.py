@@ -103,9 +103,7 @@ class VirtualMachine:
                 if op.default_value is not None:
                     self.registers[len(self.registers)] = op.default_value
                     return
-                raise ValueError(
-                    f"vm: no value provided for placeholder '{op.name}'"
-                )
+                raise ValueError(f"vm: no value provided for placeholder '{op.name}'")
             self.registers[len(self.registers)] = bindings[op.name]
             return
 
