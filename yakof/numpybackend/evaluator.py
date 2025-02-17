@@ -18,6 +18,11 @@ from ..frontend import graph, pretty
 Bindings = dict[str, np.ndarray]
 """Type alias for a dictionary of variable bindings."""
 
+
+Cache = dict[graph.Node, np.ndarray]
+"""Type alias for a dictionary tracking already-computed node values."""
+
+
 def _print_tracepoint(node: graph.Node, value: np.ndarray) -> None:
     print("=== begin tracepoint ===")
     print(f"name: {node.name}")
@@ -28,34 +33,41 @@ def _print_tracepoint(node: graph.Node, value: np.ndarray) -> None:
     print("")
 
 
-def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
+def evaluate(node: graph.Node, bindings: Bindings, cache: Cache | None = None) -> np.ndarray:
     """Evaluates a `graph.Node` to an `numpy.ndarray`."""
 
-    def __maybedebug(value: np.ndarray) -> np.ndarray:
+    # Use cache if available
+    if cache and node in cache:
+        return cache[node]
+
+    # Code to run before returning
+    def __before_return(value: np.ndarray) -> np.ndarray:
         if node.flags & graph.NODE_FLAG_TRACEPOINT != 0:
             _print_tracepoint(node, value)
         if node.flags & graph.NODE_FLAG_BREAKPOINT != 0:
             input("Press any key to continue...")
+        if cache:
+            cache[node] = value
         return value
 
     # Constant operation
     if isinstance(node, graph.constant):
-        return __maybedebug(np.asarray(node.value))
+        return __before_return(np.asarray(node.value))
 
     # Placeholder operation
     if isinstance(node, graph.placeholder):
         if node.name not in bindings:
             if node.default_value is not None:
-                return __maybedebug(np.asarray(node.default_value))
+                return __before_return(np.asarray(node.default_value))
             raise ValueError(
                 f"evaluator: no value provided for placeholder '{node.name}'"
             )
-        return __maybedebug(bindings[node.name])
+        return __before_return(bindings[node.name])
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):
-        left = evaluate(node.left, bindings)
-        right = evaluate(node.right, bindings)
+        left = evaluate(node.left, bindings, cache)
+        right = evaluate(node.right, bindings, cache)
 
         ops = {
             graph.add: np.add,
@@ -76,13 +88,13 @@ def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
         }
 
         try:
-            return __maybedebug(ops[type(node)](left, right))
+            return __before_return(ops[type(node)](left, right))
         except KeyError:
             raise TypeError(f"evaluator: unknown binary operation: {type(node)}")
 
     # Unary operations
     if isinstance(node, graph.UnaryOp):
-        operand = evaluate(node.node, bindings)
+        operand = evaluate(node.node, bindings, cache)
 
         ops = {
             graph.logical_not: np.logical_not,
@@ -91,17 +103,17 @@ def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
         }
 
         try:
-            return __maybedebug(ops[type(node)](operand))
+            return __before_return(ops[type(node)](operand))
         except KeyError:
             raise TypeError(f"evaluator: unknown unary operation: {type(node)}")
 
     # Conditional operations
     if isinstance(node, graph.where):
-        return __maybedebug(
+        return __before_return(
             np.where(
-                evaluate(node.condition, bindings),
-                evaluate(node.then, bindings),
-                evaluate(node.otherwise, bindings),
+                evaluate(node.condition, bindings, cache),
+                evaluate(node.then, bindings, cache),
+                evaluate(node.otherwise, bindings, cache),
             )
         )
 
@@ -109,14 +121,14 @@ def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
         conditions = []
         values = []
         for cond, value in node.clauses[:-1]:
-            conditions.append(evaluate(cond, bindings))
-            values.append(evaluate(value, bindings))
-        default = evaluate(node.default_value, bindings)
-        return __maybedebug(np.select(conditions, values, default=default))
+            conditions.append(evaluate(cond, bindings, cache))
+            values.append(evaluate(value, bindings, cache))
+        default = evaluate(node.default_value, bindings, cache)
+        return __before_return(np.select(conditions, values, default=default))
 
     # Axis operations
     if isinstance(node, graph.AxisOp):
-        operand = evaluate(node.node, bindings)
+        operand = evaluate(node.node, bindings, cache)
 
         ops = {
             graph.expand_dims: lambda x: np.expand_dims(x, node.axis),
@@ -125,7 +137,7 @@ def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
         }
 
         try:
-            return __maybedebug(ops[type(node)](operand))
+            return __before_return(ops[type(node)](operand))
         except KeyError:
             raise TypeError(f"evaluator: unknown axis operation: {type(node)}")
 
