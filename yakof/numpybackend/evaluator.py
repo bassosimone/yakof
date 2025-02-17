@@ -2,7 +2,7 @@
 NumPy evaluator
 ===============
 
-Evaluates a `hir.Node` by calling the corresponding NumPy
+Evaluates a `graph.Node` by calling the corresponding NumPy
 functions and producing a `numpy.ndarray` as output.
 """
 
@@ -12,101 +12,109 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import hir
-from ..frontend import graph
+from ..frontend import graph, pretty
 
 
 Bindings = dict[str, np.ndarray]
 """Type alias for a dictionary of variable bindings."""
 
 
-def evaluate(node: hir.Node, bindings: Bindings) -> np.ndarray:
+def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
     """Evaluates a `hir.Node` to an `numpy.ndarray`."""
 
-    if isinstance(node, hir.constant):
-        return node.value
+    def __maybedebug(value: np.ndarray) -> np.ndarray:
+        if node.flags & graph.NODE_FLAG_TRACEPOINT != 0:
+            print(f"TRACE: {pretty.format(node)}")
+            print(f"{value}")
+            print("")
+        return value
 
-    if isinstance(node, hir.placeholder):
+    if isinstance(node, graph.constant):
+        return __maybedebug(np.asarray(node.value))
+
+    if isinstance(node, graph.placeholder):
         if node.name not in bindings:
             if node.default_value is not None:
-                return np.asarray(node.default_value)
+                return __maybedebug(np.asarray(node.default_value))
             raise ValueError(
                 f"evaluator: no value provided for placeholder '{node.name}'"
             )
-        return bindings[node.name]
+        return __maybedebug(bindings[node.name])
 
     # Binary operations
-    if isinstance(node, hir.BinaryOp):
+    if isinstance(node, graph.BinaryOp):
         left = evaluate(node.left, bindings)
         right = evaluate(node.right, bindings)
 
         ops = {
-            hir.add: np.add,
-            hir.subtract: np.subtract,
-            hir.multiply: np.multiply,
-            hir.divide: np.divide,
-            hir.equal: np.equal,
-            hir.not_equal: np.not_equal,
-            hir.less: np.less,
-            hir.less_equal: np.less_equal,
-            hir.greater: np.greater,
-            hir.greater_equal: np.greater_equal,
-            hir.logical_and: np.logical_and,
-            hir.logical_or: np.logical_or,
-            hir.logical_xor: np.logical_xor,
-            hir.power: np.power,
-            hir.maximum: np.maximum,
+            graph.add: np.add,
+            graph.subtract: np.subtract,
+            graph.multiply: np.multiply,
+            graph.divide: np.divide,
+            graph.equal: np.equal,
+            graph.not_equal: np.not_equal,
+            graph.less: np.less,
+            graph.less_equal: np.less_equal,
+            graph.greater: np.greater,
+            graph.greater_equal: np.greater_equal,
+            graph.logical_and: np.logical_and,
+            graph.logical_or: np.logical_or,
+            graph.logical_xor: np.logical_xor,
+            graph.power: np.power,
+            graph.maximum: np.maximum,
         }
 
         try:
-            return ops[type(node)](left, right)
+            return __maybedebug(ops[type(node)](left, right))
         except KeyError:
             raise TypeError(f"evaluator: unknown binary operation: {type(node)}")
 
     # Unary operations
-    if isinstance(node, hir.UnaryOp):
+    if isinstance(node, graph.UnaryOp):
         operand = evaluate(node.node, bindings)
 
         ops = {
-            hir.logical_not: np.logical_not,
-            hir.exp: np.exp,
-            hir.log: np.log,
+            graph.logical_not: np.logical_not,
+            graph.exp: np.exp,
+            graph.log: np.log,
         }
 
         try:
-            return ops[type(node)](operand)
+            return __maybedebug(ops[type(node)](operand))
         except KeyError:
             raise TypeError(f"evaluator: unknown unary operation: {type(node)}")
 
     # Conditional operations
-    if isinstance(node, hir.where):
-        return np.where(
-            evaluate(node.condition, bindings),
-            evaluate(node.then, bindings),
-            evaluate(node.otherwise, bindings),
+    if isinstance(node, graph.where):
+        return __maybedebug(
+            np.where(
+                evaluate(node.condition, bindings),
+                evaluate(node.then, bindings),
+                evaluate(node.otherwise, bindings),
+            )
         )
 
-    if isinstance(node, hir.multi_clause_where):
+    if isinstance(node, graph.multi_clause_where):
         conditions = []
         values = []
         for cond, value in node.clauses[:-1]:
             conditions.append(evaluate(cond, bindings))
             values.append(evaluate(value, bindings))
-        default = evaluate(node.clauses[-1][1], bindings)
-        return np.select(conditions, values, default=default)
+        default = evaluate(node.default_value, bindings)
+        return __maybedebug(np.select(conditions, values, default=default))
 
     # Axis operations
-    if isinstance(node, hir.AxisOp):
+    if isinstance(node, graph.AxisOp):
         operand = evaluate(node.node, bindings)
 
         ops = {
-            hir.expand_dims: lambda x: np.expand_dims(x, node.axis),
-            hir.reduce_sum: lambda x: np.sum(x, axis=node.axis),
-            hir.reduce_mean: lambda x: np.mean(x, axis=node.axis),
+            graph.expand_dims: lambda x: np.expand_dims(x, node.axis),
+            graph.reduce_sum: lambda x: np.sum(x, axis=node.axis),
+            graph.reduce_mean: lambda x: np.mean(x, axis=node.axis),
         }
 
         try:
-            return ops[type(node)](operand)
+            return __maybedebug(ops[type(node)](operand))
         except KeyError:
             raise TypeError(f"evaluator: unknown axis operation: {type(node)}")
 

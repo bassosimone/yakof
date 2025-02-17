@@ -31,12 +31,9 @@ with autonaming.context():
 # We use the pretty printer to print the sustainability tensor
 print(pretty.format(sustainable.t))
 
-# We transform the AST into a NumPy HIR
-sustainable_ir = hir.transform(sustainable.t)
-
 # We evaluate the HIR using the NumPy evaluator
 xx, yy = np.meshgrid(np.linspace(0, 100, 10), np.linspace(0, 100, 10))
-result = evaluator.evaluate(sustainable_ir, {
+result = evaluator.evaluate(sustainable.t, {
     "sitting": xx,
     "takeaway": yy,
 })

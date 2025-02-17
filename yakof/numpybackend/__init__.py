@@ -6,15 +6,7 @@ Interpreter
 -----------
 
 This backend evaluates tensor computations by calling NumPy
-functions through the following stages:
-
-1. Translation to NumPy High-Level Intermediate Representation (hir.py)
-   - Provides NumPy-specific operation types
-   - Enables backend-specific optimizations
-
-2. Interpretation (evaluator.py)
-
-The NumPy HIR is shared between the interpreter and the compiler.
+functions while walking through the tensor graph.
 
 Compiler
 --------

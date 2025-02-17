@@ -166,6 +166,9 @@ class TensorSpace[B]:
         B: Type of the basis vectors.
     """
 
+    # TODO(bassosimone): TensorSpace should contain all the operations
+    # that are defined for graph and don't change the tensor basis.
+
     def __init__(self, b: type[B]) -> None:
         # We only need the constructor to receive a type for the
         # type system to automatically assign a type to the instance
@@ -257,6 +260,10 @@ class TensorSpace[B]:
                 x.t, _ensure_tensor[B]()(loc).t, _ensure_tensor[B]()(scale).t
             )
         )
+
+    def tracepoint(self, t: Tensor[B]) -> Tensor[B]:
+        """Inserts a tracepoint for the current tensor inside the computation graph."""
+        return Tensor[B](graph.tracepoint(t.t))
 
 
 @runtime_checkable

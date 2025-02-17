@@ -88,11 +88,16 @@ Scalar = bool | float | int
 """Type alias for supported scalar value types."""
 
 
+NODE_FLAG_TRACEPOINT = 1 << 0
+"""Inserts a tracepoint at the corresponding graph node."""
+
+
 class Node:
     """Base class for all computation graph nodes."""
 
     def __init__(self, name: str = "") -> None:
         self.name = name
+        self.flags = 0
 
     def __hash__(self) -> int:
         return id(self)  # hashing by identity
@@ -326,3 +331,18 @@ class uniform_cdf(Node):
         self.x = x
         self.loc = loc
         self.scale = scale
+
+
+# Debug operations
+
+
+def tracepoint(node: Node) -> Node:
+    """
+    Marks the node as a tracepoint and returns it. The tracepoint
+    will take effect after the node has been evaluated.
+
+    This function acts like the unit in the category with semantic side
+    effects depending on the debug operation that is requested.
+    """
+    node.flags |= NODE_FLAG_TRACEPOINT
+    return node

@@ -124,7 +124,7 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
     if isinstance(node, graph.constant):
         return str(node.value)
     if isinstance(node, graph.placeholder):
-        return node.name
+        return f"<{node.name}>"
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):
