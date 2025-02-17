@@ -7,7 +7,7 @@ operations to convert tensors across spaces. It builds on top of the
 computation graph (yakof.frontend.graph) to provide a type-safe interface
 for working with tensors in different spaces.
 
-The module provides four main abstractions:
+The module provides these abstractions:
 
 1. TensorSpace[B]: A space of tensors with a given basis.
    Provides mathematical operations such as exp, log, and power.
@@ -15,14 +15,8 @@ The module provides four main abstractions:
 2. Tensor[B]: A tensor with associated basis vectors.
    Supports arithmetic, comparison, and logical operations.
 
-3. Basis: A protocol defining the required attributes for basis vectors.
-
-4. TensorMap[A, B]: A structure-preserving map between tensor spaces.
-   Supports expansion into higher dimensions and projection to lower dimensions.
-
 The type parameters ensure that operations between tensors are only possible
-when they share the same context and basis. TensorMap provides type-safe
-transformations between different bases.
+when they share the same context and basis.
 
 Type System Design
 ------------------
@@ -31,11 +25,9 @@ The type system uses generics to enforce:
 
 1. Basis compatibility:
    - Operations only between tensors with same basis
-   - Type-safe transformations between spaces
    - Compile-time detection of dimension mismatches
 
 2. Context preservation:
-   - Morphisms preserve structural properties
    - Clear distinction between different tensor spaces
 
 This design enables catching errors at compile time.
@@ -47,7 +39,8 @@ yakof.frontend
     Provides an overview for the tensor language frontend.
 
 yakof.frontend.bases
-    Basis definitions for tensor spaces to be used along with yakof.frontend.abstract.
+    Basis definitions and base transformation operations to be
+    used along with yakof.frontend.abstract.
 
 yakof.frontend.graph
     Computation graph building.
@@ -169,13 +162,6 @@ class TensorSpace[B]:
     # TODO(bassosimone): TensorSpace should contain all the operations
     # that are defined for graph and don't change the tensor basis.
 
-    def __init__(self, b: type[B]) -> None:
-        # We only need the constructor to receive a type for the
-        # type system to automatically assign a type to the instance
-        # and to have a similar instantiation pattern as TensorMap
-        # but we have no use for the type itself.
-        pass
-
     def placeholder(
         self, name: str = "", default_value: graph.Scalar | None = None
     ) -> Tensor[B]:
@@ -268,40 +254,3 @@ class TensorSpace[B]:
     def breakpoint(self, t: Tensor[B]) -> Tensor[B]:
         """Inserts a breakpoint for the current tensor inside the computation graph."""
         return Tensor[B](graph.breakpoint(t.t))
-
-
-@runtime_checkable
-class Basis(Protocol):
-    """Protocol defining required attributes for basis vectors.
-
-    Methods:
-        axis: Return the axis of the basis vector.
-    """
-
-    @staticmethod
-    def axis() -> graph.Axis: ...
-
-
-class TensorMap[A: Basis, B: Basis]:
-    """A structure-preserving map between tensor spaces.
-
-    Type Parameters:
-        A: Source basis type for expansion / target for projection
-        B: Target basis type for expansion / source for projection
-    """
-
-    def __init__(self, a: type[A], b: type[B]) -> None:
-        self.a = a
-        self.b = b
-
-    def expand_dims(self, t: Tensor[A]) -> Tensor[B]:
-        """Expand tensor into higher-dimensional space."""
-        return Tensor[B](graph.expand_dims(t.t, axis=self.b.axis()))
-
-    def project_using_mean(self, t: Tensor[B]) -> Tensor[A]:
-        """Project tensor to lower dimension using mean reduction."""
-        return Tensor[A](graph.reduce_mean(t.t, axis=self.a.axis()))
-
-    def project_using_sum(self, t: Tensor[B]) -> Tensor[A]:
-        """Project tensor to lower dimension using sum reduction."""
-        return Tensor[A](graph.reduce_sum(t.t, axis=self.a.axis()))
