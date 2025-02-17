@@ -32,11 +32,11 @@ with autonaming.context():
     space.tracepoint(sustainable)
 
 # We use the pretty printer to print the sustainability tensor
-print(pretty.format(sustainable.t))
+print(pretty.format(sustainable.node))
 
 # We evaluate the HIR using the NumPy evaluator
 xx, yy = np.meshgrid(np.linspace(0, 100, 5), np.linspace(0, 100, 5))
-result = evaluator.evaluate(sustainable.t, {
+result = evaluator.evaluate(sustainable.node, {
     "sitting": xx,
     "takeaway": yy,
 })

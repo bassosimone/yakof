@@ -71,85 +71,87 @@ class Tensor[B]:
         B: Type of the basis vectors.
     """
 
-    def __init__(self, t: graph.Node) -> None:
-        self.t = t
+    def __init__(self, node: graph.Node) -> None:
+        self.node = node
 
     @property
     def name(self) -> str:
-        return self.t.name
+        return self.node.name
 
     @name.setter
     def name(self, value: str) -> None:
-        self.t.name = value
+        self.node.name = value
 
     def __hash__(self) -> int:
-        return hash(self.t)  # hashing by identity
+        return hash(self.node)  # hashing by identity
 
     # Arithmetic operators
     def __add__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.add(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.add(self.node, _ensure_tensor[B]()(other).node))
 
     def __radd__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.add(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.add(_ensure_tensor[B]()(other).node, self.node))
 
     def __sub__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.subtract(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.subtract(self.node, _ensure_tensor[B]()(other).node))
 
     def __rsub__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.subtract(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.subtract(_ensure_tensor[B]()(other).node, self.node))
 
     def __mul__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.multiply(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.multiply(self.node, _ensure_tensor[B]()(other).node))
 
     def __rmul__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.multiply(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.multiply(_ensure_tensor[B]()(other).node, self.node))
 
     def __truediv__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.divide(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.divide(self.node, _ensure_tensor[B]()(other).node))
 
     def __rtruediv__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.divide(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.divide(_ensure_tensor[B]()(other).node, self.node))
 
     # Comparison operators
     def __eq__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:  # type: ignore
-        return type(self)(graph.equal(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.equal(self.node, _ensure_tensor[B]()(other).node))
 
     def __ne__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:  # type: ignore
-        return type(self)(graph.not_equal(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.not_equal(self.node, _ensure_tensor[B]()(other).node))
 
     def __lt__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.less(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.less(self.node, _ensure_tensor[B]()(other).node))
 
     def __le__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.less_equal(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.less_equal(self.node, _ensure_tensor[B]()(other).node))
 
     def __gt__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.greater(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.greater(self.node, _ensure_tensor[B]()(other).node))
 
     def __ge__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.greater_equal(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(
+            graph.greater_equal(self.node, _ensure_tensor[B]()(other).node)
+        )
 
     # Logical operators
     def __and__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.logical_and(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.logical_and(self.node, _ensure_tensor[B]()(other).node))
 
     def __rand__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.logical_and(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.logical_and(_ensure_tensor[B]()(other).node, self.node))
 
     def __or__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.logical_or(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.logical_or(self.node, _ensure_tensor[B]()(other).node))
 
     def __ror__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.logical_or(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.logical_or(_ensure_tensor[B]()(other).node, self.node))
 
     def __xor__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.logical_xor(self.t, _ensure_tensor[B]()(other).t))
+        return type(self)(graph.logical_xor(self.node, _ensure_tensor[B]()(other).node))
 
     def __rxor__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
-        return type(self)(graph.logical_xor(_ensure_tensor[B]()(other).t, self.t))
+        return type(self)(graph.logical_xor(_ensure_tensor[B]()(other).node, self.node))
 
     def __invert__(self) -> Tensor[B]:
-        return type(self)(graph.logical_not(self.t))
+        return type(self)(graph.logical_not(self.node))
 
 
 class TensorSpace[B]:
@@ -163,7 +165,9 @@ class TensorSpace[B]:
     # that are defined for graph and don't change the tensor basis.
 
     def placeholder(
-        self, name: str = "", default_value: graph.Scalar | None = None
+        self,
+        name: str = "",
+        default_value: graph.Scalar | None = None,
     ) -> Tensor[B]:
         """Creates a placeholder tensor.
 
@@ -186,25 +190,25 @@ class TensorSpace[B]:
 
     def exp(self, t: Tensor[B]) -> Tensor[B]:
         """Compute the exponential of a tensor."""
-        return type(t)(graph.exp(t.t))
+        return type(t)(graph.exp(t.node))
 
     def power(self, t: Tensor[B], exp: Tensor[B]) -> Tensor[B]:
         """Raise tensor to the power of another tensor."""
-        return type(t)(graph.power(t.t, exp.t))
+        return type(t)(graph.power(t.node, exp.node))
 
     def log(self, t: Tensor[B]) -> Tensor[B]:
         """Compute the natural logarithm of a tensor."""
-        return type(t)(graph.log(t.t))
+        return type(t)(graph.log(t.node))
 
     def maximum(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Compute element-wise maximum of two tensors."""
-        return type(t1)(graph.maximum(t1.t, t2.t))
+        return type(t1)(graph.maximum(t1.node, t2.node))
 
     def where[
         C
     ](self, cond: Tensor[C], then: Tensor[B], otherwise: Tensor[B]) -> Tensor[B]:
         """Select elements based on condition."""
-        return type(then)(graph.where(cond.t, then.t, otherwise.t))
+        return type(then)(graph.where(cond.node, then.node, otherwise.node))
 
     def multi_clause_where[
         C
@@ -216,8 +220,8 @@ class TensorSpace[B]:
         """Select elements based on multiple conditions."""
         return Tensor[B](
             graph.multi_clause_where(
-                clauses=[(cond.t, value.t) for cond, value in clauses],
-                default_value=_ensure_tensor[B]()(default_value).t,
+                clauses=[(cond.node, value.node) for cond, value in clauses],
+                default_value=_ensure_tensor[B]()(default_value).node,
             )
         )
 
@@ -230,7 +234,7 @@ class TensorSpace[B]:
         """Compute normal distribution CDF."""
         return Tensor[B](
             graph.normal_cdf(
-                x.t, _ensure_tensor[B]()(loc).t, _ensure_tensor[B]()(scale).t
+                x.node, _ensure_tensor[B]()(loc).node, _ensure_tensor[B]()(scale).node
             )
         )
 
@@ -243,14 +247,14 @@ class TensorSpace[B]:
         """Compute uniform distribution CDF."""
         return Tensor[B](
             graph.uniform_cdf(
-                x.t, _ensure_tensor[B]()(loc).t, _ensure_tensor[B]()(scale).t
+                x.node, _ensure_tensor[B]()(loc).node, _ensure_tensor[B]()(scale).node
             )
         )
 
     def tracepoint(self, t: Tensor[B]) -> Tensor[B]:
         """Inserts a tracepoint for the current tensor inside the computation graph."""
-        return Tensor[B](graph.tracepoint(t.t))
+        return Tensor[B](graph.tracepoint(t.node))
 
     def breakpoint(self, t: Tensor[B]) -> Tensor[B]:
         """Inserts a breakpoint for the current tensor inside the computation graph."""
-        return Tensor[B](graph.breakpoint(t.t))
+        return Tensor[B](graph.breakpoint(t.node))

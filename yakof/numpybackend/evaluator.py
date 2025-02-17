@@ -33,7 +33,11 @@ def _print_tracepoint(node: graph.Node, value: np.ndarray) -> None:
     print("")
 
 
-def evaluate(node: graph.Node, bindings: Bindings, cache: Cache | None = None) -> np.ndarray:
+def evaluate(
+    node: graph.Node,
+    bindings: Bindings,
+    cache: Cache | None = None,
+) -> np.ndarray:
     """Evaluates a `graph.Node` to an `numpy.ndarray`."""
 
     # Use cache if available

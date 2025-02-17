@@ -21,7 +21,7 @@ with autonaming.context():
 
 # Lower to register indexed linear form
 sustainable_prog = emitter.Program()
-sustainable_register = emitter.emit(sustainable.t, sustainable_prog)
+sustainable_register = emitter.emit(sustainable.node, sustainable_prog)
 
 # Instantiate and use the virtual machine
 #
