@@ -265,6 +265,10 @@ class TensorSpace[B]:
         """Inserts a tracepoint for the current tensor inside the computation graph."""
         return Tensor[B](graph.tracepoint(t.t))
 
+    def breakpoint(self, t: Tensor[B]) -> Tensor[B]:
+        """Inserts a breakpoint for the current tensor inside the computation graph."""
+        return Tensor[B](graph.breakpoint(t.t))
+
 
 @runtime_checkable
 class Basis(Protocol):

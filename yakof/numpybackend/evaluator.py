@@ -18,24 +18,31 @@ from ..frontend import graph, pretty
 Bindings = dict[str, np.ndarray]
 """Type alias for a dictionary of variable bindings."""
 
+def _print_tracepoint(node: graph.Node, value: np.ndarray) -> None:
+    print("=== begin tracepoint ===")
+    print(f"name: {node.name}")
+    print(f"formula: {pretty.format(node)}")
+    print(f"shape: {value.shape}")
+    print(f"value:\n{value}")
+    print("=== end tracepoint ===")
+    print("")
+
 
 def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
     """Evaluates a `graph.Node` to an `numpy.ndarray`."""
 
     def __maybedebug(value: np.ndarray) -> np.ndarray:
         if node.flags & graph.NODE_FLAG_TRACEPOINT != 0:
-            print("=== begin tracepoint ===")
-            print(f"name: {node.name}")
-            print(f"formula: {pretty.format(node)}")
-            print(f"shape: {value.shape}")
-            print(f"value:\n{value}")
-            print("=== end tracepoint ===")
-            print("")
+            _print_tracepoint(node, value)
+        if node.flags & graph.NODE_FLAG_BREAKPOINT != 0:
+            input("Press any key to continue...")
         return value
 
+    # Constant operation
     if isinstance(node, graph.constant):
         return __maybedebug(np.asarray(node.value))
 
+    # Placeholder operation
     if isinstance(node, graph.placeholder):
         if node.name not in bindings:
             if node.default_value is not None:

@@ -91,6 +91,9 @@ Scalar = bool | float | int
 NODE_FLAG_TRACEPOINT = 1 << 0
 """Inserts a tracepoint at the corresponding graph node."""
 
+NODE_FLAG_BREAKPOINT = 1 << 1
+"""Inserts a breakpoint at the corresponding graph node."""
+
 
 class Node:
     """Base class for all computation graph nodes."""
@@ -345,4 +348,16 @@ def tracepoint(node: Node) -> Node:
     effects depending on the debug operation that is requested.
     """
     node.flags |= NODE_FLAG_TRACEPOINT
+    return node
+
+
+def breakpoint(node: Node) -> Node:
+    """
+    Marks the node as a breakpoint and returns it. The breakpoint
+    will take effect after the node has been evaluated.
+
+    This function acts like the unit in the category with semantic side
+    effects depending on the debug operation that is requested.
+    """
+    node.flags |= NODE_FLAG_TRACEPOINT | NODE_FLAG_BREAKPOINT
     return node
