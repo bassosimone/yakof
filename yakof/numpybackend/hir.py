@@ -31,6 +31,9 @@ NumPy-specific HIR enables:
 - More streamlined lowering to linear form
 """
 
+# TODO(bassosimone): this module is conceptually correct but otherwise
+# it is only acting as a passthrough so we should probably remove it
+
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations

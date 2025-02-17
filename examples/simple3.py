@@ -19,12 +19,9 @@ with autonaming.context():
     seats = space.constant(50)
     sustainable = sitting + takeaway <= seats
 
-# Lower to HIR
-sustainable_ir = hir.transform(sustainable.t)
-
 # Lower to register indexed linear form
 sustainable_prog = emitter.Program()
-sustainable_register = emitter.emit(sustainable_ir, sustainable_prog)
+sustainable_register = emitter.emit(sustainable.t, sustainable_prog)
 
 # Instantiate and use the virtual machine
 #

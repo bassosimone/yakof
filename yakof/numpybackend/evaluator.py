@@ -20,12 +20,16 @@ Bindings = dict[str, np.ndarray]
 
 
 def evaluate(node: graph.Node, bindings: Bindings) -> np.ndarray:
-    """Evaluates a `hir.Node` to an `numpy.ndarray`."""
+    """Evaluates a `graph.Node` to an `numpy.ndarray`."""
 
     def __maybedebug(value: np.ndarray) -> np.ndarray:
         if node.flags & graph.NODE_FLAG_TRACEPOINT != 0:
-            print(f"TRACE: {pretty.format(node)}")
-            print(f"{value}")
+            print("=== begin tracepoint ===")
+            print(f"name: {node.name}")
+            print(f"formula: {pretty.format(node)}")
+            print(f"shape: {value.shape}")
+            print(f"value:\n{value}")
+            print("=== end tracepoint ===")
             print("")
         return value
 

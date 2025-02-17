@@ -24,15 +24,18 @@ space = abstract.TensorSpace(bases.X)
 # We use the autonaming context to automatically name the tensors
 with autonaming.context():
     sitting = space.placeholder()
+    space.tracepoint(sitting)
     takeaway = space.placeholder()
+    space.tracepoint(takeaway)
     seats = space.constant(50)
     sustainable = sitting + takeaway <= seats
+    space.tracepoint(sustainable)
 
 # We use the pretty printer to print the sustainability tensor
 print(pretty.format(sustainable.t))
 
 # We evaluate the HIR using the NumPy evaluator
-xx, yy = np.meshgrid(np.linspace(0, 100, 10), np.linspace(0, 100, 10))
+xx, yy = np.meshgrid(np.linspace(0, 100, 5), np.linspace(0, 100, 5))
 result = evaluator.evaluate(sustainable.t, {
     "sitting": xx,
     "takeaway": yy,

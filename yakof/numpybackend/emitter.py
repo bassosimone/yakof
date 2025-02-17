@@ -2,7 +2,7 @@
 NumPy Linear Format Emitter
 ===========================
 
-Visitor for NumPy HIR that lowers to linear format with
+Visitor for the graph that lowers to linear format with
 explicit dependency on virtual registers.
 
 Register Allocation Strategy
@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from . import hir
 from ..frontend import graph
 
 
@@ -244,45 +243,45 @@ class Program:
         self.operations: list[Operation] = []
 
 
-def emit(node: hir.Node, program: Program) -> Register:
-    """Transforms the NumPy HIR into a linear, register-based NumPy program."""
+def emit(node: graph.Node, program: Program) -> Register:
+    """Transforms the graph into a linear, register-based NumPy program."""
 
     def __add(op: Operation) -> Register:
         program.operations.append(op)
         return len(program.operations) - 1
 
-    if isinstance(node, hir.constant):
-        return __add(constant(node.value))
+    if isinstance(node, graph.constant):
+        return __add(constant(np.asarray(node.value)))
 
-    if isinstance(node, hir.placeholder):
+    if isinstance(node, graph.placeholder):
         return __add(
             placeholder(
                 node.name,
-                (node.default_value if node.default_value is not None else None),
+                (np.asarray(node.default_value) if node.default_value else None),
             )
         )
 
     # Binary operations
-    if isinstance(node, hir.BinaryOp):
+    if isinstance(node, graph.BinaryOp):
         left = emit(node.left, program)
         right = emit(node.right, program)
 
         ops = {
-            hir.add: add,
-            hir.subtract: subtract,
-            hir.multiply: multiply,
-            hir.divide: divide,
-            hir.equal: equal,
-            hir.not_equal: not_equal,
-            hir.less: less,
-            hir.less_equal: less_equal,
-            hir.greater: greater,
-            hir.greater_equal: greater_equal,
-            hir.logical_and: logical_and,
-            hir.logical_or: logical_or,
-            hir.logical_xor: logical_xor,
-            hir.power: power,
-            hir.maximum: maximum,
+            graph.add: add,
+            graph.subtract: subtract,
+            graph.multiply: multiply,
+            graph.divide: divide,
+            graph.equal: equal,
+            graph.not_equal: not_equal,
+            graph.less: less,
+            graph.less_equal: less_equal,
+            graph.greater: greater,
+            graph.greater_equal: greater_equal,
+            graph.logical_and: logical_and,
+            graph.logical_or: logical_or,
+            graph.logical_xor: logical_xor,
+            graph.power: power,
+            graph.maximum: maximum,
         }
 
         try:
@@ -291,13 +290,13 @@ def emit(node: hir.Node, program: Program) -> Register:
             raise TypeError(f"emitter: unknown binary operation: {type(node)}")
 
     # Unary operations
-    if isinstance(node, hir.UnaryOp):
+    if isinstance(node, graph.UnaryOp):
         register = emit(node.node, program)
 
         ops = {
-            hir.logical_not: logical_not,
-            hir.exp: exp,
-            hir.log: log,
+            graph.logical_not: logical_not,
+            graph.exp: exp,
+            graph.log: log,
         }
 
         try:
@@ -306,7 +305,7 @@ def emit(node: hir.Node, program: Program) -> Register:
             raise TypeError(f"emitter: unknown unary operation: {type(node)}")
 
     # Conditional operations
-    if isinstance(node, hir.where):
+    if isinstance(node, graph.where):
         return __add(
             where(
                 emit(node.condition, program),
@@ -315,7 +314,7 @@ def emit(node: hir.Node, program: Program) -> Register:
             )
         )
 
-    if isinstance(node, hir.multi_clause_where):
+    if isinstance(node, graph.multi_clause_where):
         return __add(
             multi_clause_where(
                 *(
@@ -326,13 +325,13 @@ def emit(node: hir.Node, program: Program) -> Register:
         )
 
     # Axis operations
-    if isinstance(node, hir.AxisOp):
+    if isinstance(node, graph.AxisOp):
         register = emit(node.node, program)
 
         ops = {
-            hir.expand_dims: expand_dims,
-            hir.reduce_sum: reduce_sum,
-            hir.reduce_mean: reduce_mean,
+            graph.expand_dims: expand_dims,
+            graph.reduce_sum: reduce_sum,
+            graph.reduce_mean: reduce_mean,
         }
 
         try:
