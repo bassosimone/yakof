@@ -15,10 +15,6 @@ from typing import Generic, Final
 from enum import auto, Enum
 
 
-# TODO(bassosimone): finish sketching out and integrating this
-# code into the rest of the frontend code.
-
-
 @dataclass(frozen=True)
 class Value:
     """A strongly typed enum value with guaranteed
