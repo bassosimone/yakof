@@ -5,6 +5,12 @@ Common Tensor Spaces
 Pre-defined tensor spaces for common use cases. This module provides
 ready-to-use tensor spaces to avoid repeated instantiation.
 
+Note: This module uses mathematical terminology (bases, dimensions,
+projections) to provide intuitive abstractions for working with
+multidimensional arrays. While inspired by vector space concepts,
+these are engineering approximations rather than rigorous
+mathematical constructs.
+
 Examples:
 --------
     >>> from yakof.frontend import spaces

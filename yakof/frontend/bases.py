@@ -5,6 +5,12 @@ Tensor Bases and Transformations
 This module provides type definitions and transformations for tensor spaces
 up to R³, focusing on the X, Y, and Z dimensions.
 
+Note: This module uses mathematical terminology (bases, dimensions,
+projections) to provide intuitive abstractions for working with
+multidimensional arrays. While inspired by vector space concepts,
+these are engineering approximations rather than rigorous
+mathematical constructs.
+
 Type Definitions:
 ---------------
 - R¹: X, Y, Z (single axes)
