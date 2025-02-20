@@ -181,7 +181,7 @@ def evaluate(
     if isinstance(node, graph.multi_clause_where):
         conditions = []
         values = []
-        for cond, value in node.clauses:  # No slice - process all clauses
+        for cond, value in node.clauses:
             conditions.append(evaluate(cond, bindings, cache))
             values.append(evaluate(value, bindings, cache))
         default = evaluate(node.default_value, bindings, cache)
