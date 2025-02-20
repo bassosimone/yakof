@@ -70,6 +70,7 @@ def test_complex_arithmetic_graph():
     assert result.left is square
     assert result.right is exp_d
     assert square.left is mult_c
+    assert isinstance(square.right, graph.constant)
     assert square.right.value == 2.0
     assert mult_c.left is add_ab
     assert mult_c.right is c
@@ -113,7 +114,9 @@ def test_probability_distribution_graph():
 
     # Verify structure
     assert result.x is normal
+    assert isinstance(result.loc, graph.constant)
     assert result.loc.value == 0.0
+    assert isinstance(result.scale, graph.constant)
     assert result.scale.value == 1.0
     assert normal.x is x
     assert normal.loc is mu
@@ -172,3 +175,16 @@ def test_debug_operations_name_preservation():
     breakpointed = graph.breakpoint(traced)
     assert breakpointed.name == "debug_node"
     assert breakpointed is a
+
+
+def test_where_operation():
+    """Test the where operation."""
+    condition = graph.placeholder("condition")
+    then = graph.constant(1.0)
+    otherwise = graph.constant(0.0)
+
+    result = graph.where(condition, then, otherwise)
+
+    assert result.condition is condition
+    assert result.then is then
+    assert result.otherwise is otherwise
