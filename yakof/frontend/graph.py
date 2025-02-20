@@ -84,14 +84,32 @@ NODE_FLAG_BREAK = 1 << 1
 
 
 class Node:
-    """Base class for all computation graph nodes."""
+    """
+    Base class for all computation graph nodes.
+
+    Design Notes
+    ------------
+
+    1. Identity Semantics:
+        - Nodes use identity-based hashing and equality
+        - This allows graph traversal algorithms to work correctly
+        - Enables use of nodes as dictionary keys
+
+    2. Debug Support:
+        - Nodes carry flags for debugging (trace/break)
+        - Names for better error reporting
+        - Extensible flag system for future debug features
+    """
 
     def __init__(self, name: str = "") -> None:
         self.name = name
         self.flags = 0
 
     def __hash__(self) -> int:
-        return id(self)  # hashing by identity
+        # Note: introducing hashing by identity in the class inheritance
+        # chain to ensure that overriding the equality operator to be lazy
+        # in derived classes do not break assigning to dicts.
+        return id(self)
 
 
 class constant(Node):
