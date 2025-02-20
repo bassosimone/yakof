@@ -137,53 +137,49 @@ def test_reduction_operations():
     assert np.array_equal(evaluator.evaluate(node, bindings), np.mean(x, axis=1))
 
 
-def test_conditional_operations():
-    """Test evaluation of conditional operations."""
-    # Test simple where operation first
-    cond = np.array([True, False, True])
-    x = np.array([1.0, 2.0, 3.0])
-    y = np.array([4.0, 5.0, 6.0])
-    bindings = {"cond": cond, "x": x, "y": y}
+def test_where_operation():
+    """Test where operation with various data types and shapes."""
+    test_cases = [
+        # Basic scalar selection
+        {
+            "cond": np.array([True, False, True]),
+            "x": np.array([1.0, 2.0, 3.0]),
+            "y": np.array([4.0, 5.0, 6.0]),
+            "desc": "scalar values",
+        },
+        # Boolean values
+        {
+            "cond": np.array([True, False, True]),
+            "x": np.array([True, True, True]),
+            "y": np.array([False, False, False]),
+            "desc": "boolean values",
+        },
+        # 2D array broadcasting
+        {
+            "cond": np.array([[True, False], [False, True]]),
+            "x": np.array([[1.0, 2.0], [3.0, 4.0]]),
+            "y": np.array([[5.0, 6.0], [7.0, 8.0]]),
+            "desc": "2D arrays",
+        },
+    ]
 
-    # Simple where
-    node = graph.where(
-        graph.placeholder("cond"), graph.placeholder("x"), graph.placeholder("y")
-    )
-    result = evaluator.evaluate(node, bindings)
-    expected = np.where(cond, x, y)
-    assert np.array_equal(result, expected)
+    for case in test_cases:
+        print(f"\nTesting where with {case['desc']}:")
+        bindings = {"cond": case["cond"], "x": case["x"], "y": case["y"]}
 
-    # Print intermediate values for debugging
-    print(f"cond: {cond}")
-    print(f"x: {x}")
-    print(f"y: {y}")
-    print(f"result: {result}")
-    print(f"expected: {expected}")
+        node = graph.where(
+            graph.placeholder("cond"), graph.placeholder("x"), graph.placeholder("y")
+        )
+        result = evaluator.evaluate(node, bindings)
+        expected = np.where(case["cond"], case["x"], case["y"])
 
+        print(f"condition: {case['cond']}")
+        print(f"x: {case['x']}")
+        print(f"y: {case['y']}")
+        print(f"result: {result}")
+        print(f"expected: {expected}")
 
-def test_caching():
-    """Test that evaluation caching works correctly."""
-    # Create a simple expression that we can verify caching with
-    x = graph.placeholder("x")
-    const = graph.constant(2.0)
-    expr = graph.multiply(x, const)  # x * 2
-
-    # First evaluation
-    cache = {}
-    x_val = np.array(3.0)
-    result1 = evaluator.evaluate(expr, {"x": x_val}, cache)
-
-    # Second evaluation - should use cache
-    result2 = evaluator.evaluate(expr, {"x": x_val}, cache)
-
-    # Results should be identical
-    assert np.array_equal(result1, result2)
-    assert np.array_equal(result1, x_val * 2)
-
-    # Print cache contents for debugging
-    print("Cache contents:")
-    for k, v in cache.items():
-        print(f"  {k}: {v}")
+        assert np.array_equal(result, expected)
 
 
 def test_debug_operations(capsys):
@@ -206,3 +202,73 @@ def test_error_handling():
 
     with pytest.raises(TypeError, match="unknown node type"):
         evaluator.evaluate(unknown_op(), {})
+
+
+def test_multi_clause_where():
+    """Test multi-clause where operations, comparing with both np.select and nested where."""
+    # Setup test conditions
+    cond1 = np.array([True, False, False])
+    cond2 = np.array([False, True, False])
+    val1, val2 = 1.0, 2.0
+    default = 0.0
+    bindings = {"cond1": cond1, "cond2": cond2}
+
+    # Test our multi_clause_where implementation
+    node = graph.multi_clause_where(
+        [
+            (graph.placeholder("cond1"), graph.constant(val1)),
+            (graph.placeholder("cond2"), graph.constant(val2)),
+        ],
+        graph.constant(default),
+    )
+    result = evaluator.evaluate(node, bindings)
+
+    # Compare with np.select
+    expected_select = np.select([cond1, cond2], [val1, val2], default=default)
+
+    # Compare with nested where operations
+    nested_where = graph.where(
+        graph.placeholder("cond1"),
+        graph.constant(val1),
+        graph.where(
+            graph.placeholder("cond2"), graph.constant(val2), graph.constant(default)
+        ),
+    )
+    expected_nested = evaluator.evaluate(nested_where, bindings)
+
+    # Debug information
+    print("\nDebug information:")
+    print(f"cond1: {cond1}")
+    print(f"cond2: {cond2}")
+    print(f"result from multi_clause_where: {result}")
+    print(f"expected from np.select: {expected_select}")
+    print(f"expected from nested where: {expected_nested}")
+
+    # Verify all approaches give same result
+    assert np.array_equal(result, expected_select)
+    assert np.array_equal(result, expected_nested)
+
+
+def test_caching_behavior():
+    """Test caching behavior."""
+    # Create a computation we can verify
+    x = graph.placeholder("x")
+    node = graph.add(x, x)  # x + x
+
+    # Set up cache and bindings
+    cache = {}
+    value = np.array(2.0)
+    bindings = {"x": value}
+
+    # First evaluation should compute and cache
+    result1 = evaluator.evaluate(node, bindings, cache=cache)
+
+    # Modify bindings to ensure we're using cache
+    bindings["x"] = np.array(3.0)  # Change input value
+
+    # Second evaluation with same node should use cached value
+    result2 = evaluator.evaluate(node, bindings, cache=cache)
+
+    # Results should be identical despite different input
+    assert np.array_equal(result1, result2)
+    assert np.array_equal(result1, value + value)  # Should be 2.0 + 2.0
