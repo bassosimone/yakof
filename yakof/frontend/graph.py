@@ -38,8 +38,13 @@ Because our goal is to *capture* the arguments provided to function invocations
 for later evaluation, we are using classes instead of functions. (We could
 alternatively have used closures, but it would have been more clumsy.) To keep
 the invoked entities names as close as possible to TensorFlow, we named the
+<<<<<<< HEAD
 classes using snake_case rather than CmaleCase. This is a pragmatic and conscious
 choice: violating PEP8 to produce more readable code.
+=======
+classes using snake_case rather than CamelCase. This is a pragmatic and conscious
+choice: violating PEP8 to produce code that reads like TensorFlow or NumPy.
+>>>>>>> main
 
 The main type in this module is the `Node`, representing a node in the
 computation graph. Each operation (e.g., `add`) is a subclass of the `Node`
@@ -60,6 +65,7 @@ Design Decisions
 3. Node Identity:
    - Nodes are identified by their instance identity
    - Enables graph traversal and transformation
+<<<<<<< HEAD
 
 See Also
 --------
@@ -72,6 +78,8 @@ yakof.frontend.abstract
 
 yakof.frontend.bases
     Basis definitions for tensor spaces to be used along with yakof.frontend.abstract.
+=======
+>>>>>>> main
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -88,11 +96,10 @@ Scalar = bool | float | int
 """Type alias for supported scalar value types."""
 
 
-NODE_FLAG_TRACEPOINT = 1 << 0
+NODE_FLAG_TRACE = 1 << 0
 """Inserts a tracepoint at the corresponding graph node."""
 
-NODE_FLAG_BREAKPOINT = 1 << 1
-"""Inserts a breakpoint at the corresponding graph node."""
+NODE_FLAG_BREAK = 1 << 1
 
 
 class Node:
@@ -234,7 +241,7 @@ class power(BinaryOp):
 
 
 pow = power
-"""Alias for power for comaptibility with NumPy naming."""
+"""Alias for power for compatibility with NumPy naming."""
 
 
 class log(UnaryOp):
@@ -347,7 +354,7 @@ def tracepoint(node: Node) -> Node:
     This function acts like the unit in the category with semantic side
     effects depending on the debug operation that is requested.
     """
-    node.flags |= NODE_FLAG_TRACEPOINT
+    node.flags |= NODE_FLAG_TRACE
     return node
 
 
@@ -359,5 +366,5 @@ def breakpoint(node: Node) -> Node:
     This function acts like the unit in the category with semantic side
     effects depending on the debug operation that is requested.
     """
-    node.flags |= NODE_FLAG_TRACEPOINT | NODE_FLAG_BREAKPOINT
+    node.flags |= NODE_FLAG_TRACE | NODE_FLAG_BREAK
     return node

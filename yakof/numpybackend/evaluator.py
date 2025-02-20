@@ -46,9 +46,9 @@ def evaluate(
 
     # Code to run before returning
     def __before_return(value: np.ndarray) -> np.ndarray:
-        if node.flags & graph.NODE_FLAG_TRACEPOINT != 0:
+        if node.flags & graph.NODE_FLAG_TRACE != 0:
             _print_tracepoint(node, value)
-        if node.flags & graph.NODE_FLAG_BREAKPOINT != 0:
+        if node.flags & graph.NODE_FLAG_BREAK != 0:
             input("Press any key to continue...")
         if cache:
             cache[node] = value
