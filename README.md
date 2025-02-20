@@ -2,6 +2,8 @@
 
 ![Yes, it's literally a kettle of fish!](yakof.png)
 
+[![Build Status](https://github.com/bassosimone/yakof/actions/workflows/ci.yml/badge.svg)](https://github.com/bassosimone/yakof/actions) [![codecov](https://codecov.io/gh/bassosimone/yakof/branch/main/graph/badge.svg)](https://codecov.io/gh/bassosimone/yakof)
+
 YAKOF demonstrates improved typing and tensor manipulation for sustainability modeling,
 and specifically for the [Fondazione Bruno Kessler's](https://fbk.eu) [DT Model](
 https://github.com/tn-aixpa/dt-model) model. See [DESIGN.md](DESIGN.md) for the detailed
