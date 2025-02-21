@@ -24,6 +24,7 @@ This package uses 'tensor' in the computational sense (i.e., multidimensional
 arrays) while borrowing mathematical concepts like bases and vector spaces
 to provide a structured way to handle transformations between different
 dimensional spaces.
+
 While not strictly adhering to mathematical tensor theory, this approach
 provides a practical framework for engineering computations.
 
