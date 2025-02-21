@@ -50,7 +50,7 @@ The reference implementation provides two state classes:
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from typing import Callable, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
