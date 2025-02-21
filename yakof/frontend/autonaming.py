@@ -158,8 +158,12 @@ class context:
             if not isinstance(var, Nameable):
                 continue
             if var.name:
-                logging.warning(f"autonaming: attempting to rename {var.name} to {name}")
+                logging.warning(
+                    f"autonaming: attempting to rename {var.name} to {name}"
+                )
                 logging.warning(f"autonaming: debugging code will use {var.name}")
-                logging.warning(f"autonaming: consider adjusting your code to avoid aliasing tensors")
+                logging.warning(
+                    f"autonaming: consider adjusting your code to avoid aliasing tensors"
+                )
                 continue
             var.name = name
