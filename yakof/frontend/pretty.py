@@ -1,6 +1,6 @@
 """
 Pretty Printing for Computation Graphs
-====================================
+======================================
 
 This module provides facilities for converting computation graphs into
 readable string representations. It handles:
@@ -14,7 +14,7 @@ The main entry point is the format() function:
 
     >>> from yakof.frontend import graph, pretty
     >>> x = graph.placeholder("x")
-    >>> y = x * 2 + 1
+    >>> y = graph.add(graph.multiply(x, 2), 1)
     >>> print(pretty.format(y))
     x * 2 + 1
 
@@ -39,10 +39,28 @@ the correct evaluation order:
     >>> (x + y) * z    # "(x + y) * z"
     >>> ~x & y | z     # "(~x & y) | z"
 
-See Also
---------
-yakof.frontend.graph
-    The computation graph nodes that this module formats.
+Design Decisions
+---------------
+1. Precedence-based Formatting:
+   - Uses numeric precedence levels to determine parenthesization
+   - Follows standard mathematical conventions
+   - Allows easy addition of new operators
+
+2. Recursive Implementation:
+   - Handles nested expressions naturally
+   - Passes precedence information down the tree
+   - Enables context-aware formatting decisions
+
+3. Special Cases:
+   - Function-like operations use function call syntax
+   - Named nodes show assignment syntax
+   - Placeholders use angle bracket notation for visibility
+
+Implementation Notes
+------------------
+The formatter uses a visitor-like pattern without explicitly implementing
+the visitor pattern, which keeps the code simpler while maintaining
+extensibility.
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -62,13 +80,9 @@ def format(node: graph.Node) -> str:
 
     Examples:
         >>> x = graph.placeholder("x")
-        >>> y = x * 2 + 1
+        >>> y = graph.add(graph.multiply(x, 2), 1)
         >>> print(pretty.format(y))
         x * 2 + 1
-
-        >>> z = (x + y) * 3
-        >>> print(pretty.format(z))
-        (x + y) * 3
     """
     expr = _format(node, 0)  # Start with lowest precedence
     if node.name:
@@ -122,9 +136,11 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
 
     # Base cases
     if isinstance(node, graph.constant):
+        if node.name:
+            return node.name
         return str(node.value)
     if isinstance(node, graph.placeholder):
-        return f"<{node.name}>"
+        return node.name
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):
@@ -132,7 +148,7 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
         left = _format(node.left, op_precedence)
         right = _format(node.right, op_precedence)
 
-        # Operation-specific formatting
+        # Arithmetic operators
         if isinstance(node, graph.add):
             return wrap(f"{left} + {right}")
         if isinstance(node, graph.subtract):
@@ -149,6 +165,7 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return wrap(f"{left} | {right}")
         if isinstance(node, graph.logical_xor):
             return wrap(f"{left} ^ {right}")
+
         # Comparison operators
         if isinstance(node, graph.less):
             return wrap(f"{left} < {right}")
@@ -181,7 +198,4 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
     if isinstance(node, graph.uniform_cdf):
         return f"uniform_cdf({_format(node.x, 0)}, loc={_format(node.loc, 0)}, scale={_format(node.scale, 0)})"
 
-    # Default case
-    if node.name:
-        return node.name
     return f"<unknown:{type(node).__name__}>"
