@@ -38,13 +38,8 @@ Because our goal is to *capture* the arguments provided to function invocations
 for later evaluation, we are using classes instead of functions. (We could
 alternatively have used closures, but it would have been more clumsy.) To keep
 the invoked entities names as close as possible to TensorFlow, we named the
-<<<<<<< HEAD
-classes using snake_case rather than CmaleCase. This is a pragmatic and conscious
-choice: violating PEP8 to produce more readable code.
-=======
 classes using snake_case rather than CamelCase. This is a pragmatic and conscious
 choice: violating PEP8 to produce code that reads like TensorFlow or NumPy.
->>>>>>> main
 
 The main type in this module is the `Node`, representing a node in the
 computation graph. Each operation (e.g., `add`) is a subclass of the `Node`
@@ -65,21 +60,6 @@ Design Decisions
 3. Node Identity:
    - Nodes are identified by their instance identity
    - Enables graph traversal and transformation
-<<<<<<< HEAD
-
-See Also
---------
-
-yakof.frontend
-    Provides an overview for the tensor language frontend.
-
-yakof.frontend.abstract
-    Abstract tensor operations built on top of yakof.frontend.graph.
-
-yakof.frontend.bases
-    Basis definitions for tensor spaces to be used along with yakof.frontend.abstract.
-=======
->>>>>>> main
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -100,6 +80,7 @@ NODE_FLAG_TRACE = 1 << 0
 """Inserts a tracepoint at the corresponding graph node."""
 
 NODE_FLAG_BREAK = 1 << 1
+"""Inserts a breakpoint at the corresponding graph node."""
 
 
 class Node:
