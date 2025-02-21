@@ -96,12 +96,17 @@ class Tensor[B]:
     def __init__(self, node: graph.Node) -> None:
         self.node = node
 
+    def implements_namer(self) -> None:
+        """This method is part of the autonaming.Namer protocol"""
+
     @property
     def name(self) -> str:
+        """This method is part of the autonaming.Namer protocol"""
         return self.node.name
 
     @name.setter
     def name(self, value: str) -> None:
+        """This method is part of the autonaming.Namer protocol"""
         self.node.name = value
 
     def __hash__(self) -> int:
