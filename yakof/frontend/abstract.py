@@ -18,8 +18,45 @@ The module provides these abstractions:
 The type parameters ensure that operations between tensors are only possible
 when they share the same context and basis.
 
-Type System Design
-------------------
+On mathematical terminology
+---------------------------
+This package uses 'tensor' in the computational sense (i.e., multidimensional
+arrays) while borrowing mathematical concepts like bases and vector spaces
+to provide a structured way to handle transformations between different
+dimensional spaces.
+
+While not strictly adhering to mathematical tensor theory, this approach
+provides a practical framework for engineering computations.
+
+Categorical Structure
+---------------------
+
+The module implements a categorical structure where:
+
+1. Objects are tensor spaces (TensorSpace[B])
+2. Morphisms are structure-preserving maps between tensor spaces
+3. Endomorphisms are operations within a tensor space that preserve its structure
+
+Key categorical properties:
+
+1. Identity: Each tensor space has identity operations
+2. Composition: Operations can be composed while preserving types
+3. Associativity: Operation composition is associative
+
+This categorical view informs key design decisions:
+
+1. Operations that change tensor shape/basis (like reduce_sum or expand_dims)
+   are not methods of TensorSpace as they are morphisms between different
+   spaces rather than endomorphisms within a space.
+
+2. Operations that preserve tensor structure (like add or multiply) are
+   methods of TensorSpace as they are endomorphisms within the same space.
+
+3. The type system enforces these categorical constraints at compile time,
+   ensuring mathematical correctness.
+
+Type System Implementation
+--------------------------
 
 The type system uses generics to enforce:
 
@@ -31,28 +68,13 @@ The type system uses generics to enforce:
    - Clear distinction between different tensor spaces
 
 This design enables catching errors at compile time.
-
-See Also
---------
-
-yakof.frontend
-    Provides an overview for the tensor language frontend.
-
-yakof.frontend.bases
-    Basis definitions and base transformation operations to be
-    used along with yakof.frontend.abstract.
-
-yakof.frontend.graph
-    Computation graph building.
 """
 
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
-from typing import Protocol, Sequence, runtime_checkable
+from typing import Sequence
 
 from . import graph
 
@@ -161,9 +183,6 @@ class TensorSpace[B]:
         B: Type of the basis vectors.
     """
 
-    # TODO(bassosimone): TensorSpace should contain all the operations
-    # that are defined for graph and don't change the tensor basis.
-
     def placeholder(
         self,
         name: str = "",
@@ -258,3 +277,60 @@ class TensorSpace[B]:
     def breakpoint(self, t: Tensor[B]) -> Tensor[B]:
         """Inserts a breakpoint for the current tensor inside the computation graph."""
         return Tensor[B](graph.breakpoint(t.node))
+
+    # Additional shape/structure preserving operations
+    def add(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise addition of two tensors."""
+        return type(t1)(graph.add(t1.node, t2.node))
+
+    def subtract(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise subtraction of two tensors."""
+        return type(t1)(graph.subtract(t1.node, t2.node))
+
+    def multiply(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise multiplication of two tensors."""
+        return type(t1)(graph.multiply(t1.node, t2.node))
+
+    def divide(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise division of two tensors."""
+        return type(t1)(graph.divide(t1.node, t2.node))
+
+    def equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise equality comparison of two tensors."""
+        return type(t1)(graph.equal(t1.node, t2.node))
+
+    def not_equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise inequality comparison of two tensors."""
+        return type(t1)(graph.not_equal(t1.node, t2.node))
+
+    def less(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise less-than comparison of two tensors."""
+        return type(t1)(graph.less(t1.node, t2.node))
+
+    def less_equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise less-than-or-equal comparison of two tensors."""
+        return type(t1)(graph.less_equal(t1.node, t2.node))
+
+    def greater(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise greater-than comparison of two tensors."""
+        return type(t1)(graph.greater(t1.node, t2.node))
+
+    def greater_equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise greater-than-or-equal comparison of two tensors."""
+        return type(t1)(graph.greater_equal(t1.node, t2.node))
+
+    def logical_and(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise logical AND of two tensors."""
+        return type(t1)(graph.logical_and(t1.node, t2.node))
+
+    def logical_or(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise logical OR of two tensors."""
+        return type(t1)(graph.logical_or(t1.node, t2.node))
+
+    def logical_xor(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+        """Element-wise logical XOR of two tensors."""
+        return type(t1)(graph.logical_xor(t1.node, t2.node))
+
+    def logical_not(self, t: Tensor[B]) -> Tensor[B]:
+        """Element-wise logical NOT of a tensor."""
+        return type(t)(graph.logical_not(t.node))
