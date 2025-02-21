@@ -17,7 +17,7 @@ Here's a simple example:
     ...     z = x + y                # named 'z'
 
 Implementation Notes
-------------------
+--------------------
 
 The context manager tracks variable assignments in the current scope and automatically
 names unnamed objects that implement the Nameable protocol.
@@ -74,7 +74,7 @@ code. For reliable debugging, avoid assigning multiple names to the same
 tensor.
 
 Best Practices
--------------
+--------------
 
 DO:
 - Use meaningful, unique names for tensors

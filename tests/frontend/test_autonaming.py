@@ -97,8 +97,10 @@ def test_reassignment():
     """Test naming behavior with variable reassignment."""
     with autonaming.context():
         x = NameableObject()
-        x = NameableObject()  # Reassignment
-    assert x.name == "x"  # Last assignment should be named
+    with autonaming.context():
+        y = x
+    assert x.name == "x"
+    assert y.name == "x"
 
 
 def test_frame_behavior():
