@@ -9,8 +9,6 @@ from yakof.frontend import abstract, graph
 class DummyBasis:
     """Dummy basis type for testing."""
 
-    pass
-
 
 def test_tensor_creation():
     """Test basic tensor creation and properties."""
