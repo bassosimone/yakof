@@ -103,3 +103,84 @@ def test_named_expressions_pretty_printing():
 
     result = pretty.format(z)
     assert result == "<x> + <const_y:2.0>"
+
+
+def test_subtract_pretty_printing():
+    """Test pretty printing of subtract operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.subtract(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> - 2.0"
+
+
+def test_divide_pretty_printing():
+    """Test pretty printing of divide operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.divide(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> / 2.0"
+
+
+def test_power_pretty_printing():
+    """Test pretty printing of power operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.power(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> ** 2.0"
+
+
+def test_less_equal_pretty_printing():
+    """Test pretty printing of less_equal operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.less_equal(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> <= 2.0"
+
+
+def test_greater_pretty_printing():
+    """Test pretty printing of greater operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.greater(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> > 2.0"
+
+
+def test_equal_pretty_printing():
+    """Test pretty printing of equal operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.equal(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> == 2.0"
+
+
+def test_not_equal_pretty_printing():
+    """Test pretty printing of not_equal operation."""
+    x = graph.placeholder("x")
+    y = graph.constant(2.0)
+    z = graph.not_equal(x, y)
+
+    result = pretty.format(z)
+    assert result == "<x> != 2.0"
+
+
+def test_unhandled_node_type():
+    """Test pretty printing of an unhandled node type."""
+
+    class UnhandledNode(graph.Node):
+        pass
+
+    x = UnhandledNode()
+    result = pretty.format(x)
+    assert result == "<unknown:UnhandledNode>"
