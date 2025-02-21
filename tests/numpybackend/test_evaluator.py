@@ -83,6 +83,18 @@ def test_comparison_operations():
     node = graph.equal(graph.placeholder("x"), graph.placeholder("y"))
     assert np.array_equal(evaluator.evaluate(node, state), x == y)
 
+    # Not equal
+    node = graph.not_equal(graph.placeholder("x"), graph.placeholder("y"))
+    assert np.array_equal(evaluator.evaluate(node, state), x != y)
+
+    # Less than or equal
+    node = graph.less_equal(graph.placeholder("x"), graph.placeholder("y"))
+    assert np.array_equal(evaluator.evaluate(node, state), x <= y)
+
+    # Greater than or equal
+    node = graph.greater_equal(graph.placeholder("x"), graph.placeholder("y"))
+    assert np.array_equal(evaluator.evaluate(node, state), x >= y)
+
 
 def test_logical_operations():
     """Test evaluation of logical operations."""
@@ -200,8 +212,8 @@ def test_where_operation():
         assert np.array_equal(result, expected)
 
 
-def test_debug_operations(capsys):
-    """Test debug operations (tracepoint/breakpoint)."""
+def test_tracepoint_operation(capsys):
+    """Test tracepoint operation."""
     x = graph.placeholder("x")
     traced = graph.tracepoint(x)
 
@@ -383,8 +395,6 @@ def test_breakpoint_operation(monkeypatch):
 
 def test_state_management():
     """Test state management edge cases."""
-
-    # Test cache invalidation ordering
     state = evaluator.StateWithCache({})
     x = graph.placeholder("x")
     y = graph.add(x, x)
