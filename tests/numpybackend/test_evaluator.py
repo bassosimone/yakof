@@ -14,7 +14,9 @@ def test_constant_evaluation():
     # Scalar constants
     state = evaluator.StateWithoutCache({})
     assert np.array_equal(evaluator.evaluate(graph.constant(1.0), state), np.array(1.0))
-    assert np.array_equal(evaluator.evaluate(graph.constant(True), state), np.array(True))
+    assert np.array_equal(
+        evaluator.evaluate(graph.constant(True), state), np.array(True)
+    )
     assert np.array_equal(evaluator.evaluate(graph.constant(42), state), np.array(42))
 
 
@@ -24,8 +26,12 @@ def test_placeholder_evaluation():
     y = graph.placeholder("y", default_value=3.14)
 
     # Test with binding
-    state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])})
-    assert np.array_equal(evaluator.evaluate(x, state), np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]))
+    state = evaluator.StateWithoutCache(
+        {"x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])}
+    )
+    assert np.array_equal(
+        evaluator.evaluate(x, state), np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    )
 
     # Test default value
     state = evaluator.StateWithoutCache({})
@@ -150,7 +156,9 @@ def test_where_operation():
     test_cases = [
         # 3x3 matrix selection
         {
-            "cond": np.array([[True, False, True], [False, True, False], [True, False, True]]),
+            "cond": np.array(
+                [[True, False, True], [False, True, False], [True, False, True]]
+            ),
             "x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]),
             "y": np.array([[9.0, 8.0, 7.0], [6.0, 5.0, 4.0], [3.0, 2.0, 1.0]]),
             "desc": "3x3 matrices",
