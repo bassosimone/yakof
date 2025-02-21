@@ -18,8 +18,44 @@ The module provides these abstractions:
 The type parameters ensure that operations between tensors are only possible
 when they share the same context and basis.
 
-Type System Design
-------------------
+On mathematical terminology
+---------------------------
+This package uses 'tensor' in the computational sense (i.e., multidimensional
+arrays) while borrowing mathematical concepts like bases and vector spaces
+to provide a structured way to handle transformations between different
+dimensional spaces.
+While not strictly adhering to mathematical tensor theory, this approach
+provides a practical framework for engineering computations.
+
+Categorical Structure
+---------------------
+
+The module implements a categorical structure where:
+
+1. Objects are tensor spaces (TensorSpace[B])
+2. Morphisms are structure-preserving maps between tensor spaces
+3. Endomorphisms are operations within a tensor space that preserve its structure
+
+Key categorical properties:
+
+1. Identity: Each tensor space has identity operations
+2. Composition: Operations can be composed while preserving types
+3. Associativity: Operation composition is associative
+
+This categorical view informs key design decisions:
+
+1. Operations that change tensor shape/basis (like reduce_sum or expand_dims)
+   are not methods of TensorSpace as they are morphisms between different
+   spaces rather than endomorphisms within a space.
+
+2. Operations that preserve tensor structure (like add or multiply) are
+   methods of TensorSpace as they are endomorphisms within the same space.
+
+3. The type system enforces these categorical constraints at compile time,
+   ensuring mathematical correctness.
+
+Type System Implementation
+--------------------------
 
 The type system uses generics to enforce:
 
@@ -31,15 +67,6 @@ The type system uses generics to enforce:
    - Clear distinction between different tensor spaces
 
 This design enables catching errors at compile time.
-
-On mathematical terminology
----------------------------
-This package uses 'tensor' in the computational sense (i.e., multidimensional
-arrays) while borrowing mathematical concepts like bases and vector spaces
-to provide a structured way to handle transformations between different
-dimensional spaces.
-While not strictly adhering to mathematical tensor theory, this approach
-provides a practical framework for engineering computations.
 """
 
 # SPDX-License-Identifier: Apache-2.0

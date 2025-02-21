@@ -289,3 +289,106 @@ def test_tensor_space_method_consistency():
     assert isinstance(not_method.node, graph.UnaryOp)
     assert not_op.node.node is x.node
     assert not_method.node.node is x.node
+
+
+def test_tensor_name_property():
+    """Test tensor name getter and setter."""
+    space = abstract.TensorSpace[DummyBasis]()
+    x = space.placeholder("x")
+
+    # Test initial name
+    assert x.name == "x"
+
+    # Test name setter
+    x.name = "renamed"
+    assert x.name == "renamed"
+    assert x.node.name == "renamed"  # Verify it propagates to node
+
+
+def test_tensor_reverse_operations():
+    """Test reverse arithmetic and logical operations."""
+    space = abstract.TensorSpace[DummyBasis]()
+    x = space.placeholder("x")
+
+    # Test reverse subtraction (other - x)
+    rsub = 2.0 - x
+    assert isinstance(rsub.node, graph.subtract)
+    assert isinstance(rsub.node.left, graph.constant)
+    assert rsub.node.left.value == 2.0
+    assert rsub.node.right is x.node
+
+    # Test reverse multiplication (other * x)
+    rmul = 2.0 * x
+    assert isinstance(rmul.node, graph.multiply)
+    assert isinstance(rmul.node.left, graph.constant)
+    assert rmul.node.left.value == 2.0
+    assert rmul.node.right is x.node
+
+    # Test reverse division (other / x)
+    rdiv = 2.0 / x
+    assert isinstance(rdiv.node, graph.divide)
+    assert isinstance(rdiv.node.left, graph.constant)
+    assert rdiv.node.left.value == 2.0
+    assert rdiv.node.right is x.node
+
+    # Test reverse logical AND (other & x)
+    rand = True & x
+    assert isinstance(rand.node, graph.logical_and)
+    assert isinstance(rand.node.left, graph.constant)
+    assert rand.node.left.value is True
+    assert rand.node.right is x.node
+
+    # Test reverse logical OR (other | x)
+    ror = True | x
+    assert isinstance(ror.node, graph.logical_or)
+    assert isinstance(ror.node.left, graph.constant)
+    assert ror.node.left.value is True
+    assert ror.node.right is x.node
+
+    # Test reverse logical XOR (other ^ x)
+    rxor = True ^ x
+    assert isinstance(rxor.node, graph.logical_xor)
+    assert isinstance(rxor.node.left, graph.constant)
+    assert rxor.node.left.value is True
+    assert rxor.node.right is x.node
+
+
+def test_tensor_reverse_operations_with_tensors():
+    """Test reverse operations with tensors instead of scalars."""
+    space = abstract.TensorSpace[DummyBasis]()
+    x = space.placeholder("x")
+    y = space.placeholder("y")
+
+    # Test reverse subtraction (y - x)
+    rsub = y - x
+    assert isinstance(rsub.node, graph.subtract)
+    assert rsub.node.left is y.node
+    assert rsub.node.right is x.node
+
+    # Test reverse multiplication (y * x)
+    rmul = y * x
+    assert isinstance(rmul.node, graph.multiply)
+    assert rmul.node.left is y.node
+    assert rmul.node.right is x.node
+
+    # Test reverse division (y / x)
+    rdiv = y / x
+    assert isinstance(rdiv.node, graph.divide)
+    assert rdiv.node.left is y.node
+    assert rdiv.node.right is x.node
+
+    # Test reverse logical operations
+    rand = y & x
+    assert isinstance(rand.node, graph.logical_and)
+    assert rand.node.left is y.node
+    assert rand.node.right is x.node
+
+    ror = y | x
+    assert isinstance(ror.node, graph.logical_or)
+    assert ror.node.left is y.node
+    assert ror.node.right is x.node
+
+    rxor = y ^ x
+    assert isinstance(rxor.node, graph.logical_xor)
+    assert rxor.node.left is y.node
+    assert rxor.node.right is x.node
