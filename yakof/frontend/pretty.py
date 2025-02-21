@@ -136,6 +136,8 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
 
     # Base cases
     if isinstance(node, graph.constant):
+        if node.name:
+            return f"<{node.name}:{node.value}>"
         return str(node.value)
     if isinstance(node, graph.placeholder):
         return f"<{node.name}>"
