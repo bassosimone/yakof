@@ -379,3 +379,72 @@ def test_breakpoint_operation(monkeypatch):
     # Verify breakpoint was triggered
     assert len(mock_input_calls) == 1
     assert mock_input_calls[0] == "Press any key to continue..."
+
+
+def test_state_management():
+    """Test state management edge cases."""
+
+    # Test cache invalidation ordering
+    state = evaluator.StateWithCache({})
+    x = graph.placeholder("x")
+    y = graph.add(x, x)
+    z = graph.multiply(y, y)
+
+    state.set_placeholder_value("x", np.array(2.0))
+    result1 = evaluator.evaluate(z, state)
+
+    # Modify x and check that z is recomputed correctly
+    state.set_placeholder_value("x", np.array(3.0))
+    result2 = evaluator.evaluate(z, state)
+
+    assert result1 != result2
+    assert np.array_equal(result2, np.array(36.0))  # (3+3)*(3+3) = 36
+
+
+def test_type_validation():
+    """Test type validation and mixing."""
+
+    # Test mixing integer and float types
+    state = evaluator.StateWithoutCache(
+        {"x": np.array([1, 2, 3]), "y": np.array([1.0, 2.0, 3.0])}  # integers  # floats
+    )
+    node = graph.add(graph.placeholder("x"), graph.placeholder("y"))
+    result = evaluator.evaluate(node, state)
+    assert result.dtype == np.float64  # Should promote to float
+
+    # Test boolean operations with numeric types
+    state = evaluator.StateWithoutCache(
+        {"x": np.array([True, False, True]), "y": np.array([1.0, 0.0, 2.0])}
+    )
+    node = graph.logical_and(graph.placeholder("x"), graph.placeholder("y"))
+    result = evaluator.evaluate(node, state)
+    assert result.dtype == np.bool_
+
+
+def test_edge_cases_and_errors():
+    """Test various edge cases and error conditions."""
+
+    # Test incompatible broadcasting
+    with pytest.raises(ValueError):
+        state = evaluator.StateWithoutCache(
+            {
+                "x": np.array([[1.0, 2.0], [3.0, 4.0]]),  # 2x2
+                "y": np.array([1.0, 2.0, 3.0]),  # 3,
+            }
+        )
+        node = graph.add(graph.placeholder("x"), graph.placeholder("y"))
+        evaluator.evaluate(node, state)
+
+    # Test invalid reduction axis
+    with pytest.raises(ValueError):  # NumPy raises ValueError for invalid axes
+        state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0], [3.0, 4.0]])})
+        node = graph.reduce_sum(graph.placeholder("x"), axis=2)  # Invalid axis
+        evaluator.evaluate(node, state)
+
+    # Test division by zero
+    with pytest.warns(RuntimeWarning):
+        state = evaluator.StateWithoutCache(
+            {"x": np.array([1.0, 2.0]), "y": np.array([0.0, 0.0])}
+        )
+        node = graph.divide(graph.placeholder("x"), graph.placeholder("y"))
+        evaluator.evaluate(node, state)

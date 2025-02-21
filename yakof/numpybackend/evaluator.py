@@ -244,41 +244,50 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         ValueError: when there's no placeholder value
     """
 
-    # Use cache if available
+    # Check cache first
     cached_result = state.get_node_value(node)
     if cached_result is not None:
         return cached_result
 
-    # Code to run before returning
-    def __before_return(value: np.ndarray) -> np.ndarray:
-        if node.flags & graph.NODE_FLAG_TRACE != 0:
-            _print_tracepoint(node, value)
-        if node.flags & graph.NODE_FLAG_BREAK != 0:
-            input("Press any key to continue...")
-        state.set_node_value(node, value)
-        return value
+    # Compute result
+    result = _evaluate(node, state)
+
+    # Handle debug operations
+    if node.flags & graph.NODE_FLAG_TRACE != 0:
+        _print_tracepoint(node, result)
+    if node.flags & graph.NODE_FLAG_BREAK != 0:
+        input("Press any key to continue...")
+
+    # Cache result
+    state.set_node_value(node, result)
+
+    return result
+
+
+def _evaluate(node: graph.Node, state: State) -> np.ndarray:
+    """Internal caching-agnostic implementation of the evaluate function."""
 
     # Constant operation
     if isinstance(node, graph.constant):
-        return __before_return(np.asarray(node.value))
+        return np.asarray(node.value)
 
     # Placeholder operation
     if isinstance(node, graph.placeholder):
         value = state.get_placeholder_value(node.name)
         if value is None:
             if node.default_value is not None:
-                return __before_return(np.asarray(node.default_value))
+                return np.asarray(node.default_value)
             raise ValueError(
                 f"evaluator: no value provided for placeholder '{node.name}'"
             )
-        return __before_return(value)
+        return value
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):
         left = evaluate(node.left, state)
         right = evaluate(node.right, state)
         try:
-            return __before_return(binary_ops_dispatch_table[type(node)](left, right))
+            return binary_ops_dispatch_table[type(node)](left, right)
         except KeyError:
             raise TypeError(f"evaluator: unknown binary operation: {type(node)}")
 
@@ -286,18 +295,16 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
     if isinstance(node, graph.UnaryOp):
         operand = evaluate(node.node, state)
         try:
-            return __before_return(unary_ops_dispatch_table[type(node)](operand))
+            return unary_ops_dispatch_table[type(node)](operand)
         except KeyError:
             raise TypeError(f"evaluator: unknown unary operation: {type(node)}")
 
     # Conditional operations
     if isinstance(node, graph.where):
-        return __before_return(
-            np.where(
-                evaluate(node.condition, state),
-                evaluate(node.then, state),
-                evaluate(node.otherwise, state),
-            )
+        return np.where(
+            evaluate(node.condition, state),
+            evaluate(node.then, state),
+            evaluate(node.otherwise, state),
         )
 
     if isinstance(node, graph.multi_clause_where):
@@ -307,15 +314,13 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
             conditions.append(evaluate(cond, state))
             values.append(evaluate(value, state))
         default = evaluate(node.default_value, state)
-        return __before_return(np.select(conditions, values, default=default))
+        return np.select(conditions, values, default=default)
 
     # Axis operations
     if isinstance(node, graph.AxisOp):
         operand = evaluate(node.node, state)
         try:
-            return __before_return(
-                axis_ops_dispatch_table[type(node)](operand, node.axis)
-            )
+            return axis_ops_dispatch_table[type(node)](operand, node.axis)
         except KeyError:
             raise TypeError(f"evaluator: unknown axis operation: {type(node)}")
 
