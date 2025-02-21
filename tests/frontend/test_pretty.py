@@ -13,7 +13,7 @@ def test_basic_pretty_printing():
     z = graph.add(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> + 2.0"
+    assert result == "x + 2.0"
 
 
 def test_precedence_pretty_printing():
@@ -24,11 +24,11 @@ def test_precedence_pretty_printing():
 
     expr1 = graph.add(x, graph.multiply(y, z))
     result1 = pretty.format(expr1)
-    assert result1 == "<x> + 2.0 * 3.0"
+    assert result1 == "x + 2.0 * 3.0"
 
     expr2 = graph.multiply(graph.add(x, y), z)
     result2 = pretty.format(expr2)
-    assert result2 == "(<x> + 2.0) * 3.0"
+    assert result2 == "(x + 2.0) * 3.0"
 
 
 def test_unary_operations_pretty_printing():
@@ -37,15 +37,15 @@ def test_unary_operations_pretty_printing():
 
     expr1 = graph.exp(x)
     result1 = pretty.format(expr1)
-    assert result1 == "exp(<x>)"
+    assert result1 == "exp(x)"
 
     expr2 = graph.log(x)
     result2 = pretty.format(expr2)
-    assert result2 == "log(<x>)"
+    assert result2 == "log(x)"
 
     expr3 = graph.logical_not(x)
     result3 = pretty.format(expr3)
-    assert result3 == "~<x>"
+    assert result3 == "~x"
 
 
 def test_comparison_operations_pretty_printing():
@@ -55,11 +55,11 @@ def test_comparison_operations_pretty_printing():
 
     expr1 = graph.less(x, y)
     result1 = pretty.format(expr1)
-    assert result1 == "<x> < 2.0"
+    assert result1 == "x < 2.0"
 
     expr2 = graph.greater_equal(x, y)
     result2 = pretty.format(expr2)
-    assert result2 == "<x> >= 2.0"
+    assert result2 == "x >= 2.0"
 
 
 def test_logical_operations_pretty_printing():
@@ -69,15 +69,15 @@ def test_logical_operations_pretty_printing():
 
     expr1 = graph.logical_and(x, y)
     result1 = pretty.format(expr1)
-    assert result1 == "<x> & True"
+    assert result1 == "x & True"
 
     expr2 = graph.logical_or(x, y)
     result2 = pretty.format(expr2)
-    assert result2 == "<x> | True"
+    assert result2 == "x | True"
 
     expr3 = graph.logical_xor(x, y)
     result3 = pretty.format(expr3)
-    assert result3 == "<x> ^ True"
+    assert result3 == "x ^ True"
 
 
 def test_function_like_operations_pretty_printing():
@@ -88,11 +88,11 @@ def test_function_like_operations_pretty_printing():
 
     expr1 = graph.normal_cdf(x, mu, sigma)
     result1 = pretty.format(expr1)
-    assert result1 == "normal_cdf(<x>, loc=<mu>, scale=<sigma>)"
+    assert result1 == "normal_cdf(x, loc=mu, scale=sigma)"
 
     expr2 = graph.uniform_cdf(x, graph.constant(0.0), graph.constant(1.0))
     result2 = pretty.format(expr2)
-    assert result2 == "uniform_cdf(<x>, loc=0.0, scale=1.0)"
+    assert result2 == "uniform_cdf(x, loc=0.0, scale=1.0)"
 
 
 def test_named_expressions_pretty_printing():
@@ -102,7 +102,7 @@ def test_named_expressions_pretty_printing():
     z = graph.add(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> + <const_y:2.0>"
+    assert result == "x + const_y"
 
 
 def test_subtract_pretty_printing():
@@ -112,7 +112,7 @@ def test_subtract_pretty_printing():
     z = graph.subtract(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> - 2.0"
+    assert result == "x - 2.0"
 
 
 def test_divide_pretty_printing():
@@ -122,7 +122,7 @@ def test_divide_pretty_printing():
     z = graph.divide(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> / 2.0"
+    assert result == "x / 2.0"
 
 
 def test_power_pretty_printing():
@@ -132,7 +132,7 @@ def test_power_pretty_printing():
     z = graph.power(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> ** 2.0"
+    assert result == "x ** 2.0"
 
 
 def test_less_equal_pretty_printing():
@@ -142,7 +142,7 @@ def test_less_equal_pretty_printing():
     z = graph.less_equal(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> <= 2.0"
+    assert result == "x <= 2.0"
 
 
 def test_greater_pretty_printing():
@@ -152,7 +152,7 @@ def test_greater_pretty_printing():
     z = graph.greater(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> > 2.0"
+    assert result == "x > 2.0"
 
 
 def test_equal_pretty_printing():
@@ -162,7 +162,7 @@ def test_equal_pretty_printing():
     z = graph.equal(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> == 2.0"
+    assert result == "x == 2.0"
 
 
 def test_not_equal_pretty_printing():
@@ -172,7 +172,7 @@ def test_not_equal_pretty_printing():
     z = graph.not_equal(x, y)
 
     result = pretty.format(z)
-    assert result == "<x> != 2.0"
+    assert result == "x != 2.0"
 
 
 def test_unhandled_node_type():

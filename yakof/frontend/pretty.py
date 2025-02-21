@@ -137,10 +137,10 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
     # Base cases
     if isinstance(node, graph.constant):
         if node.name:
-            return f"<{node.name}:{node.value}>"
+            return node.name
         return str(node.value)
     if isinstance(node, graph.placeholder):
-        return f"<{node.name}>"
+        return node.name
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):
