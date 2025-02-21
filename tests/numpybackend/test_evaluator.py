@@ -299,3 +299,83 @@ def test_caching_behavior():
     # Verify that repeated evaluation with same input gives same result
     result3 = evaluator.evaluate(node, state)
     assert np.array_equal(result2, result3)
+
+
+def test_expand_dims_operation():
+    """Test evaluation of expand_dims operation."""
+    # Test expanding various dimensions
+    x = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])  # 2x3
+    state = evaluator.StateWithoutCache({"x": x})
+
+    # Add dimension at the beginning (make 1x2x3)
+    node = graph.expand_dims(graph.placeholder("x"), axis=0)
+    result = evaluator.evaluate(node, state)
+    assert result.shape == (1, 2, 3)
+    assert np.array_equal(result[0], x)
+
+    # Add dimension in the middle (make 2x1x3)
+    node = graph.expand_dims(graph.placeholder("x"), axis=1)
+    result = evaluator.evaluate(node, state)
+    assert result.shape == (2, 1, 3)
+    assert np.array_equal(result[:, 0, :], x)
+
+    # Add dimension at the end (make 2x3x1)
+    node = graph.expand_dims(graph.placeholder("x"), axis=2)
+    result = evaluator.evaluate(node, state)
+    assert result.shape == (2, 3, 1)
+    assert np.array_equal(result[:, :, 0], x)
+
+
+def test_unknown_operations():
+    """Test handling of unknown operations."""
+
+    # Unknown binary operation
+    class unknown_binary(graph.BinaryOp):
+        pass
+
+    with pytest.raises(TypeError, match="unknown binary operation"):
+        evaluator.evaluate(
+            unknown_binary(graph.constant(1.0), graph.constant(2.0)),
+            evaluator.StateWithoutCache({}),
+        )
+
+    # Unknown unary operation
+    class unknown_unary(graph.UnaryOp):
+        pass
+
+    with pytest.raises(TypeError, match="unknown unary operation"):
+        evaluator.evaluate(
+            unknown_unary(graph.constant(1.0)), evaluator.StateWithoutCache({})
+        )
+
+    # Unknown axis operation
+    class unknown_axis(graph.AxisOp):
+        pass
+
+    with pytest.raises(TypeError, match="unknown axis operation"):
+        evaluator.evaluate(
+            unknown_axis(graph.constant(1.0), 0), evaluator.StateWithoutCache({})
+        )
+
+
+def test_breakpoint_operation(monkeypatch):
+    """Test breakpoint operation using mocked input."""
+    # Mock the input function to avoid waiting for user input
+    mock_input_calls = []
+
+    def mock_input(prompt):
+        mock_input_calls.append(prompt)
+        return ""
+
+    monkeypatch.setattr("builtins.input", mock_input)
+
+    # Create and evaluate a breakpointed node
+    x = graph.placeholder("x")
+    broken = graph.breakpoint(x)
+
+    state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0], [3.0, 4.0]])})
+    result = evaluator.evaluate(broken, state)
+
+    # Verify breakpoint was triggered
+    assert len(mock_input_calls) == 1
+    assert mock_input_calls[0] == "Press any key to continue..."
