@@ -12,9 +12,10 @@ from yakof.numpybackend import evaluator
 def test_constant_evaluation():
     """Test evaluation of constant nodes."""
     # Scalar constants
-    assert np.array_equal(evaluator.evaluate(graph.constant(1.0), {}), np.array(1.0))
-    assert np.array_equal(evaluator.evaluate(graph.constant(True), {}), np.array(True))
-    assert np.array_equal(evaluator.evaluate(graph.constant(42), {}), np.array(42))
+    state = evaluator.StateWithoutCache({})
+    assert np.array_equal(evaluator.evaluate(graph.constant(1.0), state), np.array(1.0))
+    assert np.array_equal(evaluator.evaluate(graph.constant(True), state), np.array(True))
+    assert np.array_equal(evaluator.evaluate(graph.constant(42), state), np.array(42))
 
 
 def test_placeholder_evaluation():
@@ -23,154 +24,163 @@ def test_placeholder_evaluation():
     y = graph.placeholder("y", default_value=3.14)
 
     # Test with binding
-    assert np.array_equal(evaluator.evaluate(x, {"x": np.array(2.0)}), np.array(2.0))
+    state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])})
+    assert np.array_equal(evaluator.evaluate(x, state), np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]))
 
     # Test default value
-    assert np.array_equal(evaluator.evaluate(y, {}), np.array(3.14))
+    state = evaluator.StateWithoutCache({})
+    assert np.array_equal(evaluator.evaluate(y, state), np.array(3.14))
 
     # Test missing binding
     with pytest.raises(ValueError, match="no value provided for placeholder 'x'"):
-        evaluator.evaluate(x, {})
+        evaluator.evaluate(x, evaluator.StateWithoutCache({}))
 
 
 def test_arithmetic_operations():
     """Test evaluation of arithmetic operations."""
-    x = np.array(2.0)
-    y = np.array(3.0)
-    bindings = {"x": x, "y": y}
+    x = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])  # 3x3
+    y = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]])  # 3x3
+    state = evaluator.StateWithoutCache({"x": x, "y": y})
 
     # Addition
     node = graph.add(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x + y)
+    assert np.array_equal(evaluator.evaluate(node, state), x + y)
 
     # Subtraction
     node = graph.subtract(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x - y)
+    assert np.array_equal(evaluator.evaluate(node, state), x - y)
 
     # Multiplication
     node = graph.multiply(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x * y)
+    assert np.array_equal(evaluator.evaluate(node, state), x * y)
 
     # Division
     node = graph.divide(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x / y)
+    assert np.array_equal(evaluator.evaluate(node, state), x / y)
 
 
 def test_comparison_operations():
     """Test evaluation of comparison operations."""
-    x = np.array(2.0)
-    y = np.array(3.0)
-    bindings = {"x": x, "y": y}
+    x = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])  # 2x3
+    y = np.array([[2.0, 2.0, 2.0], [5.0, 5.0, 5.0]])  # 2x3
+    state = evaluator.StateWithoutCache({"x": x, "y": y})
 
     # Less than
     node = graph.less(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x < y)
+    assert np.array_equal(evaluator.evaluate(node, state), x < y)
 
     # Greater than
     node = graph.greater(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x > y)
+    assert np.array_equal(evaluator.evaluate(node, state), x > y)
 
     # Equal
     node = graph.equal(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x == y)
+    assert np.array_equal(evaluator.evaluate(node, state), x == y)
 
 
 def test_logical_operations():
     """Test evaluation of logical operations."""
-    x = np.array(True)
-    y = np.array(False)
-    bindings = {"x": x, "y": y}
+    x = np.array([[True, False, True], [False, True, False]])  # 2x3
+    y = np.array([[False, True, False], [True, False, True]])  # 2x3
+    state = evaluator.StateWithoutCache({"x": x, "y": y})
 
     # AND
     node = graph.logical_and(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.logical_and(x, y))
+    assert np.array_equal(evaluator.evaluate(node, state), np.logical_and(x, y))
 
     # OR
     node = graph.logical_or(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.logical_or(x, y))
+    assert np.array_equal(evaluator.evaluate(node, state), np.logical_or(x, y))
 
     # NOT
     node = graph.logical_not(graph.placeholder("x"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.logical_not(x))
+    assert np.array_equal(evaluator.evaluate(node, state), np.logical_not(x))
 
 
 def test_math_operations():
     """Test evaluation of mathematical operations."""
-    x = np.array(2.0)
-    bindings = {"x": x}
+    x = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])  # 2x3
+    state = evaluator.StateWithoutCache({"x": x})
 
     # Exponential
     node = graph.exp(graph.placeholder("x"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.exp(x))
+    assert np.array_equal(evaluator.evaluate(node, state), np.exp(x))
 
     # Logarithm
     node = graph.log(graph.placeholder("x"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.log(x))
+    assert np.array_equal(evaluator.evaluate(node, state), np.log(x))
 
     # Power
     node = graph.power(graph.placeholder("x"), graph.constant(2.0))
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.power(x, 2.0))
+    assert np.array_equal(evaluator.evaluate(node, state), np.power(x, 2.0))
 
 
 def test_broadcasting():
     """Test broadcasting behavior in operations."""
-    x = np.array([[1.0, 2.0], [3.0, 4.0]])
-    y = np.array([10.0, 20.0])
-    bindings = {"x": x, "y": y}
+    x = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])  # 3x3
+    y = np.array([10.0, 20.0, 30.0])  # 1x3 for broadcasting
+    z = np.array([[1.0], [2.0], [3.0]])  # 3x1 for broadcasting
+    state = evaluator.StateWithoutCache({"x": x, "y": y, "z": z})
 
-    # Broadcasting in addition
+    # Broadcasting row vector
     node = graph.add(graph.placeholder("x"), graph.placeholder("y"))
-    assert np.array_equal(evaluator.evaluate(node, bindings), x + y)
+    assert np.array_equal(evaluator.evaluate(node, state), x + y)
+
+    # Broadcasting column vector
+    node = graph.multiply(graph.placeholder("x"), graph.placeholder("z"))
+    assert np.array_equal(evaluator.evaluate(node, state), x * z)
 
 
 def test_reduction_operations():
     """Test evaluation of reduction operations."""
-    x = np.array([[1.0, 2.0], [3.0, 4.0]])
-    bindings = {"x": x}
+    x = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])  # 3x3
+    state = evaluator.StateWithoutCache({"x": x})
 
-    # Sum reduction
+    # Sum reduction over rows
     node = graph.reduce_sum(graph.placeholder("x"), axis=0)
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.sum(x, axis=0))
+    assert np.array_equal(evaluator.evaluate(node, state), np.sum(x, axis=0))
 
-    # Mean reduction
+    # Mean reduction over columns
     node = graph.reduce_mean(graph.placeholder("x"), axis=1)
-    assert np.array_equal(evaluator.evaluate(node, bindings), np.mean(x, axis=1))
+    assert np.array_equal(evaluator.evaluate(node, state), np.mean(x, axis=1))
 
 
 def test_where_operation():
     """Test where operation with various data types and shapes."""
     test_cases = [
-        # Basic scalar selection
+        # 3x3 matrix selection
         {
-            "cond": np.array([True, False, True]),
-            "x": np.array([1.0, 2.0, 3.0]),
-            "y": np.array([4.0, 5.0, 6.0]),
-            "desc": "scalar values",
+            "cond": np.array([[True, False, True], [False, True, False], [True, False, True]]),
+            "x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]),
+            "y": np.array([[9.0, 8.0, 7.0], [6.0, 5.0, 4.0], [3.0, 2.0, 1.0]]),
+            "desc": "3x3 matrices",
         },
-        # Boolean values
+        # Boolean matrix operations
         {
-            "cond": np.array([True, False, True]),
-            "x": np.array([True, True, True]),
-            "y": np.array([False, False, False]),
-            "desc": "boolean values",
+            "cond": np.array([[True, False], [False, True], [True, False]]),
+            "x": np.array([[True, True], [True, True], [True, True]]),
+            "y": np.array([[False, False], [False, False], [False, False]]),
+            "desc": "3x2 boolean matrices",
         },
-        # 2D array broadcasting
+        # Broadcasting with column vector
         {
-            "cond": np.array([[True, False], [False, True]]),
-            "x": np.array([[1.0, 2.0], [3.0, 4.0]]),
-            "y": np.array([[5.0, 6.0], [7.0, 8.0]]),
-            "desc": "2D arrays",
+            "cond": np.array([[True], [False], [True]]),
+            "x": np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]),
+            "y": np.array([[7.0, 8.0], [9.0, 10.0], [11.0, 12.0]]),
+            "desc": "3x2 matrices with broadcast",
         },
     ]
 
     for case in test_cases:
         print(f"\nTesting where with {case['desc']}:")
-        bindings = {"cond": case["cond"], "x": case["x"], "y": case["y"]}
+        state = evaluator.StateWithoutCache(
+            {"cond": case["cond"], "x": case["x"], "y": case["y"]}
+        )
 
         node = graph.where(
             graph.placeholder("cond"), graph.placeholder("x"), graph.placeholder("y")
         )
-        result = evaluator.evaluate(node, bindings)
+        result = evaluator.evaluate(node, state)
         expected = np.where(case["cond"], case["x"], case["y"])
 
         print(f"condition: {case['cond']}")
@@ -187,7 +197,8 @@ def test_debug_operations(capsys):
     x = graph.placeholder("x")
     traced = graph.tracepoint(x)
 
-    evaluator.evaluate(traced, {"x": np.array(1.0)})
+    state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0], [3.0, 4.0]])})
+    evaluator.evaluate(traced, state)
     captured = capsys.readouterr()
     assert "=== begin tracepoint ===" in captured.out
     assert "value" in captured.out
@@ -201,17 +212,17 @@ def test_error_handling():
         pass
 
     with pytest.raises(TypeError, match="unknown node type"):
-        evaluator.evaluate(unknown_op(), {})
+        evaluator.evaluate(unknown_op(), evaluator.StateWithoutCache({}))
 
 
 def test_multi_clause_where():
     """Test multi-clause where operations, comparing with both np.select and nested where."""
     # Setup test conditions
-    cond1 = np.array([True, False, False])
-    cond2 = np.array([False, True, False])
+    cond1 = np.array([[True, False, False], [False, True, False], [False, False, True]])
+    cond2 = np.array([[False, True, False], [True, False, False], [False, True, False]])
     val1, val2 = 1.0, 2.0
     default = 0.0
-    bindings = {"cond1": cond1, "cond2": cond2}
+    state = evaluator.StateWithoutCache({"cond1": cond1, "cond2": cond2})
 
     # Test our multi_clause_where implementation
     node = graph.multi_clause_where(
@@ -221,7 +232,7 @@ def test_multi_clause_where():
         ],
         graph.constant(default),
     )
-    result = evaluator.evaluate(node, bindings)
+    result = evaluator.evaluate(node, state)
 
     # Compare with np.select
     expected_select = np.select([cond1, cond2], [val1, val2], default=default)
@@ -234,7 +245,7 @@ def test_multi_clause_where():
             graph.placeholder("cond2"), graph.constant(val2), graph.constant(default)
         ),
     )
-    expected_nested = evaluator.evaluate(nested_where, bindings)
+    expected_nested = evaluator.evaluate(nested_where, state)
 
     # Debug information
     print("\nDebug information:")
@@ -253,22 +264,30 @@ def test_caching_behavior():
     """Test caching behavior."""
     # Create a computation we can verify
     x = graph.placeholder("x")
-    node = graph.add(x, x)  # x + x
+    exp_x = graph.exp(x)  # Use exp(x) so we can verify cache usage
+    node = graph.add(exp_x, exp_x)  # exp(x) + exp(x)
 
-    # Set up cache and bindings
-    cache = {}
-    value = np.array(2.0)
-    bindings = {"x": value}
+    # Set up state with initial value
+    initial_value = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    state = evaluator.StateWithCache({"x": initial_value})
 
     # First evaluation should compute and cache
-    result1 = evaluator.evaluate(node, bindings, cache=cache)
+    result1 = evaluator.evaluate(node, state)
 
-    # Modify bindings to ensure we're using cache
-    bindings["x"] = np.array(3.0)  # Change input value
+    # Modify binding - this should invalidate cache
+    new_value = np.array([[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]])
+    state.set_placeholder_value("x", new_value)
 
-    # Second evaluation with same node should use cached value
-    result2 = evaluator.evaluate(node, bindings, cache=cache)
+    # Second evaluation should compute new result
+    result2 = evaluator.evaluate(node, state)
 
-    # Results should be identical despite different input
-    assert np.array_equal(result1, result2)
-    assert np.array_equal(result1, value + value)  # Should be 2.0 + 2.0
+    # Results should be different because input changed
+    assert not np.array_equal(result1, result2)
+
+    # Verify results are correct
+    assert np.array_equal(result1, np.exp(initial_value) + np.exp(initial_value))
+    assert np.array_equal(result2, np.exp(new_value) + np.exp(new_value))
+
+    # Verify that repeated evaluation with same input gives same result
+    result3 = evaluator.evaluate(node, state)
+    assert np.array_equal(result2, result3)
