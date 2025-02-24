@@ -69,6 +69,12 @@ def generate_canonical_axes(size: int) -> tuple[int, ...]:
     increasing integers and there is no guarantee that they will be
     starting from zero. (Actually, using numbers around zero makes it
     very hard when debugging to set apart indexes and axes IDs.)
+
+    Examples:
+        >>> generate_canonical_axes(3)
+        (1000, 1001, 1002)
+        >>> generate_canonical_axes(2)
+        (1000, 1001)
     """
     return tuple(x + 1000 for x in range(size))
 
@@ -94,6 +100,13 @@ def axes_expansion(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
         ValueError: if source is not a subset of dest.
         ValueError: if source values are not monotonically increasing.
         ValueError: if dest values are not monotonically increasing.
+
+    Examples:
+        >>> x, y, z = generate_canonical_axes(3)  # Get distinct axis IDs
+        >>> axes_expansion((x,), (x, y))
+        1  # Position to insert Y
+        >>> axes_expansion((x,), (x, y, z))
+        (1, 2)  # Positions to insert Y and Z
 
     See Also:
         ExpandDims: The high-level API for dimension expansion
@@ -186,6 +199,12 @@ class Basis(Protocol):
     All bases must provide their axes as a set of integers, establishing
     their position in the canonical ordering. To generate the canonical
     ordering, use the generate_canonical_axes function.
+
+    Examples:
+        >>> class XYBasis:
+        ...     axes = {1000, 1001}  # X and Y axes
+        >>> isinstance(XYBasis(), Basis)
+        True
     """
 
     axes: set[int]
@@ -204,7 +223,11 @@ class ExpandDims[A: Basis, B: Basis]:
 
     Example:
         >>> expand = ExpandDims(Z, YZ)
-        >>> yz_tensor = expand(z_tensor)
+        >>> yz_tensor = expand(z_tensor)  # Expands 1D z_tensor to 2D
+        >>>
+        >>> # Another example with different dimensions:
+        >>> expand2 = ExpandDims(X, XYZ)
+        >>> xyz_tensor = expand2(x_tensor)  # Expands 1D to 3D
     """
 
     def __init__(self, source: type[A], dest: type[B]):
@@ -234,7 +257,11 @@ class ProjectUsingSum[A: Basis, B: Basis]:
 
     Example:
         >>> project = ProjectUsingSum(XYZ, XZ)
-        >>> xz_tensor = project(xyz_tensor)
+        >>> xz_tensor = project(xyz_tensor)  # Projects 3D to 2D
+        >>>
+        >>> # Another example reducing to 1D:
+        >>> project2 = ProjectUsingSum(XYZ, X)
+        >>> x_tensor = project2(xyz_tensor)  # Projects 3D to 1D
     """
 
     def __init__(self, source: type[A], dest: type[B]):

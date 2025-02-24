@@ -45,389 +45,392 @@ Example:
 
 from yakof.frontend import morphisms
 
+# Get canonical axes
+x_axis, y_axis, z_axis, u_axis, v_axis, w_axis = morphisms.generate_canonical_axes(6)
+
 
 # R¹ bases
 class X:
     """Tensor basis along the X axis."""
 
-    axes = {0}
+    axes = {x_axis}
 
 
 class Y:
     """Tensor basis along the Y axis."""
 
-    axes = {1}
+    axes = {y_axis}
 
 
 class Z:
     """Tensor basis along the Z axis."""
 
-    axes = {2}
+    axes = {z_axis}
 
 
 class U:
     """Tensor basis along the U axis."""
 
-    axes = {3}
+    axes = {u_axis}
 
 
 class V:
     """Tensor basis along the V axis."""
 
-    axes = {4}
+    axes = {v_axis}
 
 
 class W:
     """Tensor basis along the W axis."""
 
-    axes = {5}
+    axes = {w_axis}
 
 
 # R² bases
 class XY:
     """Tensor basis along X and Y axes."""
 
-    axes = {0, 1}
+    axes = {x_axis, y_axis}
 
 
 class XZ:
     """Tensor basis along X and Z axes."""
 
-    axes = {0, 2}
+    axes = {x_axis, z_axis}
 
 
 class XU:
     """Tensor basis along X and U axes."""
 
-    axes = {0, 3}
+    axes = {x_axis, u_axis}
 
 
 class XV:
     """Tensor basis along X and V axes."""
 
-    axes = {0, 4}
+    axes = {x_axis, v_axis}
 
 
 class XW:
     """Tensor basis along X and W axes."""
 
-    axes = {0, 5}
+    axes = {x_axis, w_axis}
 
 
 class YZ:
     """Tensor basis along Y and Z axes."""
 
-    axes = {1, 2}
+    axes = {y_axis, z_axis}
 
 
 class YU:
     """Tensor basis along Y and U axes."""
 
-    axes = {1, 3}
+    axes = {y_axis, u_axis}
 
 
 class YV:
     """Tensor basis along Y and V axes."""
 
-    axes = {1, 4}
+    axes = {y_axis, v_axis}
 
 
 class YW:
     """Tensor basis along Y and W axes."""
 
-    axes = {1, 5}
+    axes = {y_axis, w_axis}
 
 
 class ZU:
     """Tensor basis along Z and U axes."""
 
-    axes = {2, 3}
+    axes = {z_axis, u_axis}
 
 
 class ZV:
     """Tensor basis along Z and V axes."""
 
-    axes = {2, 4}
+    axes = {z_axis, v_axis}
 
 
 class ZW:
     """Tensor basis along Z and W axes."""
 
-    axes = {2, 5}
+    axes = {z_axis, w_axis}
 
 
 class UV:
     """Tensor basis along U and V axes."""
 
-    axes = {3, 4}
+    axes = {u_axis, v_axis}
 
 
 class UW:
     """Tensor basis along U and W axes."""
 
-    axes = {3, 5}
+    axes = {u_axis, w_axis}
 
 
 class VW:
     """Tensor basis along V and W axes."""
 
-    axes = {4, 5}
+    axes = {v_axis, w_axis}
 
 
 # R³ bases
 class XYZ:
     """Tensor basis along X, Y and Z axes."""
 
-    axes = {0, 1, 2}
+    axes = {x_axis, y_axis, z_axis}
 
 
 class XYU:
     """Tensor basis along X, Y and U axes."""
 
-    axes = {0, 1, 3}
+    axes = {x_axis, y_axis, u_axis}
 
 
 class XYV:
     """Tensor basis along X, Y and V axes."""
 
-    axes = {0, 1, 4}
+    axes = {x_axis, y_axis, v_axis}
 
 
 class XYW:
     """Tensor basis along X, Y and W axes."""
 
-    axes = {0, 1, 5}
+    axes = {x_axis, y_axis, w_axis}
 
 
 class XZU:
     """Tensor basis along X, Z and U axes."""
 
-    axes = {0, 2, 3}
+    axes = {x_axis, z_axis, u_axis}
 
 
 class XZV:
     """Tensor basis along X, Z and V axes."""
 
-    axes = {0, 2, 4}
+    axes = {x_axis, z_axis, v_axis}
 
 
 class XZW:
     """Tensor basis along X, Z and W axes."""
 
-    axes = {0, 2, 5}
+    axes = {x_axis, z_axis, w_axis}
 
 
 class XUV:
     """Tensor basis along X, U and V axes."""
 
-    axes = {0, 3, 4}
+    axes = {x_axis, u_axis, v_axis}
 
 
 class XUW:
     """Tensor basis along X, U and W axes."""
 
-    axes = {0, 3, 5}
+    axes = {x_axis, u_axis, w_axis}
 
 
 class XVW:
     """Tensor basis along X, V and W axes."""
 
-    axes = {0, 4, 5}
+    axes = {x_axis, v_axis, w_axis}
 
 
 class YZU:
     """Tensor basis along Y, Z and U axes."""
 
-    axes = {1, 2, 3}
+    axes = {y_axis, z_axis, u_axis}
 
 
 class YZV:
     """Tensor basis along Y, Z and V axes."""
 
-    axes = {1, 2, 4}
+    axes = {y_axis, z_axis, v_axis}
 
 
 class YZW:
     """Tensor basis along Y, Z and W axes."""
 
-    axes = {1, 2, 5}
+    axes = {y_axis, z_axis, w_axis}
 
 
 class YUV:
     """Tensor basis along Y, U and V axes."""
 
-    axes = {1, 3, 4}
+    axes = {y_axis, u_axis, v_axis}
 
 
 class YUW:
     """Tensor basis along Y, U and W axes."""
 
-    axes = {1, 3, 5}
+    axes = {y_axis, u_axis, w_axis}
 
 
 class YVW:
     """Tensor basis along Y, V and W axes."""
 
-    axes = {1, 4, 5}
+    axes = {y_axis, v_axis, w_axis}
 
 
 class ZUV:
     """Tensor basis along Z, U and V axes."""
 
-    axes = {2, 3, 4}
+    axes = {z_axis, u_axis, v_axis}
 
 
 class ZUW:
     """Tensor basis along Z, U and W axes."""
 
-    axes = {2, 3, 5}
+    axes = {z_axis, u_axis, w_axis}
 
 
 class ZVW:
     """Tensor basis along Z, V and W axes."""
 
-    axes = {2, 4, 5}
+    axes = {z_axis, v_axis, w_axis}
 
 
 class UVW:
     """Tensor basis along U, V and W axes."""
 
-    axes = {3, 4, 5}
+    axes = {u_axis, v_axis, w_axis}
 
 
 # R⁴ bases
 class XYZU:
     """Tensor basis along X, Y, Z and U axes."""
 
-    axes = {0, 1, 2, 3}
+    axes = {x_axis, y_axis, z_axis, u_axis}
 
 
 class XYZV:
     """Tensor basis along X, Y, Z and V axes."""
 
-    axes = {0, 1, 2, 4}
+    axes = {x_axis, y_axis, z_axis, v_axis}
 
 
 class XYZW:
     """Tensor basis along X, Y, Z and W axes."""
 
-    axes = {0, 1, 2, 5}
+    axes = {x_axis, y_axis, z_axis, w_axis}
 
 
 class XYUV:
     """Tensor basis along X, Y, U and V axes."""
 
-    axes = {0, 1, 3, 4}
+    axes = {x_axis, y_axis, u_axis, v_axis}
 
 
 class XYUW:
     """Tensor basis along X, Y, U and W axes."""
 
-    axes = {0, 1, 3, 5}
+    axes = {x_axis, y_axis, u_axis, w_axis}
 
 
 class XYVW:
     """Tensor basis along X, Y, V and W axes."""
 
-    axes = {0, 1, 4, 5}
+    axes = {x_axis, y_axis, v_axis, w_axis}
 
 
 class XZUV:
     """Tensor basis along X, Z, U and V axes."""
 
-    axes = {0, 2, 3, 4}
+    axes = {x_axis, z_axis, u_axis, v_axis}
 
 
 class XZUW:
     """Tensor basis along X, Z, U and W axes."""
 
-    axes = {0, 2, 3, 5}
+    axes = {x_axis, z_axis, u_axis, w_axis}
 
 
 class XZVW:
     """Tensor basis along X, Z, V and W axes."""
 
-    axes = {0, 2, 4, 5}
+    axes = {x_axis, z_axis, v_axis, w_axis}
 
 
 class XUVW:
     """Tensor basis along X, U, V and W axes."""
 
-    axes = {0, 3, 4, 5}
+    axes = {x_axis, u_axis, v_axis, w_axis}
 
 
 class YZUV:
     """Tensor basis along Y, Z, U and V axes."""
 
-    axes = {1, 2, 3, 4}
+    axes = {y_axis, z_axis, u_axis, v_axis}
 
 
 class YZUW:
     """Tensor basis along Y, Z, U and W axes."""
 
-    axes = {1, 2, 3, 5}
+    axes = {y_axis, z_axis, u_axis, w_axis}
 
 
 class YZVW:
     """Tensor basis along Y, Z, V and W axes."""
 
-    axes = {1, 2, 4, 5}
+    axes = {y_axis, z_axis, v_axis, w_axis}
 
 
 class YUVW:
     """Tensor basis along Y, U, V and W axes."""
 
-    axes = {1, 3, 4, 5}
+    axes = {y_axis, u_axis, v_axis, w_axis}
 
 
 class ZUVW:
     """Tensor basis along Z, U, V and W axes."""
 
-    axes = {2, 3, 4, 5}
+    axes = {z_axis, u_axis, v_axis, w_axis}
 
 
 # R⁵ bases
 class XYZUV:
     """Tensor basis along X, Y, Z, U and V axes."""
 
-    axes = {0, 1, 2, 3, 4}
+    axes = {x_axis, y_axis, z_axis, u_axis, v_axis}
 
 
 class XYZUW:
     """Tensor basis along X, Y, Z, U and W axes."""
 
-    axes = {0, 1, 2, 3, 5}
+    axes = {x_axis, y_axis, z_axis, u_axis, w_axis}
 
 
 class XYZVW:
     """Tensor basis along X, Y, Z, V and W axes."""
 
-    axes = {0, 1, 2, 4, 5}
+    axes = {x_axis, y_axis, z_axis, v_axis, w_axis}
 
 
 class XYUVW:
     """Tensor basis along X, Y, U, V and W axes."""
 
-    axes = {0, 1, 3, 4, 5}
+    axes = {x_axis, y_axis, u_axis, v_axis, w_axis}
 
 
 class XZUVW:
     """Tensor basis along X, Z, U, V and W axes."""
 
-    axes = {0, 2, 3, 4, 5}
+    axes = {x_axis, z_axis, u_axis, v_axis, w_axis}
 
 
 class YZUVW:
     """Tensor basis along Y, Z, U, V and W axes."""
 
-    axes = {1, 2, 3, 4, 5}
+    axes = {y_axis, z_axis, u_axis, v_axis, w_axis}
 
 
 # R⁶ basis
 class XYZUVW:
     """Tensor basis along X, Y, Z, U, V and W axes."""
 
-    axes = {0, 1, 2, 3, 4, 5}
+    axes = {x_axis, y_axis, z_axis, u_axis, v_axis, w_axis}
 
 
 # R¹ -> R² expansions
