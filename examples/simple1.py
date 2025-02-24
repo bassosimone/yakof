@@ -36,8 +36,11 @@ print(pretty.format(sustainable.node))
 
 # We evaluate the HIR using the NumPy evaluator
 xx, yy = np.meshgrid(np.linspace(0, 100, 5), np.linspace(0, 100, 5))
-result = evaluator.evaluate(sustainable.node, {
-    "sitting": xx,
-    "takeaway": yy,
-})
+result = evaluator.evaluate(
+    sustainable.node,
+    {
+        "sitting": xx,
+        "takeaway": yy,
+    },
+)
 print(result)

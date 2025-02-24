@@ -29,9 +29,13 @@ sustainable_register = emitter.emit(sustainable.node, sustainable_prog)
 # a Python script to compile to bytecode for maximum efficiency
 vm = vm.VirtualMachine()
 xx, yy = np.meshgrid(np.linspace(0, 100, 10), np.linspace(0, 100, 10))
-result = vm.execute(sustainable_prog, sustainable_register, {
-    "sitting": xx,
-    "takeaway": yy,
-})
+result = vm.execute(
+    sustainable_prog,
+    sustainable_register,
+    {
+        "sitting": xx,
+        "takeaway": yy,
+    },
+)
 
 print(result)
