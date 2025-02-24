@@ -14,47 +14,47 @@ x, y, z, u = morphisms.generate_canonical_axes(4)
 
 # Define simple basis classes for testing
 class X:
-    axes = {x}
+    axes = (x,)
 
 
 class Y:
-    axes = {y}
+    axes = (y,)
 
 
 class Z:
-    axes = {z}
+    axes = (z,)
 
 
 class U:
-    axes = {u}
+    axes = (u,)
 
 
 class XY:
-    axes = {x, y}
+    axes = (x, y)
 
 
 class XZ:
-    axes = {x, z}
+    axes = (x, z)
 
 
 class XU:
-    axes = {x, u}
+    axes = (x, u)
 
 
 class YZ:
-    axes = {y, z}
+    axes = (y, z)
 
 
 class YU:
-    axes = {y, u}
+    axes = (y, u)
 
 
 class ZU:
-    axes = {z, u}
+    axes = (z, u)
 
 
 class XYZU:
-    axes = {x, y, z, u}
+    axes = (x, y, z, u)
 
 
 def test_generate_canonical_bases():

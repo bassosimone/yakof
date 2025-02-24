@@ -196,18 +196,18 @@ def axes_projection(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
 class Basis(Protocol):
     """Protocol defining the interface for tensor space bases.
 
-    All bases must provide their axes as a set of integers, establishing
+    All bases must provide their axes as an ordered tuple of integers, establishing
     their position in the canonical ordering. To generate the canonical
     ordering, use the generate_canonical_axes function.
 
     Examples:
         >>> class XYBasis:
-        ...     axes = {1000, 1001}  # X and Y axes
+        ...     axes = (1000, 1001)  # X and Y axes
         >>> isinstance(XYBasis(), Basis)
         True
     """
 
-    axes: set[int]
+    axes: tuple[int, ...]
 
 
 class ExpandDims[A: Basis, B: Basis]:
@@ -240,7 +240,7 @@ class ExpandDims[A: Basis, B: Basis]:
         Calculates required axes and uses numpy's expand_dims to insert
         new dimensions in the correct positions.
         """
-        axes = axes_expansion(tuple(self.source.axes), tuple(self.dest.axes))
+        axes = axes_expansion(self.source.axes, self.dest.axes)
         return abstract.Tensor[B](graph.expand_dims(t.node, axis=axes))
 
 
@@ -274,5 +274,5 @@ class ProjectUsingSum[A: Basis, B: Basis]:
         Calculates required axes and uses numpy's reduce_sum to eliminate
         dimensions by summing over them.
         """
-        axes = axes_projection(tuple(self.source.axes), tuple(self.dest.axes))
+        axes = axes_projection(self.source.axes, self.dest.axes)
         return abstract.Tensor[B](graph.reduce_sum(t.node, axis=axes))
