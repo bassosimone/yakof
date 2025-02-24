@@ -3,7 +3,58 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
-from yakof.frontend import bases, morphisms, spaces
+import numpy as np
+
+from yakof.frontend import abstract, morphisms
+from yakof.numpybackend import evaluator
+
+# Generate axes to makes tests using explicit axes more readable
+x, y, z, u = morphisms.generate_canonical_axes(4)
+
+
+# Define simple basis classes for testing
+class X:
+    axes = {x}
+
+
+class Y:
+    axes = {y}
+
+
+class Z:
+    axes = {z}
+
+
+class U:
+    axes = {u}
+
+
+class XY:
+    axes = {x, y}
+
+
+class XZ:
+    axes = {x, z}
+
+
+class XU:
+    axes = {x, u}
+
+
+class YZ:
+    axes = {y, z}
+
+
+class YU:
+    axes = {y, u}
+
+
+class ZU:
+    axes = {z, u}
+
+
+class XYZU:
+    axes = {x, y, z, u}
 
 
 def test_generate_canonical_bases():
@@ -12,117 +63,95 @@ def test_generate_canonical_bases():
     assert morphisms.generate_canonical_axes(0) == ()
 
 
-# Generate axes to makes tests using explicit axes more readable
-x, y, z, u = morphisms.generate_canonical_axes(4)
+def test_axes_expansion_exceptions():
+    # Test source not subset of destination
+    with pytest.raises(ValueError, match="source must be a subset of destination"):
+        morphisms.axes_expansion((z, x), (x, y))
+
+    # Test non-monotonic source
+    with pytest.raises(ValueError, match="source must have monotonic values"):
+        morphisms.axes_expansion((z, x, y), (x, y, z))
+
+    # Test non-monotonic destination
+    with pytest.raises(ValueError, match="dest must have monotonic values"):
+        morphisms.axes_expansion((x,), (z, x, y))
 
 
-# TODO(bassosimone): think about corner cases
+def test_axes_projection_exceptions():
+    # Test destination not subset of source
+    with pytest.raises(ValueError, match="destination must be a subset of source"):
+        morphisms.axes_projection((x, y), (x, y, z))
 
+    # Test non-monotonic source
+    with pytest.raises(ValueError, match="source must have monotonic values"):
+        morphisms.axes_projection((z, x, y), (x,))
 
-def test_axes_expansion():
-    # Single dimension expansions
-    assert morphisms.axes_expansion(2, (1, 2)) == 0
-    assert morphisms.axes_expansion((0, 2), (0, 1, 2)) == 1
-
-    # Multiple dimension expansions
-    assert morphisms.axes_expansion(2, (0, 1, 2)) == (0, 1)
-
-    # Empty expansion (should this be allowed?)
-    assert morphisms.axes_expansion((0,), (0,)) == ()
-
-
-def test_axes_projection():
-    # Single dimension projections
-    assert morphisms.axes_projection((0, 1, 2), (0, 2)) == 1
-
-    # Multiple dimension projections
-    assert morphisms.axes_projection((0, 1, 2), 2) == (0, 1)
-
-
-def test_expand_dims_morphism():
-    x, y = spaces.x.placeholder("x"), spaces.y.placeholder("y")
-    pass
-
-
-def test_project_using_sum_morphism():
-    project = morphisms.ProjectUsingSum(bases.XYZ, bases.XZ)
-    # Need to create a tensor and verify projection...
-
-
-def test_invalid_projections():
-    # Test error cases
-    with pytest.raises(ValueError):
-        morphisms.axes_projection((0,), (0, 1))  # Can't project to larger space
-
-
-def test_composite_transformations():
-    # Test that composing expansion and projection works as expected
-    # e.g., Z -> XYZ -> XZ should give expected result
-    pass
+    # Test non-monotonic destination
+    with pytest.raises(ValueError, match="dest must have monotonic values"):
+        morphisms.axes_projection((x, y, z), (z, x))
 
 
 @pytest.mark.parametrize(
     "source,dest,expected",
     [
         # R¹ -> R² expansions
-        (0, (0, 1), 1),  # X -> XY
-        (0, (0, 2), 1),  # X -> XZ
-        (0, (0, 3), 1),  # X -> XU
-        (1, (0, 1), 0),  # Y -> XY
-        (1, (1, 2), 1),  # Y -> YZ
-        (1, (1, 3), 1),  # Y -> YU
-        (2, (0, 2), 0),  # Z -> XZ
-        (2, (1, 2), 0),  # Z -> YZ
-        (2, (2, 3), 1),  # Z -> ZU
-        (3, (0, 3), 0),  # U -> XU
-        (3, (1, 3), 0),  # U -> YU
-        (3, (2, 3), 0),  # U -> ZU
+        (x, (x, y), 1),  # X -> XY
+        (x, (x, z), 1),  # X -> XZ
+        (x, (x, u), 1),  # X -> XU
+        (y, (x, y), 0),  # Y -> XY
+        (y, (y, z), 1),  # Y -> YZ
+        (y, (y, u), 1),  # Y -> YU
+        (z, (x, z), 0),  # Z -> XZ
+        (z, (y, z), 0),  # Z -> YZ
+        (z, (z, u), 1),  # Z -> ZU
+        (u, (x, u), 0),  # U -> XU
+        (u, (y, u), 0),  # U -> YU
+        (u, (z, u), 0),  # U -> ZU
         # R¹ -> R³ expansions
-        (0, (0, 1, 2), (1, 2)),  # X -> XYZ
-        (0, (0, 1, 3), (1, 2)),  # X -> XYU
-        (0, (0, 2, 3), (1, 2)),  # X -> XZU
-        (1, (0, 1, 2), (0, 2)),  # Y -> XYZ
-        (1, (0, 1, 3), (0, 2)),  # Y -> XYU
-        (1, (1, 2, 3), (1, 2)),  # Y -> YZU
-        (2, (0, 2, 3), (0, 2)),  # Z -> XZU
-        (2, (1, 2, 3), (0, 2)),  # Z -> YZU
-        (3, (0, 1, 3), (0, 1)),  # U -> XYU
-        (3, (0, 2, 3), (0, 1)),  # U -> XZU
-        (3, (1, 2, 3), (0, 1)),  # U -> YZU
+        (x, (x, y, z), (1, 2)),  # X -> XYZ
+        (x, (x, y, u), (1, 2)),  # X -> XYU
+        (x, (x, z, u), (1, 2)),  # X -> XZU
+        (y, (x, y, z), (0, 2)),  # Y -> XYZ
+        (y, (x, y, u), (0, 2)),  # Y -> XYU
+        (y, (y, z, u), (1, 2)),  # Y -> YZU
+        (z, (x, z, u), (0, 2)),  # Z -> XZU
+        (z, (y, z, u), (0, 2)),  # Z -> YZU
+        (u, (x, y, u), (0, 1)),  # U -> XYU
+        (u, (x, z, u), (0, 1)),  # U -> XZU
+        (u, (y, z, u), (0, 1)),  # U -> YZU
         # R¹ -> R⁴ expansions
-        (0, (0, 1, 2, 3), (1, 2, 3)),  # X -> XYZU
-        (1, (0, 1, 2, 3), (0, 2, 3)),  # Y -> XYZU
-        (2, (0, 1, 2, 3), (0, 1, 3)),  # Z -> XYZU
-        (3, (0, 1, 2, 3), (0, 1, 2)),  # U -> XYZU
+        (x, (x, y, z, u), (1, 2, 3)),  # X -> XYZU
+        (y, (x, y, z, u), (0, 2, 3)),  # Y -> XYZU
+        (z, (x, y, z, u), (0, 1, 3)),  # Z -> XYZU
+        (u, (x, y, z, u), (0, 1, 2)),  # U -> XYZU
         # R² -> R³ expansions
-        ((0, 1), (0, 1, 2), 2),  # XY -> XYZ
-        ((0, 1), (0, 1, 3), 2),  # XY -> XYU
-        ((0, 2), (0, 1, 2), 1),  # XZ -> XYZ
-        ((0, 2), (0, 2, 3), 2),  # XZ -> XZU
-        ((0, 3), (0, 1, 3), 1),  # XU -> XYU
-        ((0, 3), (0, 2, 3), 1),  # XU -> XZU
-        ((1, 2), (0, 1, 2), 0),  # YZ -> XYZ
-        ((1, 2), (1, 2, 3), 2),  # YZ -> YZU
-        ((1, 3), (0, 1, 3), 0),  # YU -> XYU
-        ((1, 3), (1, 2, 3), 1),  # YU -> YZU
-        ((2, 3), (0, 2, 3), 0),  # ZU -> XZU
-        ((2, 3), (1, 2, 3), 0),  # ZU -> YZU
+        ((x, y), (x, y, z), 2),  # XY -> XYZ
+        ((x, y), (x, y, u), 2),  # XY -> XYU
+        ((x, z), (x, y, z), 1),  # XZ -> XYZ
+        ((x, z), (x, z, u), 2),  # XZ -> XZU
+        ((x, u), (x, y, u), 1),  # XU -> XYU
+        ((x, u), (x, z, u), 1),  # XU -> XZU
+        ((y, z), (x, y, z), 0),  # YZ -> XYZ
+        ((y, z), (y, z, u), 2),  # YZ -> YZU
+        ((y, u), (x, y, u), 0),  # YU -> XYU
+        ((y, u), (y, z, u), 1),  # YU -> YZU
+        ((z, u), (x, z, u), 0),  # ZU -> XZU
+        ((z, u), (y, z, u), 0),  # ZU -> YZU
         # R² -> R⁴ expansions
-        ((0, 1), (0, 1, 2, 3), (2, 3)),  # XY -> XYZU
-        ((0, 2), (0, 1, 2, 3), (1, 3)),  # XZ -> XYZU
-        ((0, 3), (0, 1, 2, 3), (1, 2)),  # XU -> XYZU
-        ((1, 2), (0, 1, 2, 3), (0, 3)),  # YZ -> XYZU
-        ((1, 3), (0, 1, 2, 3), (0, 2)),  # YU -> XYZU
-        ((2, 3), (0, 1, 2, 3), (0, 1)),  # ZU -> XYZU
+        ((x, y), (x, y, z, u), (2, 3)),  # XY -> XYZU
+        ((x, z), (x, y, z, u), (1, 3)),  # XZ -> XYZU
+        ((x, u), (x, y, z, u), (1, 2)),  # XU -> XYZU
+        ((y, z), (x, y, z, u), (0, 3)),  # YZ -> XYZU
+        ((y, u), (x, y, z, u), (0, 2)),  # YU -> XYZU
+        ((z, u), (x, y, z, u), (0, 1)),  # ZU -> XYZU
         # R³ -> R⁴ expansions
-        ((0, 1, 2), (0, 1, 2, 3), 3),  # XYZ -> XYZU
-        ((0, 1, 3), (0, 1, 2, 3), 2),  # XYU -> XYZU
-        ((0, 2, 3), (0, 1, 2, 3), 1),  # XZU -> XYZU
-        ((1, 2, 3), (0, 1, 2, 3), 0),  # YZU -> XYZU
+        ((x, y, z), (x, y, z, u), 3),  # XYZ -> XYZU
+        ((x, y, u), (x, y, z, u), 2),  # XYU -> XYZU
+        ((x, z, u), (x, y, z, u), 1),  # XZU -> XYZU
+        ((y, z, u), (x, y, z, u), 0),  # YZU -> XYZU
         # Edge cases
         ((), (), ()),  # Empty -> Empty
-        ((0,), (0,), ()),  # Single -> Same single
-        ((0,), (0, 1, 2, 3), (1, 2, 3)),  # Single -> Full R⁴ space
+        ((x,), (x,), ()),  # Single -> Same single
     ],
 )
 def test_parametrized_expansions(source, dest, expected):
@@ -195,3 +224,63 @@ def test_parametrized_expansions(source, dest, expected):
 )
 def test_parametrized_projections(source, dest, expected):
     assert morphisms.axes_projection(source, dest) == expected
+
+
+def test_r4_to_r2_projections():
+    # fixture1: (2,2,2,2) array reshaped from [0,1,2,...,15]*100
+    fixture1 = np.arange(16).reshape(2, 2, 2, 2) * 100
+
+    # Test all R⁴->R² projections
+    for source, dest, fixture, axes in [
+        (XYZU, XY, fixture1, (2, 3)),  # Sum over Z and U
+        (XYZU, XZ, fixture1, (1, 3)),  # Sum over Y and U
+        (XYZU, XU, fixture1, (1, 2)),  # Sum over Y and Z
+        (XYZU, YZ, fixture1, (0, 3)),  # Sum over X and U
+        (XYZU, YU, fixture1, (0, 2)),  # Sum over X and Z
+        (XYZU, ZU, fixture1, (0, 1)),  # Sum over X and Y
+    ]:
+        # Create tensors using frontend
+        space_xyzu = abstract.TensorSpace[source]()
+        t = space_xyzu.placeholder("t")
+        project = morphisms.ProjectUsingSum(source, dest)
+        result = project(t)
+
+        # Direct numpy projection using explicitly specified axes
+        expected = np.sum(fixture, axis=axes)
+
+        # Compare results
+        actual = evaluator.evaluate(
+            result.node, evaluator.StateWithoutCache({"t": fixture})
+        )
+        np.testing.assert_array_equal(actual, expected)
+
+
+def test_r2_to_r4_expansions():
+    # fixture1: (2,2) array reshaped from [0,1,2,3]
+    fixture1 = np.arange(4).reshape(2, 2)
+
+    # Test all R²->R⁴ expansions
+    for source, dest, fixture, axes in [
+        (XY, XYZU, fixture1, (2, 3)),  # Add Z and U dimensions
+        (XZ, XYZU, fixture1, (1, 3)),  # Add Y and U dimensions
+        (XU, XYZU, fixture1, (1, 2)),  # Add Y and Z dimensions
+        (YZ, XYZU, fixture1, (0, 3)),  # Add X and U dimensions
+        (YU, XYZU, fixture1, (0, 2)),  # Add X and Z dimensions
+        (ZU, XYZU, fixture1, (0, 1)),  # Add X and Y dimensions
+    ]:
+        # Create tensors using frontend
+        space_r2 = abstract.TensorSpace[source]()
+        t = space_r2.placeholder("t")
+        expand = morphisms.ExpandDims(source, dest)
+        result = expand(t)
+
+        # Direct numpy expansion using explicitly specified axes
+        expected = fixture
+        for axis in axes:
+            expected = np.expand_dims(expected, axis)
+
+        # Compare results
+        actual = evaluator.evaluate(
+            result.node, evaluator.StateWithoutCache({"t": fixture})
+        )
+        np.testing.assert_array_equal(actual, expected)

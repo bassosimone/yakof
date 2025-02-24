@@ -3,58 +3,57 @@ Morphisms Between Tensor Spaces
 ===============================
 
 This module implements morphisms between tensor spaces, allowing tensors to be
-transformed between spaces of different dimensions.
+transformed between spaces of different dimensions via expansion and projection.
 
 Main Classes
 ------------
 
 ExpandDims
-    The primary class for expanding tensors to higher dimensional spaces.
-    This should be your default choice for dimension expansion.
+    The primary class for expanding tensors to higher dimensional spaces by
+    inserting new dimensions in the correct positions.
 
 ProjectUsingSum
-    The primary class for projecting tensors to lower dimensional spaces.
-    This should be your default choice for dimension reduction.
+    The primary class for projecting tensors to lower dimensional spaces by
+    summing over removed dimensions.
 
 Low-Level Functions
 -------------------
 
 axes_expansion
-    Internal function for calculating expansion axes. Most users should use
-    ExpandDims instead.
+    Internal function for calculating positions where new dimensions should
+    be inserted. Most users should use ExpandDims instead.
 
 axes_projection
-    Internal function for calculating projection axes. Most users should use
-    ProjectUsingSum instead.
+    Internal function for calculating which dimensions to sum over. Most users
+    should use ProjectUsingSum instead.
 
 Implementation Details
 ----------------------
 
 The implementation relies on three key properties:
 
-1. Consistent dimension numbering: Each dimension has a unique small integer ID
-   (e.g., X=0, Y=1, Z=2). This establishes a canonical ordering.
+1. Canonical axes: Each dimension has a unique integer ID (e.g., X=1000,
+   Y=1001, Z=1002). This establishes a consistent ordering and makes
+   debugging easier by clearly distinguishing axes from array indices.
 
-2. Canonical ordering: Dimensions are always used in ascending order of their IDs.
-   This matches both numpy's dimension ordering and our semantic needs.
+2. Monotonicity: Dimensions are always used in ascending order of their IDs.
+   Both source and destination spaces must maintain this ordering.
 
-3. numpy's dimension operations: The implementation matches numpy's behavior for
-   inserting and reducing dimensions, particularly:
-   - expand_dims: Inserts new axes at specified positions
-   - reduce_sum: Reduces (sums) along specified axes
+3. Subset relationships: For expansion, source axes must be a subset of
+   destination axes. For projection, destination axes must be a subset of
+   source axes.
 
 Examples
-
 --------
-To expand a tensor from space Z to space YZ:
+Expand a 1D tensor in Z space to a 2D tensor in YZ space:
 
-    >>> expand = ExpandDims(Z, YZ)
-    >>> yz_tensor = expand(z_tensor)
+    >>> expand = ExpandDims(Z, YZ)  # Z ⊆ YZ
+    >>> yz_tensor = expand(z_tensor)  # Adds Y dimension at index 0
 
-To project a tensor from space XYZ to space XZ:
+Project a 3D tensor in XYZ space to a 2D tensor in XZ space:
 
-    >>> project = ProjectUsingSum(XYZ, XZ)
-    >>> xz_tensor = project(xyz_tensor)
+    >>> project = ProjectUsingSum(XYZ, XZ)  # XZ ⊆ XYZ
+    >>> xz_tensor = project(xyz_tensor)  # Sums over Y dimension
 """
 
 from typing import Callable, Protocol, runtime_checkable
@@ -80,9 +79,8 @@ def axes_expansion(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
     .. warning::
         This is a low-level function. Most users should use ExpandDims instead.
 
-    Determines positions where new dimensions should be inserted when expanding
-    a tensor from the source space to the destination space. Handles both single
-    axis and multiple axes cases.
+    Determines which axes to insert when expanding a tensor from the source
+    space to the destination space. Handles single axis and multiple axes.
 
     Args:
         source: Dimension(s) in source space
@@ -93,7 +91,9 @@ def axes_expansion(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
         otherwise tuple of positions for inserting new dimensions
 
     Raises:
-        ValueError: if dest is smaller than source.
+        ValueError: if source is not a subset of dest.
+        ValueError: if source values are not monotonically increasing.
+        ValueError: if dest values are not monotonically increasing.
 
     See Also:
         ExpandDims: The high-level API for dimension expansion
@@ -102,76 +102,23 @@ def axes_expansion(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
     source = source if isinstance(source, tuple) else (source,)
     dest = dest if isinstance(dest, tuple) else (dest,)
 
-    # TODO: raise if dest is smaller than source!!!
+    # Ensure that the destination is a subset of the source
+    if not set(source).issubset(set(dest)):
+        raise ValueError("source must be a subset of destination")
 
-    # TODO: raise if tuples do not monotonically increase!!!
+    # Ensure that source has monotonic values
+    if source != tuple(sorted(source)):
+        raise ValueError("source must have monotonic values")
 
-    # TODO: raise if they are disjoint, that is the second set MUST
-    # be a superset of the original set!!!
+    # Ensure that dest has monotonic values
+    if dest != tuple(sorted(dest)):
+        raise ValueError("dest must have monotonic values")
 
-    # To understand the algorithm, consider this example. We want to
-    # expand (X, Z, V) to (X, Y, Z, U, V). We also assume that the axes
-    # are numbered from 10 to 14. The source axes are (10, 12, 14) and
-    # the destination axes are (10, 11, 12, 13, 14). We're using numbers
-    # starting from 10 to illustrate a more general case compared to
-    # the one where we're starting to number from zero.
-    #
-    # TODO: verify if we have more restrictions here! Ideally we would
-    # like that this mehcanism works with as little restrictions as possible.
-    #
-    # We build a map that tracks which axes appear in input and/or
-    # output, by using flags to indicate the presence of an axis. In
-    # the above example, we end up with the following map:
-    #
-    #   {
-    #       10: sourceflag | destflag,
-    #       11: destflag,
-    #       12: sourceflag | destflag,
-    #       13: destflag,
-    #       14: sourceflag | destflag,
-    #   }
-    #
-    # Note that we are using the axes numbers as the map keys.
-    sourceflag, destflag = 1 << 0, 1 << 1
-    merged = {}
-    for axis in source:
-        merged[axis] = merged.get(axis, 0) | sourceflag
-    for axis in dest:
-        merged[axis] = merged.get(axis, 0) | destflag
-
-    # Maps keys are ordered with random order but we can sort them
-    # and follow canonical ordering to determine the positions where
-    # new dimensions should be inserted. In other words, first we
-    # build this data structure:
-    #
-    #   (
-    #       (0, 10),  # sourceflag | destflag
-    #       (1, 11),  # destflag
-    #       (2, 12),  # sourceflag | destflag
-    #       (3, 13),  # destflag
-    #       (4, 14),  # sourceflag | destflag
-    #   )
-    #
-    # Comments on the side indicate the corresponding map values.
-    #
-    # Then, we filter to only include the indexes of the axes that do
-    # not appear in the source. In this example, we get:
-    #
-    #   (1, 3)
-    #
-    # This means we will invoke np.expand_dims as follows:
-    #
-    #   np.expand_dims(..., axis=(1, 3))
-    #
-    # That is, we add axes in positions 1 and 3.
-    rv = []
-    for idx, axis in enumerate(sorted(merged.keys())):
-        if merged[axis] == destflag:
-            rv.append(idx)
+    # Obtain the indexes of the dest values not belonging to source
+    rv = [idx for idx, value in enumerate(dest) if value not in set(source)]
 
     # Return single axis or tuple based on result size
-    res = tuple(rv)
-    return res[0] if len(res) == 1 else res
+    return rv[0] if len(rv) == 1 else tuple(rv)
 
 
 def axes_projection(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
