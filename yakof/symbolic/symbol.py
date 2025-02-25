@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from yakof.frontend import graph, autonaming
+from ..frontend import graph, autonaming
 
 
 class Symbol:

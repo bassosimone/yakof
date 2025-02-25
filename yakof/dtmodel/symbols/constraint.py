@@ -13,7 +13,7 @@ from __future__ import annotations
 import numpy as np
 import typing
 
-from yakof.symbolic.symbol import Symbol
+from ...symbolic.symbol import Symbol
 
 
 @typing.runtime_checkable

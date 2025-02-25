@@ -15,8 +15,8 @@ from typing import Callable
 import numpy as np
 from scipy import stats
 
-from yakof.symbolic.symbol import Symbol
-from yakof.dtmodel.symbols.context_variable import ContextVariable
+from ...symbolic.symbol import Symbol
+from ...dtmodel.symbols.context_variable import ContextVariable
 
 
 class PresenceVariable(Symbol):
