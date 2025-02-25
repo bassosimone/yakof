@@ -27,6 +27,9 @@ axes_projection
     Internal function for calculating which dimensions to sum over. Most users
     should use ProjectUsingSum instead.
 
+generate_canonical_axes
+    Generates canonical axes IDs for a 1-dimensional tensor space of given size.
+
 Implementation Details
 ----------------------
 
