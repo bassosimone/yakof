@@ -1,6 +1,6 @@
 """
 Common Tensor Spaces
-===================
+====================
 
 Pre-defined tensor spaces for common use cases. This module provides
 ready-to-use tensor spaces to avoid repeated instantiation.

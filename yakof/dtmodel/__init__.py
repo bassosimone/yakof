@@ -47,9 +47,7 @@ would need to modify the evaluation loop to (a) use a yakof cache and (b)
 use the `evaluator` package to evaluate to a numpy array. I think this also
 raises the question of whether we want any `.rvs` stuff inside the graph.
 
-6. 2025-02-25: [outside of this package but this does not matter since
-these notes are not meant to survive this experiment] I have also
-imported `model.py` into a dedicated package called `model`. I have
+6. 2025-02-25: have also imported `model.py` into `model.py`. I have
 added `type: ignore` below a specific point in the file to silence the
 squiggles that are not related to the yakof integration. Beyond this,
 I restructured the `evaluate` loop and turned the `Ensemble` into
@@ -60,3 +58,46 @@ probably done something wrong with the `Constraint.capacity` field: the
 type should either be a `Symbol` or a `Distribution`. At this point,
 I finished adapting the code in the `Model` loop.
 """
+
+from .constraint import Constraint, Distribution as ConstraintDistribution
+from .context_variable import (
+    ContextVariable,
+    UniformCategoricalContextVariable,
+    CategoricalContextVariable,
+    ContinuousContextVariable,
+)
+from .index import (
+    Index,
+    Distribution as IndexDistribution,
+    UniformDistIndex,
+    LognormDistIndex,
+    TriangDistIndex,
+    ConstIndex,
+    SymIndex,
+)
+from .model import Model, Ensemble
+from .presence_variable import PresenceVariable
+
+__all__ = [
+    # Constraint related
+    "Constraint",
+    "ConstraintDistribution",
+    # Context variables
+    "ContextVariable",
+    "UniformCategoricalContextVariable",
+    "CategoricalContextVariable",
+    "ContinuousContextVariable",
+    # Index related
+    "Index",
+    "IndexDistribution",
+    "UniformDistIndex",
+    "LognormDistIndex",
+    "TriangDistIndex",
+    "ConstIndex",
+    "SymIndex",
+    # Model related
+    "Model",
+    "Ensemble",
+    # Presence variables
+    "PresenceVariable",
+]
