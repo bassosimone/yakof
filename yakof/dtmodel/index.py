@@ -17,8 +17,8 @@ from scipy import stats
 
 import numpy as np
 
-from ...symbolic.symbol import Symbol
-from ...dtmodel.symbols.context_variable import ContextVariable
+from ..symbolic.symbol import Symbol
+from .context_variable import ContextVariable
 
 
 @runtime_checkable
@@ -41,6 +41,7 @@ class Index(Symbol):
         group: str | None = None,
         ref_name: str | None = None,
     ) -> None:
+        print(f"ELLIOT: initializing index with name {name} and value {value}")
         super().__init__(name)
         self.group = group
         self.ref_name = ref_name if ref_name is not None else name

@@ -105,6 +105,7 @@ class StateWithoutCache:
 
     def __init__(self, bindings: Bindings) -> None:
         self._bindings = bindings
+        self.debug = False
 
     def set_node_value(self, key: graph.Node, value: np.ndarray) -> None:
         pass
@@ -153,6 +154,7 @@ class StateWithCache(StateWithoutCache):
 def _print_tracepoint(node: graph.Node, value: np.ndarray) -> None:
     print("=== begin tracepoint ===")
     print(f"name: {node.name}")
+    print(f"type: {node.__class__}")
     print(f"formula: {pretty.format(node)}")
     print(f"shape: {value.shape}")
     print(f"value:\n{value}")
@@ -249,11 +251,16 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
     if cached_result is not None:
         return cached_result
 
+    # FIXME: we need to print before entering the node as well
+    if True:
+        _print_tracepoint(node, np.array([]))
+
     # Compute result
     result = _evaluate(node, state)
 
     # Handle debug operations
-    if node.flags & graph.NODE_FLAG_TRACE != 0:
+    # XXX: we need a better mechanism for debugging :grimacing:
+    if node.flags & graph.NODE_FLAG_TRACE != 0 or True:
         _print_tracepoint(node, result)
     if node.flags & graph.NODE_FLAG_BREAK != 0:
         input("Press any key to continue...")

@@ -15,7 +15,7 @@ import random
 
 from scipy.stats import rv_continuous
 
-from ...symbolic.symbol import Symbol
+from ..symbolic.symbol import Symbol
 
 
 class ContextVariable(Symbol, ABC):

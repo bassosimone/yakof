@@ -19,13 +19,13 @@ import pandas as pd
 
 from scipy import interpolate, ndimage, stats
 
-from ..symbols.constraint import Constraint, Distribution as ConstraintDistribution
-from ..symbols.context_variable import ContextVariable
-from ..symbols.index import Index, Distribution as IndexDistribution
-from ..symbols.presence_variable import PresenceVariable
+from .constraint import Constraint, Distribution as ConstraintDistribution
+from .context_variable import ContextVariable
+from .index import Index, Distribution as IndexDistribution
+from .presence_variable import PresenceVariable
 
-from ...numpybackend import evaluator
-from ...symbolic.symbol import Symbol
+from ..numpybackend import evaluator
+from ..symbolic.symbol import Symbol
 
 Ensemble = Iterator[tuple[float, dict[ContextVariable, Symbol]]]
 """Type alias for specifying the expected ensemble type."""
@@ -71,6 +71,7 @@ class Model:
 
         # 2. Create the bindings
         bindings: evaluator.Bindings = {pv.name: grid[pv] for pv in self.pvs}
+        print("ELLIOT: bindings", bindings)
 
         # 3. Evaluate the indexes
         c_subs = {}
@@ -84,7 +85,6 @@ class Model:
                     c_subs[index] = index.value.rvs(size=c_size)
             else:
                 assert isinstance(index.value, Symbol)
-                args = [c_values[cv].values for cv in index.cvs]
                 c_subs[index] = evaluator.evaluate(index.value.node, state)
 
         # 4. Ensure the indexes have the right shape
