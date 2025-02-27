@@ -245,7 +245,8 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
     """
 
     # TODO(bassosimone): restructure debugging support to print as
-    # much as possible before evaluating the node.
+    # much as possible before evaluating the node. See the documentation
+    # inside graph.py for guidance on what needs to be done.
 
     # Check cache first
     cached_result = state.get_node_value(node)
