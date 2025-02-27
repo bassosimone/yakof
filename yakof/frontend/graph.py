@@ -137,6 +137,22 @@ class placeholder(Node):
         self.default_value = default_value
 
 
+class alias(Node):
+    """Creates a named alias for a node without modifying the original node.
+
+    This allows referencing the same computation with multiple names
+    or giving a name to an anonymous expression.
+
+    Args:
+        node: The node to alias
+        name: The name for this alias
+    """
+
+    def __init__(self, name: str, node: Node) -> None:
+        super().__init__(name)
+        self.node = node
+
+
 class BinaryOp(Node):
     """Base class for binary operations with broadcasting.
 

@@ -289,6 +289,10 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
             )
         return value
 
+    # Alias operation
+    if isinstance(node, graph.alias):
+        return _evaluate(node.node, state)
+
     # Binary operations
     if isinstance(node, graph.BinaryOp):
         left = evaluate(node.left, state)
