@@ -3,9 +3,8 @@ Computation Graph Building
 ==========================
 
 This module allows to build an abstract computation graph using TensorFlow-like
-computation primitives and concepts. These primitives and concepts are similar to
-NumPy primitives, but we picked up TensorFlow ones when they disagree. For
-probability distributions, instead, we follow SciPy conventions.
+computation primitives and concepts. These primitives and concepts are also similar
+to NumPy primitives, with minor naming differences.
 
 This module provides:
 
@@ -39,7 +38,7 @@ for later evaluation, we are using classes instead of functions. (We could
 alternatively have used closures, but it would have been more clumsy.) To keep
 the invoked entities names as close as possible to TensorFlow, we named the
 classes using snake_case rather than CamelCase. This is a pragmatic and conscious
-choice: violating PEP8 to produce code that reads like TensorFlow or NumPy.
+choice: violating PEP8 to produce code that reads like TensorFlow.
 
 The main type in this module is the `Node`, representing a node in the
 computation graph. Each operation (e.g., `add`) is a subclass of the `Node`
@@ -93,7 +92,7 @@ class Node:
     1. Identity Semantics:
         - Nodes use identity-based hashing and equality
         - This allows graph traversal algorithms to work correctly
-        - Enables use of nodes as dictionary keys
+        - Enables use of nodes as dictionary and sets keys
 
     2. Debug Support:
         - Nodes carry flags for debugging (trace/break)
@@ -107,8 +106,10 @@ class Node:
 
     def __hash__(self) -> int:
         # Note: introducing hashing by identity in the class inheritance
-        # chain to ensure that overriding the equality operator to be lazy
-        # in derived classes do not break assigning to dicts.
+        # chain to ensure that overriding the equality operator type signature
+        # in derived classes does not break assigning to dicts.
+        #
+        # See also the implementation of Tensor[B].__eq__ in abstract.py.
         return id(self)
 
 
@@ -154,7 +155,7 @@ class alias(Node):
 
 
 class BinaryOp(Node):
-    """Base class for binary operations with broadcasting.
+    """Base class for binary operations.
 
     Args:
         left: First input node
@@ -335,36 +336,14 @@ class reduce_mean(AxisOp):
     """Computes mean of tensor elements along specified axes."""
 
 
-# Probability distributions
-
-
-class normal_cdf(Node):
-    """Compute CDF of normal distribution."""
-
-    def __init__(self, x: Node, loc: Node, scale: Node) -> None:
-        super().__init__()
-        self.x = x
-        self.loc = loc
-        self.scale = scale
-
-
-class uniform_cdf(Node):
-    """Compute CDF of uniform distribution."""
-
-    def __init__(self, x: Node, loc: Node, scale: Node) -> None:
-        super().__init__()
-        self.x = x
-        self.loc = loc
-        self.scale = scale
-
-
 # Debug operations
 
 
 def tracepoint(node: Node) -> Node:
     """
     Marks the node as a tracepoint and returns it. The tracepoint
-    will take effect after the node has been evaluated.
+    will take effect while evaluating the node. We will print information
+    before evaluating the node, evaluate it, then print the result.
 
     This function acts like the unit in the category with semantic side
     effects depending on the debug operation that is requested.
@@ -375,8 +354,8 @@ def tracepoint(node: Node) -> Node:
 
 def breakpoint(node: Node) -> Node:
     """
-    Marks the node as a breakpoint and returns it. The breakpoint
-    will take effect after the node has been evaluated.
+    Marks the node as a breakpoint and returns it. The breakpoint will
+    cause the interpreter to stop before evaluating the node.
 
     This function acts like the unit in the category with semantic side
     effects depending on the debug operation that is requested.
