@@ -244,6 +244,9 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         ValueError: when there's no placeholder value
     """
 
+    # TODO(bassosimone): restructure debugging support to print as
+    # much as possible before evaluating the node.
+
     # Check cache first
     cached_result = state.get_node_value(node)
     if cached_result is not None:

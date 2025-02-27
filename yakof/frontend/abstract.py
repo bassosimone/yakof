@@ -2,10 +2,9 @@
 Abstract Tensor Operations
 ==========================
 
-This modules defines tensors spaces, tensors within spaces, and mapping
-operations to convert tensors across spaces. It builds on top of the
-computation graph (yakof.frontend.graph) to provide a type-safe interface
-for working with tensors in different spaces.
+This modules defines tensors spaces and tensors within spaces. It builds on
+top of the computation graph (`graph.py`) to provide a type-safe interface for
+working with tensors in different tensor spaces.
 
 The module provides these abstractions:
 
@@ -15,18 +14,15 @@ The module provides these abstractions:
 2. Tensor[B]: A tensor with associated basis vectors.
    Supports arithmetic, comparison, and logical operations.
 
-The type parameters ensure that operations between tensors are only possible
-when they share the same context and basis.
+The type parameters ensure that operations between tensors are only
+allowed when they share the same basis of the space.
 
 On mathematical terminology
 ---------------------------
-This package uses 'tensor' in the computational sense (i.e., multidimensional
-arrays) while borrowing mathematical concepts like bases and vector spaces
-to provide a structured way to handle transformations between different
-dimensional spaces.
 
-While not strictly adhering to mathematical tensor theory, this approach
-provides a practical framework for engineering computations.
+This package uses 'tensor' in the computational sense (i.e., multidimensional
+arrays) and borrows mathematical concepts such as bases and vector spaces to
+use a terminology that would sound familiar to engineers.
 
 Categorical Structure
 ---------------------
@@ -34,26 +30,29 @@ Categorical Structure
 The module implements a categorical structure where:
 
 1. Objects are tensor spaces (TensorSpace[B])
-2. Morphisms are structure-preserving maps between tensor spaces
+2. Morphisms are, in general, structure-preserving maps between tensor spaces
 3. Endomorphisms are operations within a tensor space that preserve its structure
+
+However, note that this module only implements endomorphisms. We implement
+space-changing morphisms in the `morphisms.py` module instead.
 
 Key categorical properties:
 
-1. Identity: Each tensor space has identity operations
-2. Composition: Operations can be composed while preserving types
-3. Associativity: Operation composition is associative
+1. Identity: Each tensor space has identity operations.
+2. Composition: Operations can be composed while preserving types.
+3. Associativity: Operations composition is associative.
 
 This categorical view informs key design decisions:
 
 1. Operations that change tensor shape/basis (like reduce_sum or expand_dims)
-   are not methods of TensorSpace as they are morphisms between different
-   spaces rather than endomorphisms within a space.
+   are not methods of TensorSpace as they are morphisms between different spaces
+   rather than endomorphisms within a space (see `morphisms.py`).
 
-2. Operations that preserve tensor structure (like add or multiply) are
-   methods of TensorSpace as they are endomorphisms within the same space.
+2. Operations that preserve tensor structure (like add or multiply) are methods
+of TensorSpace as they are endomorphisms within the same space.
 
 3. The type system enforces these categorical constraints at compile time,
-   ensuring mathematical correctness.
+   ensuring a certain degree of mathematical correctness.
 
 Type System Implementation
 --------------------------
@@ -61,13 +60,13 @@ Type System Implementation
 The type system uses generics to enforce:
 
 1. Basis compatibility:
-   - Operations only between tensors with same basis
-   - Compile-time detection of dimension mismatches
+   - Operations allowed only between tensors with the same basis
+   - Compile-time detection of bases mismatches
 
 2. Context preservation:
    - Clear distinction between different tensor spaces
 
-This design enables catching errors at compile time.
+Thus, we can detect errors at compile time.
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -80,6 +79,8 @@ from . import graph
 
 
 class _ensure_tensor[B]:
+    """Helper class to ensure that a scalar is converted to a tensor."""
+
     def __call__(self, t: Tensor[B] | graph.Scalar) -> Tensor[B]:
         if isinstance(t, graph.Scalar):
             t = Tensor[B](graph.constant(t))
@@ -96,6 +97,7 @@ class Tensor[B]:
     def __init__(self, node: graph.Node) -> None:
         self.node = node
 
+    # autonaming.Namer protocol implementation
     def implements_namer(self) -> None:
         """This method is part of the autonaming.Namer protocol"""
 
@@ -109,8 +111,9 @@ class Tensor[B]:
         """This method is part of the autonaming.Namer protocol"""
         self.node.name = value
 
+    # Hashing by identity - see also comment in graph.py
     def __hash__(self) -> int:
-        return hash(self.node)  # hashing by identity
+        return hash(self.node)
 
     # Arithmetic operators
     def __add__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:
@@ -138,6 +141,8 @@ class Tensor[B]:
         return type(self)(graph.divide(_ensure_tensor[B]()(other).node, self.node))
 
     # Comparison operators
+    #
+    # See corresponding comment in graph.py
     def __eq__(self, other: Tensor[B] | graph.Scalar) -> Tensor[B]:  # type: ignore
         return type(self)(graph.equal(self.node, _ensure_tensor[B]()(other).node))
 
@@ -204,8 +209,11 @@ class TensorSpace[B]:
 
             >>> y = space.placeholder("y")  # explicitly named
 
-        Regardless, a placeholder with no name cannot be used in the graph.
+        Failing to name a tensor would cause the grap evaluation to fail. We highly
+        recommend using autonaming to provide a name to tensors.
         """
+        # TODO(bassosimone): perhaps autonaming should be a higher-level feature? We should
+        # decide whether do to this *before* merging this code into the dt-model repo.
         return Tensor[B](graph.placeholder(name, default_value))
 
     def constant(self, value: graph.Scalar, name: str = "") -> Tensor[B]:
@@ -246,32 +254,6 @@ class TensorSpace[B]:
             graph.multi_clause_where(
                 clauses=[(cond.node, value.node) for cond, value in clauses],
                 default_value=_ensure_tensor[B]()(default_value).node,
-            )
-        )
-
-    def normal_cdf(
-        self,
-        x: Tensor[B],
-        loc: Tensor[B] | graph.Scalar = 0.0,
-        scale: Tensor[B] | graph.Scalar = 1.0,
-    ) -> Tensor[B]:
-        """Compute normal distribution CDF."""
-        return Tensor[B](
-            graph.normal_cdf(
-                x.node, _ensure_tensor[B]()(loc).node, _ensure_tensor[B]()(scale).node
-            )
-        )
-
-    def uniform_cdf(
-        self,
-        x: Tensor[B],
-        loc: Tensor[B] | graph.Scalar = 0.0,
-        scale: Tensor[B] | graph.Scalar = 1.0,
-    ) -> Tensor[B]:
-        """Compute uniform distribution CDF."""
-        return Tensor[B](
-            graph.uniform_cdf(
-                x.node, _ensure_tensor[B]()(loc).node, _ensure_tensor[B]()(scale).node
             )
         )
 

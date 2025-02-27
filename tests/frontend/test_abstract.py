@@ -139,28 +139,6 @@ def test_tensor_conditional():
     assert multi_where.node.default_value is y.node
 
 
-def test_tensor_distributions():
-    """Test probability distribution operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
-    x = space.placeholder("x")
-    loc = space.placeholder("loc")
-    scale = space.placeholder("scale")
-
-    # Test normal CDF
-    normal = space.normal_cdf(x, loc, scale)
-    assert isinstance(normal.node, graph.normal_cdf)
-    assert normal.node.x is x.node
-    assert normal.node.loc is loc.node
-    assert normal.node.scale is scale.node
-
-    # Test uniform CDF
-    uniform = space.uniform_cdf(x, loc, scale)
-    assert isinstance(uniform.node, graph.uniform_cdf)
-    assert uniform.node.x is x.node
-    assert uniform.node.loc is loc.node
-    assert uniform.node.scale is scale.node
-
-
 def test_tensor_debug():
     """Test debug operations on tensors."""
     space = abstract.TensorSpace[DummyBasis]()
