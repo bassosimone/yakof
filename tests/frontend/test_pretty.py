@@ -80,21 +80,6 @@ def test_logical_operations_pretty_printing():
     assert result3 == "x ^ True"
 
 
-def test_function_like_operations_pretty_printing():
-    """Test pretty printing of function-like operations."""
-    x = graph.placeholder("x")
-    mu = graph.placeholder("mu")
-    sigma = graph.placeholder("sigma")
-
-    expr1 = graph.normal_cdf(x, mu, sigma)
-    result1 = pretty.format(expr1)
-    assert result1 == "normal_cdf(x, loc=mu, scale=sigma)"
-
-    expr2 = graph.uniform_cdf(x, graph.constant(0.0), graph.constant(1.0))
-    result2 = pretty.format(expr2)
-    assert result2 == "uniform_cdf(x, loc=0.0, scale=1.0)"
-
-
 def test_named_expressions_pretty_printing():
     """Test pretty printing of named expressions."""
     x = graph.placeholder("x")

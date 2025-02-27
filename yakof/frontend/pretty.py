@@ -58,14 +58,13 @@ Design Decisions
 
 Implementation Notes
 ------------------
-The formatter uses a visitor-like pattern without explicitly implementing
-the visitor pattern, which keeps the code simpler while maintaining
-extensibility.
+The formatter uses a visitor-like pattern without explicitly implementing the
+visitor pattern, which keeps the code simple and maintains extensibility.
 """
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.frontend import graph
+from . import graph
 
 
 def format(node: graph.Node) -> str:
@@ -191,11 +190,5 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return f"exp({inner})"
         if isinstance(node, graph.log):
             return f"log({inner})"
-
-    # Function-like operations
-    if isinstance(node, graph.normal_cdf):
-        return f"normal_cdf({_format(node.x, 0)}, loc={_format(node.loc, 0)}, scale={_format(node.scale, 0)})"
-    if isinstance(node, graph.uniform_cdf):
-        return f"uniform_cdf({_format(node.x, 0)}, loc={_format(node.loc, 0)}, scale={_format(node.scale, 0)})"
 
     return f"<unknown:{type(node).__name__}>"

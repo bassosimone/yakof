@@ -102,27 +102,6 @@ def test_complex_conditional_graph():
     assert result.default_value is default
 
 
-def test_probability_distribution_graph():
-    """Test building a probability distribution computation graph."""
-    x = graph.placeholder("x")
-    mu = graph.placeholder("mu")
-    sigma = graph.placeholder("sigma")
-
-    # Build normal CDF composed with uniform CDF
-    normal = graph.normal_cdf(x, mu, sigma)
-    result = graph.uniform_cdf(normal, graph.constant(0.0), graph.constant(1.0))
-
-    # Verify structure
-    assert result.x is normal
-    assert isinstance(result.loc, graph.constant)
-    assert result.loc.value == 0.0
-    assert isinstance(result.scale, graph.constant)
-    assert result.scale.value == 1.0
-    assert normal.x is x
-    assert normal.loc is mu
-    assert normal.scale is sigma
-
-
 def test_reduction_graph():
     """Test building a graph with reduction operations."""
     x = graph.placeholder("x")
