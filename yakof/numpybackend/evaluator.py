@@ -105,7 +105,6 @@ class StateWithoutCache:
 
     def __init__(self, bindings: Bindings) -> None:
         self._bindings = bindings
-        self.debug = False
 
     def set_node_value(self, key: graph.Node, value: np.ndarray) -> None:
         pass
@@ -297,10 +296,6 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
                 f"evaluator: no value provided for placeholder '{node.name}'"
             )
         return value
-
-    # Alias operation
-    if isinstance(node, graph.alias):
-        return _evaluate(node.node, state)
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):

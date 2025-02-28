@@ -139,9 +139,7 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return node.name
         return str(node.value)
     if isinstance(node, graph.placeholder):
-        return node.name + f"default: {node.default_value}"
-    if isinstance(node, graph.alias):
-        return f"{node.name} = {_format(node.node, 0)}"
+        return node.name
 
     # Binary operations
     if isinstance(node, graph.BinaryOp):
