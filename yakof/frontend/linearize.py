@@ -72,7 +72,7 @@ def forest(*leaves: graph.Node) -> list[graph.Node]:
         # Check for cycles
         if node in visiting:
             raise ValueError(
-                f"Cycle detected in computation graph at node {node.name or f'<unnamed node {node.id}>'}"
+                f"linearize: cycle detected in computation graph at node {node.name or f'<unnamed node {node.id}>'}"
             )
 
         visiting.add(node)
