@@ -90,17 +90,17 @@ def test_expansion_morphisms():
 def test_projection_morphisms():
     """Test that projection morphisms connect the right spaces."""
     # Test R² -> R¹ projections
-    assert spaces.project_xy_to_x.source == spaces.xy
-    assert spaces.project_xy_to_x.dest == spaces.x
-    assert spaces.project_yz_to_z.source == spaces.yz
-    assert spaces.project_yz_to_z.dest == spaces.z
+    assert spaces.project_xy_to_x_using_sum.source == spaces.xy
+    assert spaces.project_xy_to_x_using_sum.dest == spaces.x
+    assert spaces.project_yz_to_z_using_sum.source == spaces.yz
+    assert spaces.project_yz_to_z_using_sum.dest == spaces.z
 
     # Test R³ -> R² projections
-    assert spaces.project_xyz_to_xy.source == spaces.xyz
-    assert spaces.project_xyz_to_xy.dest == spaces.xy
-    assert spaces.project_uvw_to_vw.source == spaces.uvw
-    assert spaces.project_uvw_to_vw.dest == spaces.vw
+    assert spaces.project_xyz_to_xy_using_sum.source == spaces.xyz
+    assert spaces.project_xyz_to_xy_using_sum.dest == spaces.xy
+    assert spaces.project_uvw_to_vw_using_sum.source == spaces.uvw
+    assert spaces.project_uvw_to_vw_using_sum.dest == spaces.vw
 
     # Test higher dimension projections
-    assert spaces.project_xyzuvw_to_xyzuv.source == spaces.xyzuvw
-    assert spaces.project_xyzuvw_to_xyzuv.dest == spaces.xyzuv
+    assert spaces.project_xyzuvw_to_xyzuv_using_sum.source == spaces.xyzuvw
+    assert spaces.project_xyzuvw_to_xyzuv_using_sum.dest == spaces.xyzuv
