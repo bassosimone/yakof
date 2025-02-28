@@ -96,7 +96,7 @@ def test_cycle_detection():
     # This isn't normally possible with the API but we're testing error detection
     b.left = b  # type: ignore
 
-    with pytest.raises(ValueError, match="Cycle detected"):
+    with pytest.raises(ValueError, match="cycle detected"):
         linearize.forest(b)
 
 
