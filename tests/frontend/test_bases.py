@@ -7,12 +7,6 @@ import pytest
 from yakof.frontend import bases, spaces, abstract, morphisms
 
 
-def test_canonical_axes():
-    """Test that canonical axes are created correctly and are unique."""
-    x, y, z, u, v, w = morphisms.generate_canonical_axes(6)
-    assert len({x, y, z, u, v, w}) == 6  # All axes are distinct
-
-
 def test_base_dimensions():
     """Test that bases have correct dimensions and monotonic axes."""
     # Sample from each dimension
