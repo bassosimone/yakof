@@ -151,13 +151,20 @@ class StateWithCache(StateWithoutCache):
         return super().get_placeholder_value(key)
 
 
-def _print_tracepoint(node: graph.Node, value: np.ndarray) -> None:
+def _print_node_before_evaluation(node: graph.Node) -> None:
+    """Print node information before evaluation."""
     print("=== begin tracepoint ===")
     print(f"name: {node.name}")
     print(f"type: {node.__class__}")
     print(f"formula: {pretty.format(node)}")
+    print("=== evaluating node ===")
+
+
+def _print_result(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
+    """Print node result after evaluation."""
+    cache_status = " (from cache)" if cached else ""
     print(f"shape: {value.shape}")
-    print(f"value:\n{value}")
+    print(f"value{cache_status}:\n{value}")
     print("=== end tracepoint ===")
     print("")
 
@@ -246,26 +253,24 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         ValueError: when there's no placeholder value
     """
 
-    # TODO(bassosimone): restructure debugging support to print as
-    # much as possible before evaluating the node. See the documentation
-    # inside graph.py for guidance on what needs to be done.
+    # Print node information before evaluation if tracing is enabled
+    should_trace = node.flags & graph.NODE_FLAG_TRACE != 0
+    if should_trace:
+        _print_node_before_evaluation(node)
 
     # Check cache first
     cached_result = state.get_node_value(node)
     if cached_result is not None:
+        if should_trace:
+            _print_result(node, cached_result, cached=True)
         return cached_result
-
-    # FIXME: we need to print before entering the node as well
-    if True:
-        _print_tracepoint(node, np.array([]))
 
     # Compute result
     result = _evaluate(node, state)
 
     # Handle debug operations
-    # XXX: we need a better mechanism for debugging :grimacing:
-    if node.flags & graph.NODE_FLAG_TRACE != 0 or True:
-        _print_tracepoint(node, result)
+    if should_trace:
+        _print_result(node, result)
     if node.flags & graph.NODE_FLAG_BREAK != 0:
         input("Press any key to continue...")
 
