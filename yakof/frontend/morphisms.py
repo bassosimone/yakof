@@ -59,7 +59,7 @@ Project a 3D tensor in XYZ space to a 2D tensor in XZ space:
     >>> xz_tensor = project(xyz_tensor)  # Sums over Y dimension
 """
 
-from typing import Callable, Generic, Protocol, TypeVar, runtime_checkable
+from typing import Generic, TypeVar
 
 from . import abstract, graph
 
