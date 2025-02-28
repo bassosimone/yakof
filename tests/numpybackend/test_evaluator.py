@@ -458,3 +458,29 @@ def test_edge_cases_and_errors():
         )
         node = graph.divide(graph.placeholder("x"), graph.placeholder("y"))
         evaluator.evaluate(node, state)
+
+
+def test_tracepoint_with_cached_value(capsys):
+    """Test tracepoint operation with cached values."""
+    # Create a node with the tracing flag
+    x = graph.placeholder("x")
+    traced = graph.tracepoint(x)
+
+    # Use a state with caching
+    state = evaluator.StateWithCache({"x": np.array([[1.0, 2.0], [3.0, 4.0]])})
+
+    # First evaluation will compute and cache
+    evaluator.evaluate(traced, state)
+    captured1 = capsys.readouterr()
+
+    # Second evaluation should use the cached value
+    evaluator.evaluate(traced, state)
+    captured2 = capsys.readouterr()
+
+    # First output should indicate not cached
+    assert "=== begin tracepoint ===" in captured1.out
+    assert "cached: False" in captured1.out
+
+    # Second output should indicate cached
+    assert "=== begin tracepoint ===" in captured2.out
+    assert "cached: True" in captured2.out
