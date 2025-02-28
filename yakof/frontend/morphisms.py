@@ -201,7 +201,6 @@ A = TypeVar("A")
 B = TypeVar("B")
 """Type variable for destination tensor space."""
 
-# FIXME: ensure we fix the docstrings
 
 class ExpandDims(Generic[B]):
     """Morphism that expands tensors to higher dimensional spaces.
