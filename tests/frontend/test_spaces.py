@@ -71,37 +71,37 @@ def test_expansion_morphisms():
     """Test that expansion morphisms connect the right spaces."""
     # Test R¹ -> R² expansions
     assert spaces.expand_x_to_xy.source == spaces.x
-    assert spaces.expand_x_to_xy.target == spaces.xy
+    assert spaces.expand_x_to_xy.dest == spaces.xy
     assert spaces.expand_y_to_yz.source == spaces.y
-    assert spaces.expand_y_to_yz.target == spaces.yz
+    assert spaces.expand_y_to_yz.dest == spaces.yz
 
     # Test R² -> R³ expansions
     assert spaces.expand_xy_to_xyz.source == spaces.xy
-    assert spaces.expand_xy_to_xyz.target == spaces.xyz
+    assert spaces.expand_xy_to_xyz.dest == spaces.xyz
     assert spaces.expand_uv_to_zuv.source == spaces.uv
-    assert spaces.expand_uv_to_zuv.target == spaces.zuv
+    assert spaces.expand_uv_to_zuv.dest == spaces.zuv
 
     # Test higher dimension expansions
     assert spaces.expand_xyzuv_to_xyzuvw.source == spaces.xyzuv
-    assert spaces.expand_xyzuv_to_xyzuvw.target == spaces.xyzuvw
+    assert spaces.expand_xyzuv_to_xyzuvw.dest == spaces.xyzuvw
 
 def test_projection_morphisms():
     """Test that projection morphisms connect the right spaces."""
     # Test R² -> R¹ projections
     assert spaces.project_xy_to_x.source == spaces.xy
-    assert spaces.project_xy_to_x.target == spaces.x
+    assert spaces.project_xy_to_x.dest == spaces.x
     assert spaces.project_yz_to_z.source == spaces.yz
-    assert spaces.project_yz_to_z.target == spaces.z
+    assert spaces.project_yz_to_z.dest == spaces.z
 
     # Test R³ -> R² projections
     assert spaces.project_xyz_to_xy.source == spaces.xyz
-    assert spaces.project_xyz_to_xy.target == spaces.xy
+    assert spaces.project_xyz_to_xy.dest == spaces.xy
     assert spaces.project_uvw_to_vw.source == spaces.uvw
-    assert spaces.project_uvw_to_vw.target == spaces.vw
+    assert spaces.project_uvw_to_vw.dest == spaces.vw
 
     # Test higher dimension projections
     assert spaces.project_xyzuvw_to_xyzuv.source == spaces.xyzuvw
-    assert spaces.project_xyzuvw_to_xyzuv.target == spaces.xyzuv
+    assert spaces.project_xyzuvw_to_xyzuv.dest == spaces.xyzuv
 
 def test_count_spaces_and_morphisms():
     """Test that we have the expected number of spaces and morphisms."""
