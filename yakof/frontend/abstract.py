@@ -76,7 +76,7 @@ class Basis(Protocol):
 
     All bases must provide their axes as an ordered tuple of integers, establishing
     their position in the canonical ordering. To generate the canonical
-    ordering, use the generate_canonical_axes function.
+    ordering, use the morphisms.generate_canonical_axes function.
 
     Examples:
         >>> class XYBasis:
@@ -88,8 +88,19 @@ class Basis(Protocol):
     axes: graph.Axis
 
 
-def _ensure_same_basis(left: Any, right: Any) -> None:
-    """Ensures that the two bases are the same."""
+def ensure_same_basis(left: Any, right: Any) -> None:
+    """
+    Ensures that the two bases are the same.
+
+    The two bases are the same if
+
+    1. they are the same instance (tested using the `is` operator); or
+
+    2. they both implement Basis and return the same axes.
+
+    If these two conditions are not met, this function raise a TypeError. Note that
+    using a type checker prevents this class of errors at compile time.
+    """
     if left is not right:
         if not isinstance(left, Basis):
             raise TypeError(f"{left} must be an instance of Basis")
@@ -100,10 +111,10 @@ def _ensure_same_basis(left: Any, right: Any) -> None:
 
 
 B = TypeVar("B")
-"""Type variable for tensor basis types used by Tensor and TensorSpace."""
+"""Type variable for tensor basis types, used by Tensor and TensorSpace."""
 
 C = TypeVar("C")
-"""Type variable for condition basis types, used by where and multi_clause_where."""
+"""Type variable for condition tensor basis types, used by where and multi_clause_where."""
 
 
 class Tensor(Generic[B]):
@@ -123,14 +134,8 @@ class Tensor(Generic[B]):
     Implementation Note
     -------------------
 
-    A given space basis B is equal to another basis iff:
-
-    1. they are the same instance (tested using the `is` operator);
-
-    2. they both implement Basis and return the same axes.
-
-    If these two conditions are not met, we raise a TypeError. However, if you
-    are using a type checker, you should not incur into these errors.
+    We use ensure_same_basis whenever we combine tensors potentially
+    belonging to different tensor spaces.
     """
 
     def __init__(self, space: TensorSpace[B], node: graph.Node) -> None:
@@ -239,14 +244,8 @@ class TensorSpace(Generic[B]):
     Implementation Note
     -------------------
 
-    A given basis B is equal to another basis iff:
-
-    1. they are the same instance (tested using the `is` operator)
-
-    2. they both implement Basis and return the same axes
-
-    If these two conditions are not met, we raise a TypeError. However, if you
-    are using a type checker, you should not incur into these errors.
+    We use ensure_same_basis whenever we combine tensors potentially
+    belonging to different tensor spaces.
     """
 
     def __init__(self, basis: B) -> None:
@@ -296,32 +295,32 @@ class TensorSpace(Generic[B]):
 
     def exp(self, t: Tensor[B]) -> Tensor[B]:
         """Compute the exponential of a tensor."""
-        _ensure_same_basis(self.basis, t.space.basis)
+        ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.exp(t.node))
 
     def power(self, t: Tensor[B], exp: Tensor[B]) -> Tensor[B]:
         """Raise tensor to the power of another tensor."""
-        _ensure_same_basis(self.basis, t.space.basis)
-        _ensure_same_basis(self.basis, exp.space.basis)
+        ensure_same_basis(self.basis, t.space.basis)
+        ensure_same_basis(self.basis, exp.space.basis)
         return self.new_tensor(graph.power(t.node, exp.node))
 
     def log(self, t: Tensor[B]) -> Tensor[B]:
         """Compute the natural logarithm of a tensor."""
-        _ensure_same_basis(self.basis, t.space.basis)
+        ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.log(t.node))
 
     def maximum(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Compute element-wise maximum of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.maximum(t1.node, t2.node))
 
     def where(
         self, cond: Tensor[C], then: Tensor[B], otherwise: Tensor[B]
     ) -> Tensor[B]:
         """Select elements based on condition."""
-        _ensure_same_basis(self.basis, then.space.basis)
-        _ensure_same_basis(self.basis, otherwise.space.basis)
+        ensure_same_basis(self.basis, then.space.basis)
+        ensure_same_basis(self.basis, otherwise.space.basis)
         return self.new_tensor(graph.where(cond.node, then.node, otherwise.node))
 
     def multi_clause_where(
@@ -331,10 +330,10 @@ class TensorSpace(Generic[B]):
     ) -> Tensor[B]:
         """Select elements based on multiple conditions."""
         for cond, value in clauses:
-            _ensure_same_basis(self.basis, value.space.basis)
+            ensure_same_basis(self.basis, value.space.basis)
 
         default_value = self.ensure_tensor(default_value)
-        _ensure_same_basis(self.basis, default_value.space.basis)
+        ensure_same_basis(self.basis, default_value.space.basis)
 
         return self.new_tensor(
             graph.multi_clause_where(
@@ -345,94 +344,94 @@ class TensorSpace(Generic[B]):
 
     def tracepoint(self, t: Tensor[B]) -> Tensor[B]:
         """Inserts a tracepoint for the current tensor inside the computation graph."""
-        _ensure_same_basis(self.basis, t.space.basis)
+        ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.tracepoint(t.node))
 
     def breakpoint(self, t: Tensor[B]) -> Tensor[B]:
         """Inserts a breakpoint for the current tensor inside the computation graph."""
-        _ensure_same_basis(self.basis, t.space.basis)
+        ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.breakpoint(t.node))
 
     # Additional shape/structure preserving operations
     def add(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise addition of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.add(t1.node, t2.node))
 
     def subtract(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise subtraction of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.subtract(t1.node, t2.node))
 
     def multiply(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise multiplication of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.multiply(t1.node, t2.node))
 
     def divide(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise division of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.divide(t1.node, t2.node))
 
     def equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise equality comparison of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.equal(t1.node, t2.node))
 
     def not_equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise inequality comparison of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.not_equal(t1.node, t2.node))
 
     def less(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise less-than comparison of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.less(t1.node, t2.node))
 
     def less_equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise less-than-or-equal comparison of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.less_equal(t1.node, t2.node))
 
     def greater(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise greater-than comparison of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.greater(t1.node, t2.node))
 
     def greater_equal(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise greater-than-or-equal comparison of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.greater_equal(t1.node, t2.node))
 
     def logical_and(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise logical AND of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.logical_and(t1.node, t2.node))
 
     def logical_or(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise logical OR of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.logical_or(t1.node, t2.node))
 
     def logical_xor(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
         """Element-wise logical XOR of two tensors."""
-        _ensure_same_basis(self.basis, t1.space.basis)
-        _ensure_same_basis(self.basis, t2.space.basis)
+        ensure_same_basis(self.basis, t1.space.basis)
+        ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.logical_xor(t1.node, t2.node))
 
     def logical_not(self, t: Tensor[B]) -> Tensor[B]:
         """Element-wise logical NOT of a tensor."""
-        _ensure_same_basis(self.basis, t.space.basis)
+        ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.logical_not(t.node))

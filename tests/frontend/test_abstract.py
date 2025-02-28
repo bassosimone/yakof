@@ -370,3 +370,138 @@ def test_tensor_reverse_operations_with_tensors():
     assert isinstance(rxor.node, graph.logical_xor)
     assert rxor.node.left is y.node
     assert rxor.node.right is x.node
+
+
+def test_ensure_same_basis():
+    """Test ensure_same_basis function."""
+    # Same instance - should pass
+    basis1 = DummyBasis()
+    abstract.ensure_same_basis(basis1, basis1)
+
+    # Different instances but same axes - should pass
+    class TestBasis:
+        axes = (1, 2, 3)
+
+    basis2 = TestBasis()
+    basis3 = TestBasis()
+    abstract.ensure_same_basis(basis2, basis3)
+
+    # Different axes - should fail
+    class AnotherBasis:
+        axes = (4, 5, 6)
+
+    basis4 = AnotherBasis()
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        abstract.ensure_same_basis(basis2, basis4)
+
+    # Non-Basis object - should fail
+    not_a_basis = "not a basis"
+    with pytest.raises(TypeError):
+        abstract.ensure_same_basis(basis1, not_a_basis)
+
+    with pytest.raises(TypeError):
+        abstract.ensure_same_basis(not_a_basis, basis1)
+
+
+def test_tensor_operations_with_different_bases():
+    """Test operations between tensors with different bases."""
+
+    # Create two spaces with different bases
+    class BasisA:
+        axes = (1, 2)
+
+    class BasisB:
+        axes = (3, 4)
+
+    space_a = abstract.TensorSpace(BasisA())
+    space_b = abstract.TensorSpace(BasisB())
+
+    x = space_a.placeholder("x")
+    y = space_b.placeholder("y")
+
+    # Attempting operations between tensors with different bases should fail
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        x + y  # type: ignore
+
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        space_a.add(x, y)  # type: ignore
+
+    # Test other operations
+    with pytest.raises(ValueError):
+        x - y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x * y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x / y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x == y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x < y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x & y  # type: ignore
+
+
+def test_tensor_math_with_different_bases():
+    """Test mathematical operations between tensors with different bases."""
+
+    # Create two spaces with different bases
+    class BasisA:
+        axes = (1, 2)
+
+    class BasisB:
+        axes = (3, 4)
+
+    space_a = abstract.TensorSpace(BasisA())
+    space_b = abstract.TensorSpace(BasisB())
+
+    x = space_a.placeholder("x")
+    y = space_b.placeholder("y")
+
+    # Test math operations with different bases
+    with pytest.raises(ValueError):
+        space_a.power(x, y)  # type: ignore
+
+    with pytest.raises(ValueError):
+        space_a.maximum(x, y)  # type: ignore
+
+    with pytest.raises(ValueError):
+        space_a.where(x, y, y)  # type: ignore
+
+    # This should also fail because then/otherwise have different bases
+    with pytest.raises(ValueError):
+        space_a.where(x, x, y)  # type: ignore
+
+
+def test_tensor_space_axes_method():
+    """Test that TensorSpace.axes() raises TypeError for invalid basis."""
+
+    # Valid case - basis implements Basis protocol
+    class ValidBasis:
+        axes = (1, 2, 3)
+
+    valid_space = abstract.TensorSpace(ValidBasis())
+    assert valid_space.axes() == (1, 2, 3)
+
+    # Invalid case - basis doesn't implement Basis protocol
+    class InvalidBasis:
+        # Missing axes attribute
+        pass
+
+    invalid_space = abstract.TensorSpace(InvalidBasis())
+    with pytest.raises(TypeError, match="must be an instance of Basis"):
+        invalid_space.axes()
+
+    # Another invalid case - basis is not an object
+    string_space = abstract.TensorSpace("not an object with axes")
+    with pytest.raises(TypeError, match="must be an instance of Basis"):
+        string_space.axes()
+
+    # None as basis
+    none_space = abstract.TensorSpace(None)
+    with pytest.raises(TypeError, match="must be an instance of Basis"):
+        none_space.axes()
