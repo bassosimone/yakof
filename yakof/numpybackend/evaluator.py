@@ -154,6 +154,7 @@ def _print_node_before_evaluation(node: graph.Node) -> None:
     """Print node information before evaluation."""
     print("=== begin tracepoint ===")
     print(f"name: {node.name}")
+    print(f"id: {node.id}")
     print(f"type: {node.__class__}")
     print(f"formula: {pretty.format(node)}")
     print("=== evaluating node ===")
