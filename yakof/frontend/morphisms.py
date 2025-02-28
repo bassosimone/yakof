@@ -202,10 +202,11 @@ B = TypeVar("B")
 """Type variable for destination tensor space."""
 
 
-class ExpandDims(Generic[B]):
+class ExpandDims(Generic[A, B]):
     """Morphism that expands tensors to higher dimensional spaces.
 
     Type Parameters:
+        A: Source basis type
         B: Destination basis type
 
     Args:
@@ -235,10 +236,11 @@ class ExpandDims(Generic[B]):
         return self.dest.new_tensor(graph.expand_dims(t.node, axis=axes))
 
 
-class ProjectUsingSum(Generic[B]):
+class ProjectUsingSum(Generic[A, B]):
     """Morphism that projects tensors to lower dimensional spaces using summation.
 
     Type Parameters:
+        A: Source basis type
         B: Destination basis type
 
     Args:
