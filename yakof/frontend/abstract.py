@@ -8,11 +8,11 @@ working with tensors in different tensor spaces.
 
 The module provides these abstractions:
 
-1. TensorSpace[B]: A space of tensors with a given basis.
-   Provides mathematical operations such as exp, log, and power.
+1. TensorSpace: A space of tensors with a given basis. Provides
+mathematical operations such as exp, log, and power.
 
-2. Tensor[B]: A tensor with associated basis vectors.
-   Supports arithmetic, comparison, and logical operations.
+2. Tensor: A tensor with associated basis vectors. Supports
+arithmetic, comparison, and logical operations.
 
 The type parameters ensure that operations between tensors are only
 allowed when they share the same basis of the space.
@@ -29,30 +29,24 @@ Categorical Structure
 
 The module implements a categorical structure where:
 
-1. Objects are tensor spaces (TensorSpace[B])
-2. Morphisms are, in general, structure-preserving maps between tensor spaces
-3. Endomorphisms are operations within a tensor space that preserve its structure
+1. Objects are tensor spaces (TensorSpace)
+2. Morphisms are structure-preserving maps between tensor spaces
 
-However, note that this module only implements endomorphisms. We implement
-space-changing morphisms in the `morphisms.py` module instead.
-
-Key categorical properties:
-
-1. Identity: Each tensor space has identity operations.
-2. Composition: Operations can be composed while preserving types.
-3. Associativity: Operations composition is associative.
+This module only implements endomorphisms, i.e., morphisms from a tensor space
+to itself. Morphisms between different tensor spaces are implemented in the
+`morphisms.py` module.
 
 This categorical view informs key design decisions:
 
 1. Operations that change tensor shape/basis (like reduce_sum or expand_dims)
-   are not methods of TensorSpace as they are morphisms between different spaces
-   rather than endomorphisms within a space (see `morphisms.py`).
+are not methods of TensorSpace as they are morphisms between different spaces
+rather than endomorphisms within a space (see `morphisms.py`).
 
 2. Operations that preserve tensor structure (like add or multiply) are methods
 of TensorSpace as they are endomorphisms within the same space.
 
 3. The type system enforces these categorical constraints at compile time,
-   ensuring a certain degree of mathematical correctness.
+ensuring a certain degree of mathematical correctness.
 
 Type System Implementation
 --------------------------
@@ -60,13 +54,11 @@ Type System Implementation
 The type system uses generics to enforce:
 
 1. Basis compatibility:
-   - Operations allowed only between tensors with the same basis
-   - Compile-time detection of bases mismatches
+- Operations allowed only between tensors with the same basis
+- Compile-time detection of bases mismatches
 
 2. Context preservation:
-   - Clear distinction between different tensor spaces
-
-Thus, we can detect errors at compile time.
+- Clear distinction between different tensor spaces
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -108,7 +100,7 @@ def _ensure_same_basis(left: Any, right: Any) -> None:
 
 
 B = TypeVar("B")
-"""Type variable for tensor basis types."""
+"""Type variable for tensor basis types used by Tensor and TensorSpace."""
 
 C = TypeVar("C")
 """Type variable for condition basis types, used by where and multi_clause_where."""
@@ -133,9 +125,12 @@ class Tensor(Generic[B]):
 
     A given space basis B is equal to another basis iff:
 
-    1. they are the same instance (tested using the `is` operator)
+    1. they are the same instance (tested using the `is` operator);
 
-    2. they both implement Basis and return the same axes
+    2. they both implement Basis and return the same axes.
+
+    If these two conditions are not met, we raise a TypeError. However, if you
+    are using a type checker, you should not incur into these errors.
     """
 
     def __init__(self, space: TensorSpace[B], node: graph.Node) -> None:
@@ -249,6 +244,9 @@ class TensorSpace(Generic[B]):
     1. they are the same instance (tested using the `is` operator)
 
     2. they both implement Basis and return the same axes
+
+    If these two conditions are not met, we raise a TypeError. However, if you
+    are using a type checker, you should not incur into these errors.
     """
 
     def __init__(self, basis: B) -> None:

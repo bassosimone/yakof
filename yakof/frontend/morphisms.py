@@ -3,10 +3,10 @@ Morphisms Between Tensor Spaces
 ===============================
 
 This module implements morphisms between tensor spaces, allowing tensors to be
-transformed between spaces of different dimensions via expansion and projection.
+transformed between spaces of different dimensions.
 
-Main Classes
-------------
+Classes
+-------
 
 ExpandDims
     The primary class for expanding tensors to higher dimensional spaces by
@@ -36,15 +36,15 @@ Implementation Details
 The implementation relies on three key properties:
 
 1. Canonical axes: Each dimension has a unique integer ID (e.g., X=1000,
-   Y=1001, Z=1002). This establishes a consistent ordering and makes
-   debugging easier by clearly distinguishing axes from array indices.
+Y=1001, Z=1002). This establishes a consistent ordering and makes
+debugging easier by clearly distinguishing axes from array indices.
 
-2. Monotonicity: Dimensions are always used in ascending order of their IDs.
-   Both source and destination spaces must maintain this ordering.
+2. Monotonicity: Dimensions are always used in ascending order of their
+IDs. Both source and destination spaces must maintain this ordering.
 
 3. Subset relationships: For expansion, source axes must be a subset of
-   destination axes. For projection, destination axes must be a subset of
-   source axes.
+destination axes. For projection, destination axes must be a subset of
+source axes.
 
 Examples
 --------
@@ -207,20 +207,19 @@ class ExpandDims(Generic[B]):
     """Morphism that expands tensors to higher dimensional spaces.
 
     Type Parameters:
-        A: Source basis type
         B: Destination basis type
 
     Args:
-        source: Instance of A
-        dest: Instance of B
+        source: source tensor space.
+        dest: destination tensor space.
+
+    Attributes:
+        source: source tensor space.
+        dest: destination tensor space.
 
     Example:
-        >>> expand = ExpandDims(Z, YZ)
-        >>> yz_tensor = expand(z_tensor)  # Expands 1D z_tensor to 2D
-        >>>
-        >>> # Another example with different dimensions:
-        >>> expand2 = ExpandDims(X, XYZ)
-        >>> xyz_tensor = expand2(x_tensor)  # Expands 1D to 3D
+        >>> expand = ExpandDims(space_z, space_yz)
+        >>> yz_tensor = expand(z_tensor)  # Expands 1D to 2D
     """
 
     def __init__(self, source: abstract.TensorSpace[A], dest: abstract.TensorSpace[B]):
@@ -237,26 +236,23 @@ class ExpandDims(Generic[B]):
         return self.dest.new_tensor(graph.expand_dims(t.node, axis=axes))
 
 
-# FIXME: ensure we fix the docstrings
-
 class ProjectUsingSum(Generic[B]):
     """Morphism that projects tensors to lower dimensional spaces using summation.
 
     Type Parameters:
-        A: Source basis type
         B: Destination basis type
 
     Args:
-        source: Instance of A
-        dest: Instance of B
+        source: source tensor space.
+        dest: destination tensor space.
+
+    Attributes:
+        source: source tensor space.
+        dest: destination tensor space.
 
     Example:
-        >>> project = ProjectUsingSum(XYZ, XZ)
+        >>> project = ProjectUsingSum(space_xyz, space_xz)
         >>> xz_tensor = project(xyz_tensor)  # Projects 3D to 2D
-        >>>
-        >>> # Another example reducing to 1D:
-        >>> project2 = ProjectUsingSum(XYZ, X)
-        >>> x_tensor = project2(xyz_tensor)  # Projects 3D to 1D
     """
 
     def __init__(self, source: abstract.TensorSpace[A], dest: abstract.TensorSpace[B]):
