@@ -374,6 +374,7 @@ def test_tensor_reverse_operations_with_tensors():
 
 def test_ensure_same_basis():
     """Test ensure_same_basis function."""
+
     # Same instance - should pass
     class DummyBasisWithoutAxesAttribute:
         pass
