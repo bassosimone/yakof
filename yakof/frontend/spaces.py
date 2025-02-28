@@ -1,519 +1,122 @@
 """
-Bases, Spaces and Morphisms
-===========================
+Canonical Spaces and Morphisms
+==============================
 
-This module provides type definitions, tensor spaces, and morphisms
-up to R⁶, using the canonical dimensions X, Y, Z, U, V, and W.
+This module provides the definition of canonical tensor spaces, and
+morphisms up to R⁶, using the `bases.py` canonical dimensions.
 
-Each basis defines its axes as a set of integers following the canonical ordering:
-X=0, Y=1, Z=2, U=3, V=4, W=5. These are used by the morphism classes to
-automatically compute the correct axes for expansions and projections.
-
-Type Definitions and Spaces:
---------------------------
-- R¹: X, Y, Z, U, V, W (single axes)
-- R²: XY, XZ, YZ, ... (15 pairs of axes)
-- R³: XYZ, XYU, ... (20 combinations)
-- R⁴: XYZU, ... (15 combinations)
-- R⁵: XYZUV, ... (6 combinations)
-- R⁶: XYZUVW (1 combination)
-
-This file defines both the basis classes (e.g., X, Y) and corresponding tensor
-spaces (e.g., x, y) for each of these dimensions.
+Spaces
+------
+- R¹: x, y, z, u, v, w (bases.single axes)
+- R²: xy, xz, yz, ... (bases.15 pairs of axes)
+- R³: xyz, xyu, ... (bases.20 combinations)
+- R⁴: xyzu, ... (bases.15 combinations)
+- R⁵: xyzuv, ... (bases.6 combinations)
+- R⁶: xyzuvw (bases.1 combination)
 
 Expansions:
 ----------
-- R¹ -> R²: 30 morphisms (each single axis to its valid 2D combinations)
-- R² -> R³: 60 morphisms (each 2D space to its valid 3D combinations)
-- R³ -> R⁴: 60 morphisms (each 3D space to its valid 4D combinations)
-- R⁴ -> R⁵: 30 morphisms (each 4D space to its valid 5D combinations)
-- R⁵ -> R⁶: 6 morphisms (each 5D space to the full 6D space)
+- R¹ -> R²: 30 morphisms (bases.each single axis to its valid 2D combinations)
+- R² -> R³: 60 morphisms (bases.each 2D space to its valid 3D combinations)
+- R³ -> R⁴: 60 morphisms (bases.each 3D space to its valid 4D combinations)
+- R⁴ -> R⁵: 30 morphisms (bases.each 4D space to its valid 5D combinations)
+- R⁵ -> R⁶: 6 morphisms (bases.each 5D space to the full 6D space)
 
 Projections:
 -----------
-- R² -> R¹: 30 morphisms (each 2D space to its constituent axes)
-- R³ -> R²: 60 morphisms (each 3D space to its valid 2D combinations)
-- R⁴ -> R³: 60 morphisms (each 4D space to its valid 3D combinations)
-- R⁵ -> R⁴: 30 morphisms (each 5D space to its valid 4D combinations)
-- R⁶ -> R⁵: 6 morphisms (full 6D space to each 5D combination)
+- R² -> R¹: 30 morphisms (bases.each 2D space to its constituent axes)
+- R³ -> R²: 60 morphisms (bases.each 3D space to its valid 2D combinations)
+- R⁴ -> R³: 60 morphisms (bases.each 4D space to its valid 3D combinations)
+- R⁵ -> R⁴: 30 morphisms (bases.each 5D space to its valid 4D combinations)
+- R⁶ -> R⁵: 6 morphisms (bases.full 6D space to each 5D combination)
 
 Example:
 -------
     >>> from yakof.frontend import abstract, spaces, morphisms
     >>> space_x = spaces.x  # Pre-defined space
-    >>> x = space_x.placeholder("x")
-    >>> expand = morphisms.ExpandDims(spaces.X, spaces.XY)
-    >>> xy = expand(x)
+    >>> x = space_x.placeholder(bases."x")
+    >>> expand = morphisms.ExpandDims(bases.spaces.X, spaces.XY)
+    >>> xy = expand(bases.x)
 """
 
-from . import abstract, morphisms
-
-# Get canonical axes
-x_axis, y_axis, z_axis, u_axis, v_axis, w_axis = morphisms.generate_canonical_axes(6)
-
-
-# R¹ bases
-class X:
-    """Tensor basis along the X axis."""
-
-    axes = (x_axis,)
-
-
-class Y:
-    """Tensor basis along the Y axis."""
-
-    axes = (y_axis,)
-
-
-class Z:
-    """Tensor basis along the Z axis."""
-
-    axes = (z_axis,)
-
-
-class U:
-    """Tensor basis along the U axis."""
-
-    axes = (u_axis,)
-
-
-class V:
-    """Tensor basis along the V axis."""
-
-    axes = (v_axis,)
-
-
-class W:
-    """Tensor basis along the W axis."""
-
-    axes = (w_axis,)
-
-
-# R² bases
-class XY:
-    """Tensor basis along X and Y axes."""
-
-    axes = (x_axis, y_axis)
-
-
-class XZ:
-    """Tensor basis along X and Z axes."""
-
-    axes = (x_axis, z_axis)
-
-
-class XU:
-    """Tensor basis along X and U axes."""
-
-    axes = (x_axis, u_axis)
-
-
-class XV:
-    """Tensor basis along X and V axes."""
-
-    axes = (x_axis, v_axis)
-
-
-class XW:
-    """Tensor basis along X and W axes."""
-
-    axes = (x_axis, w_axis)
-
-
-class YZ:
-    """Tensor basis along Y and Z axes."""
-
-    axes = (y_axis, z_axis)
-
-
-class YU:
-    """Tensor basis along Y and U axes."""
-
-    axes = (y_axis, u_axis)
-
-
-class YV:
-    """Tensor basis along Y and V axes."""
-
-    axes = (y_axis, v_axis)
-
-
-class YW:
-    """Tensor basis along Y and W axes."""
-
-    axes = (y_axis, w_axis)
-
-
-class ZU:
-    """Tensor basis along Z and U axes."""
-
-    axes = (z_axis, u_axis)
-
-
-class ZV:
-    """Tensor basis along Z and V axes."""
-
-    axes = (z_axis, v_axis)
-
-
-class ZW:
-    """Tensor basis along Z and W axes."""
-
-    axes = (z_axis, w_axis)
-
-
-class UV:
-    """Tensor basis along U and V axes."""
-
-    axes = (u_axis, v_axis)
-
-
-class UW:
-    """Tensor basis along U and W axes."""
-
-    axes = (u_axis, w_axis)
-
-
-class VW:
-    """Tensor basis along V and W axes."""
-
-    axes = (v_axis, w_axis)
-
-
-# R³ bases
-class XYZ:
-    """Tensor basis along X, Y and Z axes."""
-
-    axes = (x_axis, y_axis, z_axis)
-
-
-class XYU:
-    """Tensor basis along X, Y and U axes."""
-
-    axes = (x_axis, y_axis, u_axis)
-
-
-class XYV:
-    """Tensor basis along X, Y and V axes."""
-
-    axes = (x_axis, y_axis, v_axis)
-
-
-class XYW:
-    """Tensor basis along X, Y and W axes."""
-
-    axes = (x_axis, y_axis, w_axis)
-
-
-class XZU:
-    """Tensor basis along X, Z and U axes."""
-
-    axes = (x_axis, z_axis, u_axis)
-
-
-class XZV:
-    """Tensor basis along X, Z and V axes."""
-
-    axes = (x_axis, z_axis, v_axis)
-
-
-class XZW:
-    """Tensor basis along X, Z and W axes."""
-
-    axes = (x_axis, z_axis, w_axis)
-
-
-class XUV:
-    """Tensor basis along X, U and V axes."""
-
-    axes = (x_axis, u_axis, v_axis)
-
-
-class XUW:
-    """Tensor basis along X, U and W axes."""
-
-    axes = (x_axis, u_axis, w_axis)
-
-
-class XVW:
-    """Tensor basis along X, V and W axes."""
-
-    axes = (x_axis, v_axis, w_axis)
-
-
-class YZU:
-    """Tensor basis along Y, Z and U axes."""
-
-    axes = (y_axis, z_axis, u_axis)
-
-
-class YZV:
-    """Tensor basis along Y, Z and V axes."""
-
-    axes = (y_axis, z_axis, v_axis)
-
-
-class YZW:
-    """Tensor basis along Y, Z and W axes."""
-
-    axes = (y_axis, z_axis, w_axis)
-
-
-class YUV:
-    """Tensor basis along Y, U and V axes."""
-
-    axes = (y_axis, u_axis, v_axis)
-
-
-class YUW:
-    """Tensor basis along Y, U and W axes."""
-
-    axes = (y_axis, u_axis, w_axis)
-
-
-class YVW:
-    """Tensor basis along Y, V and W axes."""
-
-    axes = (y_axis, v_axis, w_axis)
-
-
-class ZUV:
-    """Tensor basis along Z, U and V axes."""
-
-    axes = (z_axis, u_axis, v_axis)
-
-
-class ZUW:
-    """Tensor basis along Z, U and W axes."""
-
-    axes = (z_axis, u_axis, w_axis)
-
-
-class ZVW:
-    """Tensor basis along Z, V and W axes."""
-
-    axes = (z_axis, v_axis, w_axis)
-
-
-class UVW:
-    """Tensor basis along U, V and W axes."""
-
-    axes = (u_axis, v_axis, w_axis)
-
-
-# R⁴ bases
-class XYZU:
-    """Tensor basis along X, Y, Z and U axes."""
-
-    axes = (x_axis, y_axis, z_axis, u_axis)
-
-
-class XYZV:
-    """Tensor basis along X, Y, Z and V axes."""
-
-    axes = (x_axis, y_axis, z_axis, v_axis)
-
-
-class XYZW:
-    """Tensor basis along X, Y, Z and W axes."""
-
-    axes = (x_axis, y_axis, z_axis, w_axis)
-
-
-class XYUV:
-    """Tensor basis along X, Y, U and V axes."""
-
-    axes = (x_axis, y_axis, u_axis, v_axis)
-
-
-class XYUW:
-    """Tensor basis along X, Y, U and W axes."""
-
-    axes = (x_axis, y_axis, u_axis, w_axis)
-
-
-class XYVW:
-    """Tensor basis along X, Y, V and W axes."""
-
-    axes = (x_axis, y_axis, v_axis, w_axis)
-
-
-class XZUV:
-    """Tensor basis along X, Z, U and V axes."""
-
-    axes = (x_axis, z_axis, u_axis, v_axis)
-
-
-class XZUW:
-    """Tensor basis along X, Z, U and W axes."""
-
-    axes = (x_axis, z_axis, u_axis, w_axis)
-
-
-class XZVW:
-    """Tensor basis along X, Z, V and W axes."""
-
-    axes = (x_axis, z_axis, v_axis, w_axis)
-
-
-class XUVW:
-    """Tensor basis along X, U, V and W axes."""
-
-    axes = (x_axis, u_axis, v_axis, w_axis)
-
-
-class YZUV:
-    """Tensor basis along Y, Z, U and V axes."""
-
-    axes = (y_axis, z_axis, u_axis, v_axis)
-
-
-class YZUW:
-    """Tensor basis along Y, Z, U and W axes."""
-
-    axes = (y_axis, z_axis, u_axis, w_axis)
-
-
-class YZVW:
-    """Tensor basis along Y, Z, V and W axes."""
-
-    axes = (y_axis, z_axis, v_axis, w_axis)
-
-
-class YUVW:
-    """Tensor basis along Y, U, V and W axes."""
-
-    axes = (y_axis, u_axis, v_axis, w_axis)
-
-
-class ZUVW:
-    """Tensor basis along Z, U, V and W axes."""
-
-    axes = (z_axis, u_axis, v_axis, w_axis)
-
-
-# R⁵ bases
-class XYZUV:
-    """Tensor basis along X, Y, Z, U and V axes."""
-
-    axes = (x_axis, y_axis, z_axis, u_axis, v_axis)
-
-
-class XYZUW:
-    """Tensor basis along X, Y, Z, U and W axes."""
-
-    axes = (x_axis, y_axis, z_axis, u_axis, w_axis)
-
-
-class XYZVW:
-    """Tensor basis along X, Y, Z, V and W axes."""
-
-    axes = (x_axis, y_axis, z_axis, v_axis, w_axis)
-
-
-class XYUVW:
-    """Tensor basis along X, Y, U, V and W axes."""
-
-    axes = (x_axis, y_axis, u_axis, v_axis, w_axis)
-
-
-class XZUVW:
-    """Tensor basis along X, Z, U, V and W axes."""
-
-    axes = (x_axis, z_axis, u_axis, v_axis, w_axis)
-
-
-class YZUVW:
-    """Tensor basis along Y, Z, U, V and W axes."""
-
-    axes = (y_axis, z_axis, u_axis, v_axis, w_axis)
-
-
-# R⁶ basis
-class XYZUVW:
-    """Tensor basis along X, Y, Z, U, V and W axes."""
-
-    axes = (x_axis, y_axis, z_axis, u_axis, v_axis, w_axis)
-
+from . import abstract, bases, morphisms
 
 # R¹ tensor spaces
-x = abstract.TensorSpace(X())
-y = abstract.TensorSpace(Y())
-z = abstract.TensorSpace(Z())
-u = abstract.TensorSpace(U())
-v = abstract.TensorSpace(V())
-w = abstract.TensorSpace(W())
+x = abstract.TensorSpace(bases.X())
+y = abstract.TensorSpace(bases.Y())
+z = abstract.TensorSpace(bases.Z())
+u = abstract.TensorSpace(bases.U())
+v = abstract.TensorSpace(bases.V())
+w = abstract.TensorSpace(bases.W())
 
 # R² tensor spaces
-xy = abstract.TensorSpace(XY())
-xz = abstract.TensorSpace(XZ())
-xu = abstract.TensorSpace(XU())
-xv = abstract.TensorSpace(XV())
-xw = abstract.TensorSpace(XW())
-yz = abstract.TensorSpace(YZ())
-yu = abstract.TensorSpace(YU())
-yv = abstract.TensorSpace(YV())
-yw = abstract.TensorSpace(YW())
-zu = abstract.TensorSpace(ZU())
-zv = abstract.TensorSpace(ZV())
-zw = abstract.TensorSpace(ZW())
-uv = abstract.TensorSpace(UV())
-uw = abstract.TensorSpace(UW())
-vw = abstract.TensorSpace(VW())
+xy = abstract.TensorSpace(bases.XY())
+xz = abstract.TensorSpace(bases.XZ())
+xu = abstract.TensorSpace(bases.XU())
+xv = abstract.TensorSpace(bases.XV())
+xw = abstract.TensorSpace(bases.XW())
+yz = abstract.TensorSpace(bases.YZ())
+yu = abstract.TensorSpace(bases.YU())
+yv = abstract.TensorSpace(bases.YV())
+yw = abstract.TensorSpace(bases.YW())
+zu = abstract.TensorSpace(bases.ZU())
+zv = abstract.TensorSpace(bases.ZV())
+zw = abstract.TensorSpace(bases.ZW())
+uv = abstract.TensorSpace(bases.UV())
+uw = abstract.TensorSpace(bases.UW())
+vw = abstract.TensorSpace(bases.VW())
 
 # R³ tensor spaces
-xyz = abstract.TensorSpace(XYZ())
-xyu = abstract.TensorSpace(XYU())
-xyv = abstract.TensorSpace(XYV())
-xyw = abstract.TensorSpace(XYW())
-xzu = abstract.TensorSpace(XZU())
-xzv = abstract.TensorSpace(XZV())
-xzw = abstract.TensorSpace(XZW())
-xuv = abstract.TensorSpace(XUV())
-xuw = abstract.TensorSpace(XUW())
-xvw = abstract.TensorSpace(XVW())
-yzu = abstract.TensorSpace(YZU())
-yzv = abstract.TensorSpace(YZV())
-yzw = abstract.TensorSpace(YZW())
-yuv = abstract.TensorSpace(YUV())
-yuw = abstract.TensorSpace(YUW())
-yvw = abstract.TensorSpace(YVW())
-zuv = abstract.TensorSpace(ZUV())
-zuw = abstract.TensorSpace(ZUW())
-zvw = abstract.TensorSpace(ZVW())
-uvw = abstract.TensorSpace(UVW())
+xyz = abstract.TensorSpace(bases.XYZ())
+xyu = abstract.TensorSpace(bases.XYU())
+xyv = abstract.TensorSpace(bases.XYV())
+xyw = abstract.TensorSpace(bases.XYW())
+xzu = abstract.TensorSpace(bases.XZU())
+xzv = abstract.TensorSpace(bases.XZV())
+xzw = abstract.TensorSpace(bases.XZW())
+xuv = abstract.TensorSpace(bases.XUV())
+xuw = abstract.TensorSpace(bases.XUW())
+xvw = abstract.TensorSpace(bases.XVW())
+yzu = abstract.TensorSpace(bases.YZU())
+yzv = abstract.TensorSpace(bases.YZV())
+yzw = abstract.TensorSpace(bases.YZW())
+yuv = abstract.TensorSpace(bases.YUV())
+yuw = abstract.TensorSpace(bases.YUW())
+yvw = abstract.TensorSpace(bases.YVW())
+zuv = abstract.TensorSpace(bases.ZUV())
+zuw = abstract.TensorSpace(bases.ZUW())
+zvw = abstract.TensorSpace(bases.ZVW())
+uvw = abstract.TensorSpace(bases.UVW())
 
 # R⁴ tensor spaces
-xyzu = abstract.TensorSpace(XYZU())
-xyzv = abstract.TensorSpace(XYZV())
-xyzw = abstract.TensorSpace(XYZW())
-xyuv = abstract.TensorSpace(XYUV())
-xyuw = abstract.TensorSpace(XYUW())
-xyvw = abstract.TensorSpace(XYVW())
-xzuv = abstract.TensorSpace(XZUV())
-xzuw = abstract.TensorSpace(XZUW())
-xzvw = abstract.TensorSpace(XZVW())
-xuvw = abstract.TensorSpace(XUVW())
-yzuv = abstract.TensorSpace(YZUV())
-yzuw = abstract.TensorSpace(YZUW())
-yzvw = abstract.TensorSpace(YZVW())
-yuvw = abstract.TensorSpace(YUVW())
-zuvw = abstract.TensorSpace(ZUVW())
+xyzu = abstract.TensorSpace(bases.XYZU())
+xyzv = abstract.TensorSpace(bases.XYZV())
+xyzw = abstract.TensorSpace(bases.XYZW())
+xyuv = abstract.TensorSpace(bases.XYUV())
+xyuw = abstract.TensorSpace(bases.XYUW())
+xyvw = abstract.TensorSpace(bases.XYVW())
+xzuv = abstract.TensorSpace(bases.XZUV())
+xzuw = abstract.TensorSpace(bases.XZUW())
+xzvw = abstract.TensorSpace(bases.XZVW())
+xuvw = abstract.TensorSpace(bases.XUVW())
+yzuv = abstract.TensorSpace(bases.YZUV())
+yzuw = abstract.TensorSpace(bases.YZUW())
+yzvw = abstract.TensorSpace(bases.YZVW())
+yuvw = abstract.TensorSpace(bases.YUVW())
+zuvw = abstract.TensorSpace(bases.ZUVW())
 
 # R⁵ tensor spaces
-xyzuv = abstract.TensorSpace(XYZUV())
-xyzuw = abstract.TensorSpace(XYZUW())
-xyzvw = abstract.TensorSpace(XYZVW())
-xyuvw = abstract.TensorSpace(XYUVW())
-xzuvw = abstract.TensorSpace(XZUVW())
-yzuvw = abstract.TensorSpace(YZUVW())
+xyzuv = abstract.TensorSpace(bases.XYZUV())
+xyzuw = abstract.TensorSpace(bases.XYZUW())
+xyzvw = abstract.TensorSpace(bases.XYZVW())
+xyuvw = abstract.TensorSpace(bases.XYUVW())
+xzuvw = abstract.TensorSpace(bases.XZUVW())
+yzuvw = abstract.TensorSpace(bases.YZUVW())
 
 # R⁶ tensor space
-xyzuvw = abstract.TensorSpace(XYZUVW())
-
+xyzuvw = abstract.TensorSpace(bases.XYZUVW())
 
 # R¹ -> R² expansions
-
 expand_x_to_xy = morphisms.ExpandDims(x, xy)
 expand_x_to_xz = morphisms.ExpandDims(x, xz)
 expand_x_to_xu = morphisms.ExpandDims(x, xu)
