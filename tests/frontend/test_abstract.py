@@ -9,10 +9,12 @@ from yakof.frontend import abstract, graph
 class DummyBasis:
     """Dummy basis type for testing."""
 
+    axes = 0
+
 
 def test_tensor_creation():
     """Test basic tensor creation and properties."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
 
     # Test placeholder creation
     x = space.placeholder("x", 1.0)
@@ -29,7 +31,7 @@ def test_tensor_creation():
 
 def test_tensor_arithmetic():
     """Test arithmetic operations between tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
     c = space.constant(2.0)
@@ -63,7 +65,7 @@ def test_tensor_arithmetic():
 
 def test_tensor_comparisons():
     """Test comparison operations between tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -84,7 +86,7 @@ def test_tensor_comparisons():
 
 def test_tensor_logical():
     """Test logical operations between tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -101,7 +103,7 @@ def test_tensor_logical():
 
 def test_tensor_math():
     """Test mathematical operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -118,7 +120,7 @@ def test_tensor_math():
 
 def test_tensor_conditional():
     """Test conditional operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     cond = space.placeholder("cond")
     x = space.placeholder("x")
     y = space.placeholder("y")
@@ -141,7 +143,7 @@ def test_tensor_conditional():
 
 def test_tensor_debug():
     """Test debug operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
 
     # Test tracepoint
@@ -158,7 +160,7 @@ def test_tensor_debug():
 
 def test_tensor_identity():
     """Test tensor identity and hashing behavior."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("x")  # Same name, different tensor
 
@@ -175,7 +177,7 @@ def test_tensor_identity():
 
 def test_tensor_space_method_consistency():
     """Test that TensorSpace methods are consistent with Tensor operators."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -269,7 +271,7 @@ def test_tensor_space_method_consistency():
 
 def test_tensor_name_property():
     """Test tensor name getter and setter."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
 
     # Test initial name
@@ -283,7 +285,7 @@ def test_tensor_name_property():
 
 def test_tensor_reverse_operations():
     """Test reverse arithmetic and logical operations."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
 
     # Test reverse subtraction (other - x)
@@ -331,7 +333,7 @@ def test_tensor_reverse_operations():
 
 def test_tensor_reverse_operations_with_tensors():
     """Test reverse operations with tensors instead of scalars."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 

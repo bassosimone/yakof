@@ -59,7 +59,7 @@ Project a 3D tensor in XYZ space to a 2D tensor in XZ space:
     >>> xz_tensor = project(xyz_tensor)  # Sums over Y dimension
 """
 
-from typing import Callable, Protocol, runtime_checkable
+from typing import Callable, Generic, Protocol, TypeVar, runtime_checkable
 
 from . import abstract, graph
 
@@ -195,25 +195,15 @@ def axes_projection(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
     return rv[0] if len(rv) == 1 else tuple(rv)
 
 
-@runtime_checkable
-class Basis(Protocol):
-    """Protocol defining the interface for tensor space bases.
+A = TypeVar("A")
+"""Type variable for source tensor space."""
 
-    All bases must provide their axes as an ordered tuple of integers, establishing
-    their position in the canonical ordering. To generate the canonical
-    ordering, use the generate_canonical_axes function.
+B = TypeVar("B")
+"""Type variable for destination tensor space."""
 
-    Examples:
-        >>> class XYBasis:
-        ...     axes = (1000, 1001)  # X and Y axes
-        >>> isinstance(XYBasis(), Basis)
-        True
-    """
+# FIXME: ensure we fix the docstrings
 
-    axes: tuple[int, ...]
-
-
-class ExpandDims[A: Basis, B: Basis]:
+class ExpandDims(Generic[B]):
     """Morphism that expands tensors to higher dimensional spaces.
 
     Type Parameters:
@@ -233,7 +223,7 @@ class ExpandDims[A: Basis, B: Basis]:
         >>> xyz_tensor = expand2(x_tensor)  # Expands 1D to 3D
     """
 
-    def __init__(self, source: type[A], dest: type[B]):
+    def __init__(self, source: abstract.TensorSpace[A], dest: abstract.TensorSpace[B]):
         self.source = source
         self.dest = dest
 
@@ -243,11 +233,13 @@ class ExpandDims[A: Basis, B: Basis]:
         Calculates required axes and uses numpy's expand_dims to insert
         new dimensions in the correct positions.
         """
-        axes = axes_expansion(self.source.axes, self.dest.axes)
-        return abstract.Tensor[B](graph.expand_dims(t.node, axis=axes))
+        axes = axes_expansion(self.source.axes(), self.dest.axes())
+        return self.dest.new_tensor(graph.expand_dims(t.node, axis=axes))
 
 
-class ProjectUsingSum[A: Basis, B: Basis]:
+# FIXME: ensure we fix the docstrings
+
+class ProjectUsingSum(Generic[B]):
     """Morphism that projects tensors to lower dimensional spaces using summation.
 
     Type Parameters:
@@ -267,7 +259,7 @@ class ProjectUsingSum[A: Basis, B: Basis]:
         >>> x_tensor = project2(xyz_tensor)  # Projects 3D to 1D
     """
 
-    def __init__(self, source: type[A], dest: type[B]):
+    def __init__(self, source: abstract.TensorSpace[A], dest: abstract.TensorSpace[B]):
         self.source = source
         self.dest = dest
 
@@ -277,5 +269,5 @@ class ProjectUsingSum[A: Basis, B: Basis]:
         Calculates required axes and uses numpy's reduce_sum to eliminate
         dimensions by summing over them.
         """
-        axes = axes_projection(self.source.axes, self.dest.axes)
-        return abstract.Tensor[B](graph.reduce_sum(t.node, axis=axes))
+        axes = axes_projection(self.source.axes(), self.dest.axes())
+        return self.dest.new_tensor(graph.reduce_sum(t.node, axis=axes))
