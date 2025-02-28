@@ -262,25 +262,10 @@ class TensorSpace(Generic[B]):
 
     def placeholder(
         self,
-        name: str = "",
+        name: str,
         default_value: graph.Scalar | None = None,
     ) -> Tensor[B]:
-        """Creates a placeholder tensor.
-
-        The name parameter is optional to allow using autonaming.context():
-
-            >>> with autonaming.context():
-            ...     x = space.placeholder()  # automatically named 'x'
-
-        But must be explicitly provided otherwise:
-
-            >>> y = space.placeholder("y")  # explicitly named
-
-        Failing to name a tensor would cause the grap evaluation to fail. We highly
-        recommend using autonaming to provide a name to tensors.
-        """
-        # TODO(bassosimone): perhaps autonaming should be a higher-level feature? We should
-        # decide whether do to this *before* merging this code into the dt-model repo.
+        """Creates a placeholder tensor."""
         return self.new_tensor(graph.placeholder(name, default_value))
 
     def constant(self, value: graph.Scalar, name: str = "") -> Tensor[B]:
