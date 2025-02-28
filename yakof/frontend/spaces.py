@@ -7,6 +7,7 @@ morphisms up to R⁶, using the `bases.py` canonical dimensions.
 
 Spaces
 ------
+- R⁰: scalar
 - R¹: x, y, z, u, v, w (bases.single axes)
 - R²: xy, xz, yz, ... (bases.15 pairs of axes)
 - R³: xyz, xyu, ... (bases.20 combinations)
@@ -16,19 +17,21 @@ Spaces
 
 Expansions:
 ----------
-- R¹ -> R²: 30 morphisms (bases.each single axis to its valid 2D combinations)
-- R² -> R³: 60 morphisms (bases.each 2D space to its valid 3D combinations)
-- R³ -> R⁴: 60 morphisms (bases.each 3D space to its valid 4D combinations)
-- R⁴ -> R⁵: 30 morphisms (bases.each 4D space to its valid 5D combinations)
-- R⁵ -> R⁶: 6 morphisms (bases.each 5D space to the full 6D space)
+- R⁰ -> R¹: 6 morphisms (scalar to each single 1D axis)
+- R¹ -> R²: 30 morphisms (each single axis to its valid 2D combinations)
+- R² -> R³: 60 morphisms (each 2D space to its valid 3D combinations)
+- R³ -> R⁴: 60 morphisms (each 3D space to its valid 4D combinations)
+- R⁴ -> R⁵: 30 morphisms (each 4D space to its valid 5D combinations)
+- R⁵ -> R⁶: 6 morphisms (each 5D space to the full 6D space)
 
 Projections:
 -----------
-- R² -> R¹: 30 morphisms (bases.each 2D space to its constituent axes)
-- R³ -> R²: 60 morphisms (bases.each 3D space to its valid 2D combinations)
-- R⁴ -> R³: 60 morphisms (bases.each 4D space to its valid 3D combinations)
-- R⁵ -> R⁴: 30 morphisms (bases.each 5D space to its valid 4D combinations)
-- R⁶ -> R⁵: 6 morphisms (bases.full 6D space to each 5D combination)
+- R¹ -> R⁰: 6 morphisms (each single 1D axis to scalar)
+- R² -> R¹: 30 morphisms (each 2D space to its constituent axes)
+- R³ -> R²: 60 morphisms (each 3D space to its valid 2D combinations)
+- R⁴ -> R³: 60 morphisms (each 4D space to its valid 3D combinations)
+- R⁵ -> R⁴: 30 morphisms (each 5D space to its valid 4D combinations)
+- R⁶ -> R⁵: 6 morphisms (full 6D space to each 5D combination)
 
 Example:
 -------
@@ -40,6 +43,9 @@ Example:
 """
 
 from . import abstract, bases, morphisms
+
+# R⁰ tensor space (scalar)
+scalar = abstract.TensorSpace(bases.Scalar())
 
 # R¹ tensor spaces
 x = abstract.TensorSpace(bases.X())
@@ -115,6 +121,14 @@ yzuvw = abstract.TensorSpace(bases.YZUVW())
 
 # R⁶ tensor space
 xyzuvw = abstract.TensorSpace(bases.XYZUVW())
+
+# R⁰ -> R¹ expansions
+expand_scalar_to_x = morphisms.ExpandDims(scalar, x)
+expand_scalar_to_y = morphisms.ExpandDims(scalar, y)
+expand_scalar_to_z = morphisms.ExpandDims(scalar, z)
+expand_scalar_to_u = morphisms.ExpandDims(scalar, u)
+expand_scalar_to_v = morphisms.ExpandDims(scalar, v)
+expand_scalar_to_w = morphisms.ExpandDims(scalar, w)
 
 # R¹ -> R² expansions
 expand_x_to_xy = morphisms.ExpandDims(x, xy)
@@ -311,6 +325,14 @@ expand_xyzvw_to_xyzuvw = morphisms.ExpandDims(xyzvw, xyzuvw)
 expand_xyuvw_to_xyzuvw = morphisms.ExpandDims(xyuvw, xyzuvw)
 expand_xzuvw_to_xyzuvw = morphisms.ExpandDims(xzuvw, xyzuvw)
 expand_yzuvw_to_xyzuvw = morphisms.ExpandDims(yzuvw, xyzuvw)
+
+# R¹ -> R⁰ projections
+project_x_to_scalar_using_sum = morphisms.ProjectUsingSum(x, scalar)
+project_y_to_scalar_using_sum = morphisms.ProjectUsingSum(y, scalar)
+project_z_to_scalar_using_sum = morphisms.ProjectUsingSum(z, scalar)
+project_u_to_scalar_using_sum = morphisms.ProjectUsingSum(u, scalar)
+project_v_to_scalar_using_sum = morphisms.ProjectUsingSum(v, scalar)
+project_w_to_scalar_using_sum = morphisms.ProjectUsingSum(w, scalar)
 
 # R² -> R¹ projections
 project_xy_to_x_using_sum = morphisms.ProjectUsingSum(xy, x)

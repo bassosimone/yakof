@@ -13,6 +13,10 @@ x, y, z, u = morphisms.generate_canonical_axes(4)
 
 
 # Define simple basis classes for testing
+class Scalar:
+    axes = ()
+
+
 class X:
     axes = (x,)
 
@@ -94,6 +98,25 @@ def test_axes_projection_exceptions():
 @pytest.mark.parametrize(
     "source,dest,expected",
     [
+        # R⁰ -> R¹ expansions (scalar to vector)
+        ((), (x,), 0),  # Scalar -> X
+        ((), (y,), 0),  # Scalar -> Y
+        ((), (z,), 0),  # Scalar -> Z
+        ((), (u,), 0),  # Scalar -> U
+        # R⁰ -> R² expansions (scalar to matrix)
+        ((), (x, y), (0, 1)),  # Scalar -> XY
+        ((), (x, z), (0, 1)),  # Scalar -> XZ
+        ((), (x, u), (0, 1)),  # Scalar -> XU
+        ((), (y, z), (0, 1)),  # Scalar -> YZ
+        ((), (y, u), (0, 1)),  # Scalar -> YU
+        ((), (z, u), (0, 1)),  # Scalar -> ZU
+        # R⁰ -> R³ expansions (scalar to 3D tensor)
+        ((), (x, y, z), (0, 1, 2)),  # Scalar -> XYZ
+        ((), (x, y, u), (0, 1, 2)),  # Scalar -> XYU
+        ((), (x, z, u), (0, 1, 2)),  # Scalar -> XZU
+        ((), (y, z, u), (0, 1, 2)),  # Scalar -> YZU
+        # R⁰ -> R⁴ expansions (scalar to 4D tensor)
+        ((), (x, y, z, u), (0, 1, 2, 3)),  # Scalar -> XYZU
         # R¹ -> R² expansions
         (x, (x, y), 1),  # X -> XY
         (x, (x, z), 1),  # X -> XZ
@@ -161,6 +184,25 @@ def test_parametrized_expansions(source, dest, expected):
 @pytest.mark.parametrize(
     "source,dest,expected",
     [
+        # R¹ -> R⁰ projections (vector to scalar)
+        ((x,), (), 0),  # X -> Scalar
+        ((y,), (), 0),  # Y -> Scalar
+        ((z,), (), 0),  # Z -> Scalar
+        ((u,), (), 0),  # U -> Scalar
+        # R² -> R⁰ projections (matrix to scalar)
+        ((x, y), (), (0, 1)),  # XY -> Scalar
+        ((x, z), (), (0, 1)),  # XZ -> Scalar
+        ((x, u), (), (0, 1)),  # XU -> Scalar
+        ((y, z), (), (0, 1)),  # YZ -> Scalar
+        ((y, u), (), (0, 1)),  # YU -> Scalar
+        ((z, u), (), (0, 1)),  # ZU -> Scalar
+        # R³ -> R⁰ projections (3D tensor to scalar)
+        ((x, y, z), (), (0, 1, 2)),  # XYZ -> Scalar
+        ((x, y, u), (), (0, 1, 2)),  # XYU -> Scalar
+        ((x, z, u), (), (0, 1, 2)),  # XZU -> Scalar
+        ((y, z, u), (), (0, 1, 2)),  # YZU -> Scalar
+        # R⁴ -> R⁰ projections (4D tensor to scalar)
+        ((x, y, z, u), (), (0, 1, 2, 3)),  # XYZU -> Scalar
         # R⁴ -> R³ projections
         ((x, y, z, u), (x, y, z), 3),  # XYZU -> XYZ
         ((x, y, z, u), (x, y, u), 2),  # XYZU -> XYU
@@ -286,3 +328,45 @@ def test_r2_to_r4_expansions():
             result.node, evaluator.StateWithoutCache({"t": fixture})
         )
         np.testing.assert_array_equal(actual, expected)
+
+
+def test_scalar_expansion():
+    # Test expansion from scalar to 1D
+    fixture = np.array(42)
+
+    space_scalar = abstract.TensorSpace(Scalar())
+    space_x = abstract.TensorSpace(X())
+
+    t = space_scalar.placeholder("t")
+    expand = morphisms.ExpandDims(space_scalar, space_x)
+    result = expand(t)
+
+    # Direct numpy expansion
+    expected = np.expand_dims(fixture, 0)
+
+    # Compare results
+    actual = evaluator.evaluate(
+        result.node, evaluator.StateWithoutCache({"t": fixture})
+    )
+    np.testing.assert_array_equal(actual, expected)
+
+
+def test_scalar_projection():
+    # Test projection from 1D to scalar
+    fixture = np.array([1, 2, 3, 4])
+
+    space_x = abstract.TensorSpace(X())
+    space_scalar = abstract.TensorSpace(Scalar())
+
+    t = space_x.placeholder("t")
+    project = morphisms.ProjectUsingSum(space_x, space_scalar)
+    result = project(t)
+
+    # Direct numpy projection
+    expected = np.sum(fixture)
+
+    # Compare results
+    actual = evaluator.evaluate(
+        result.node, evaluator.StateWithoutCache({"t": fixture})
+    )
+    np.testing.assert_array_equal(actual, expected)
