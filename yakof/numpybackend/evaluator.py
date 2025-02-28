@@ -150,7 +150,7 @@ class StateWithCache(StateWithoutCache):
         return super().get_placeholder_value(key)
 
 
-def _print_node_before_evaluation(node: graph.Node) -> None:
+def _print_node(node: graph.Node) -> None:
     """Print node information before evaluation."""
     print("=== begin tracepoint ===")
     print(f"name: {node.name}")
@@ -160,7 +160,7 @@ def _print_node_before_evaluation(node: graph.Node) -> None:
     print("=== evaluating node ===")
 
 
-def _print_result(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
+def _print_result(value: np.ndarray, cached: bool = False) -> None:
     """Print node result after evaluation."""
     print(f"shape: {value.shape}")
     print(f"cached: {cached}")
@@ -255,22 +255,29 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
 
     # Print node information before evaluation if tracing is enabled
     should_trace = node.flags & graph.NODE_FLAG_TRACE != 0
-    if should_trace:
-        _print_node_before_evaluation(node)
 
     # Check cache first
     cached_result = state.get_node_value(node)
     if cached_result is not None:
         if should_trace:
-            _print_result(node, cached_result, cached=True)
+            _print_node(node)
+            _print_result(cached_result, cached=True)
         return cached_result
 
     # Compute result
-    result = _evaluate(node, state)
+    try:
+        result = _evaluate(node, state)
+    except Exception as e:
+        if should_trace:
+            _print_node(node)
+        if node.flags & graph.NODE_FLAG_BREAK != 0:
+            input("Press any key to continue...")
+        raise
 
     # Handle debug operations
     if should_trace:
-        _print_result(node, result)
+        _print_node(node)
+        _print_result(result)
     if node.flags & graph.NODE_FLAG_BREAK != 0:
         input("Press any key to continue...")
 
