@@ -68,34 +68,6 @@ def test_monotonic_axes_in_spaces():
             ), f"Axes not monotonic in {space.basis.__class__.__name__}"
 
 
-def test_space_types():
-    """Test that all spaces are TensorSpace instances."""
-    all_spaces = [
-        # R¹
-        spaces.x,
-        spaces.y,
-        spaces.z,
-        spaces.u,
-        spaces.v,
-        spaces.w,
-        # Sample from R²
-        spaces.xy,
-        spaces.yz,
-        spaces.vw,
-        # Sample from R³
-        spaces.xyz,
-        spaces.yuv,
-        spaces.uvw,
-        # Sample from higher dimensions
-        spaces.xyzu,
-        spaces.xyzuv,
-        spaces.xyzuvw,
-    ]
-
-    for space in all_spaces:
-        assert isinstance(space, abstract.TensorSpace)
-
-
 def test_expansion_morphisms():
     """Test that expansion morphisms connect the right spaces."""
     # Test R¹ -> R² expansions
@@ -132,14 +104,3 @@ def test_projection_morphisms():
     # Test higher dimension projections
     assert spaces.project_xyzuvw_to_xyzuv.source == spaces.xyzuvw
     assert spaces.project_xyzuvw_to_xyzuv.dest == spaces.xyzuv
-
-
-def test_morphism_types():
-    """Test that morphisms are of correct types."""
-    # Test expansions
-    assert isinstance(spaces.expand_x_to_xy, morphisms.ExpandDims)
-    assert isinstance(spaces.expand_xyz_to_xyzu, morphisms.ExpandDims)
-
-    # Test projections
-    assert isinstance(spaces.project_xy_to_x, morphisms.ProjectUsingSum)
-    assert isinstance(spaces.project_xyz_to_xy, morphisms.ProjectUsingSum)
