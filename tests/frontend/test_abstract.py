@@ -375,7 +375,10 @@ def test_tensor_reverse_operations_with_tensors():
 def test_ensure_same_basis():
     """Test ensure_same_basis function."""
     # Same instance - should pass
-    basis1 = DummyBasis()
+    class DummyBasisWithoutAxesAttribute:
+        pass
+
+    basis1 = DummyBasisWithoutAxesAttribute()
     abstract.ensure_same_basis(basis1, basis1)
 
     # Different instances but same axes - should pass
@@ -397,10 +400,10 @@ def test_ensure_same_basis():
     # Non-Basis object - should fail
     not_a_basis = "not a basis"
     with pytest.raises(TypeError):
-        abstract.ensure_same_basis(basis1, not_a_basis)
+        abstract.ensure_same_basis(DummyBasis(), not_a_basis)
 
     with pytest.raises(TypeError):
-        abstract.ensure_same_basis(not_a_basis, basis1)
+        abstract.ensure_same_basis(not_a_basis, DummyBasis())
 
 
 def test_tensor_operations_with_different_bases():
