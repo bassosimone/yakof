@@ -240,9 +240,10 @@ def test_r4_to_r2_projections():
         (XYZU, ZU, fixture1, (0, 1)),  # Sum over X and Y
     ]:
         # Create tensors using frontend
-        space_xyzu = abstract.TensorSpace[source]()
-        t = space_xyzu.placeholder("t")
-        project = morphisms.ProjectUsingSum(source, dest)
+        space_source = abstract.TensorSpace(source())
+        space_dest = abstract.TensorSpace(dest())
+        t = space_source.placeholder("t")
+        project = morphisms.ProjectUsingSum(space_source, space_dest)
         result = project(t)
 
         # Direct numpy projection using explicitly specified axes
@@ -269,9 +270,10 @@ def test_r2_to_r4_expansions():
         (ZU, XYZU, fixture1, (0, 1)),  # Add X and Y dimensions
     ]:
         # Create tensors using frontend
-        space_r2 = abstract.TensorSpace[source]()
-        t = space_r2.placeholder("t")
-        expand = morphisms.ExpandDims(source, dest)
+        space_source = abstract.TensorSpace(source())
+        space_dest = abstract.TensorSpace(dest())
+        t = space_source.placeholder("t")
+        expand = morphisms.ExpandDims(space_source, space_dest)
         result = expand(t)
 
         # Direct numpy expansion using explicitly specified axes

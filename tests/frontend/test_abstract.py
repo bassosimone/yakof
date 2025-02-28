@@ -9,10 +9,12 @@ from yakof.frontend import abstract, graph
 class DummyBasis:
     """Dummy basis type for testing."""
 
+    axes = 0
+
 
 def test_tensor_creation():
     """Test basic tensor creation and properties."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
 
     # Test placeholder creation
     x = space.placeholder("x", 1.0)
@@ -29,7 +31,7 @@ def test_tensor_creation():
 
 def test_tensor_arithmetic():
     """Test arithmetic operations between tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
     c = space.constant(2.0)
@@ -63,7 +65,7 @@ def test_tensor_arithmetic():
 
 def test_tensor_comparisons():
     """Test comparison operations between tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -84,7 +86,7 @@ def test_tensor_comparisons():
 
 def test_tensor_logical():
     """Test logical operations between tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -101,7 +103,7 @@ def test_tensor_logical():
 
 def test_tensor_math():
     """Test mathematical operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -118,7 +120,7 @@ def test_tensor_math():
 
 def test_tensor_conditional():
     """Test conditional operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     cond = space.placeholder("cond")
     x = space.placeholder("x")
     y = space.placeholder("y")
@@ -141,7 +143,7 @@ def test_tensor_conditional():
 
 def test_tensor_debug():
     """Test debug operations on tensors."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
 
     # Test tracepoint
@@ -158,7 +160,7 @@ def test_tensor_debug():
 
 def test_tensor_identity():
     """Test tensor identity and hashing behavior."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("x")  # Same name, different tensor
 
@@ -175,7 +177,7 @@ def test_tensor_identity():
 
 def test_tensor_space_method_consistency():
     """Test that TensorSpace methods are consistent with Tensor operators."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -269,7 +271,7 @@ def test_tensor_space_method_consistency():
 
 def test_tensor_name_property():
     """Test tensor name getter and setter."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
 
     # Test initial name
@@ -283,7 +285,7 @@ def test_tensor_name_property():
 
 def test_tensor_reverse_operations():
     """Test reverse arithmetic and logical operations."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
 
     # Test reverse subtraction (other - x)
@@ -331,7 +333,7 @@ def test_tensor_reverse_operations():
 
 def test_tensor_reverse_operations_with_tensors():
     """Test reverse operations with tensors instead of scalars."""
-    space = abstract.TensorSpace[DummyBasis]()
+    space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
 
@@ -368,3 +370,142 @@ def test_tensor_reverse_operations_with_tensors():
     assert isinstance(rxor.node, graph.logical_xor)
     assert rxor.node.left is y.node
     assert rxor.node.right is x.node
+
+
+def test_ensure_same_basis():
+    """Test ensure_same_basis function."""
+
+    # Same instance - should pass
+    class DummyBasisWithoutAxesAttribute:
+        pass
+
+    basis1 = DummyBasisWithoutAxesAttribute()
+    abstract.ensure_same_basis(basis1, basis1)
+
+    # Different instances but same axes - should pass
+    class TestBasis:
+        axes = (1, 2, 3)
+
+    basis2 = TestBasis()
+    basis3 = TestBasis()
+    abstract.ensure_same_basis(basis2, basis3)
+
+    # Different axes - should fail
+    class AnotherBasis:
+        axes = (4, 5, 6)
+
+    basis4 = AnotherBasis()
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        abstract.ensure_same_basis(basis2, basis4)
+
+    # Non-Basis object - should fail
+    not_a_basis = "not a basis"
+    with pytest.raises(TypeError):
+        abstract.ensure_same_basis(DummyBasis(), not_a_basis)
+
+    with pytest.raises(TypeError):
+        abstract.ensure_same_basis(not_a_basis, DummyBasis())
+
+
+def test_tensor_operations_with_different_bases():
+    """Test operations between tensors with different bases."""
+
+    # Create two spaces with different bases
+    class BasisA:
+        axes = (1, 2)
+
+    class BasisB:
+        axes = (3, 4)
+
+    space_a = abstract.TensorSpace(BasisA())
+    space_b = abstract.TensorSpace(BasisB())
+
+    x = space_a.placeholder("x")
+    y = space_b.placeholder("y")
+
+    # Attempting operations between tensors with different bases should fail
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        x + y  # type: ignore
+
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        space_a.add(x, y)  # type: ignore
+
+    # Test other operations
+    with pytest.raises(ValueError):
+        x - y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x * y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x / y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x == y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x < y  # type: ignore
+
+    with pytest.raises(ValueError):
+        x & y  # type: ignore
+
+
+def test_tensor_math_with_different_bases():
+    """Test mathematical operations between tensors with different bases."""
+
+    # Create two spaces with different bases
+    class BasisA:
+        axes = (1, 2)
+
+    class BasisB:
+        axes = (3, 4)
+
+    space_a = abstract.TensorSpace(BasisA())
+    space_b = abstract.TensorSpace(BasisB())
+
+    x = space_a.placeholder("x")
+    y = space_b.placeholder("y")
+
+    # Test math operations with different bases
+    with pytest.raises(ValueError):
+        space_a.power(x, y)  # type: ignore
+
+    with pytest.raises(ValueError):
+        space_a.maximum(x, y)  # type: ignore
+
+    with pytest.raises(ValueError):
+        space_a.where(x, y, y)  # type: ignore
+
+    # This should also fail because then/otherwise have different bases
+    with pytest.raises(ValueError):
+        space_a.where(x, x, y)  # type: ignore
+
+
+def test_tensor_space_axes_method():
+    """Test that TensorSpace.axes() raises TypeError for invalid basis."""
+
+    # Valid case - basis implements Basis protocol
+    class ValidBasis:
+        axes = (1, 2, 3)
+
+    valid_space = abstract.TensorSpace(ValidBasis())
+    assert valid_space.axes() == (1, 2, 3)
+
+    # Invalid case - basis doesn't implement Basis protocol
+    class InvalidBasis:
+        # Missing axes attribute
+        pass
+
+    invalid_space = abstract.TensorSpace(InvalidBasis())
+    with pytest.raises(TypeError, match="must be an instance of Basis"):
+        invalid_space.axes()
+
+    # Another invalid case - basis is not an object
+    string_space = abstract.TensorSpace("not an object with axes")
+    with pytest.raises(TypeError, match="must be an instance of Basis"):
+        string_space.axes()
+
+    # None as basis
+    none_space = abstract.TensorSpace(None)
+    with pytest.raises(TypeError, match="must be an instance of Basis"):
+        none_space.axes()
