@@ -162,9 +162,9 @@ def _print_node_before_evaluation(node: graph.Node) -> None:
 
 def _print_result(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
     """Print node result after evaluation."""
-    cache_status = " (from cache)" if cached else ""
     print(f"shape: {value.shape}")
-    print(f"value{cache_status}:\n{value}")
+    print(f"cached: {cached}")
+    print(f"value:\n{value}")
     print("=== end tracepoint ===")
     print("")
 
