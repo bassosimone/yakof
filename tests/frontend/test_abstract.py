@@ -509,3 +509,65 @@ def test_tensor_space_axes_method():
     none_space = abstract.TensorSpace(None)
     with pytest.raises(TypeError, match="must be an instance of Basis"):
         none_space.axes()
+
+
+def test_tensor_id_property():
+    """Test that Tensor exposes its node's ID property."""
+    space = abstract.TensorSpace(DummyBasis())
+
+    # Create tensors
+    x = space.placeholder("x")
+    y = space.placeholder("y")
+
+    # Test ID access
+    assert hasattr(x, "id")
+    assert isinstance(x.id, int)
+
+    # Test uniqueness
+    assert x.id != y.id
+
+    # Test ID propagation through operations
+    z = x + y
+    assert z.id == z.node.id
+    assert z.id != x.id
+    assert z.id != y.id
+
+
+def test_tensor_id_consistency():
+    """Test that tensor ID is consistent with its node ID."""
+    space = abstract.TensorSpace(DummyBasis())
+    x = space.placeholder("x")
+
+    # Verify the tensor's ID matches its node's ID
+    assert x.id == x.node.id
+
+    # Create operation and verify ID consistency
+    y = space.exp(x)
+    assert y.id == y.node.id
+
+
+def test_id_through_tensor_operations():
+    """Test ID behavior through various tensor operations."""
+    space = abstract.TensorSpace(DummyBasis())
+    a = space.placeholder("a")
+    b = space.placeholder("b")
+
+    # Test various operations
+    operations = [
+        a + b,
+        a - b,
+        a * b,
+        a / b,
+        a < b,
+        a & b,
+        space.exp(a),
+        space.maximum(a, b),
+    ]
+
+    # Verify all operations have unique IDs
+    ids = [op.id for op in operations]
+    assert len(set(ids)) == len(ids)
+
+    # Verify underlying node IDs match
+    for op in operations:
+        assert op.id == op.node.id

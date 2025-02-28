@@ -142,6 +142,11 @@ class Tensor(Generic[B]):
         self.space = space
         self.node = node
 
+    # Allows accessing the underlying node ID transparently
+    @property
+    def id(self) -> int:
+        return self.node.id
+
     # autonaming.Namer protocol implementation
     def implements_namer(self) -> None:
         """This method is part of the autonaming.Namer protocol"""
