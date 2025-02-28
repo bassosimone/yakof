@@ -41,7 +41,9 @@ class Symbol:
             print("ELLIOT: creating a constant node with value {value}")
         else:
             self.node = graph.placeholder(name, default_value=value)
-            print(f"ELLIOT: creating a placeholder node with name {name} and value {value}")
+            print(
+                f"ELLIOT: creating a placeholder node with name {name} and value {value}"
+            )
 
     def __hash__(self) -> int:
         return hash(self.node)

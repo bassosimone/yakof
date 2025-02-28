@@ -27,7 +27,10 @@ U_food_customers = Index("food service usage factor", value=1)
 
 # Constraints
 C_drink_customers = Constraint(
-    usage=Index(value=drink_customers.t * U_drink_customers.t + food_customers.t * U_food_customers.t),
+    usage=Index(
+        value=drink_customers.t * U_drink_customers.t
+        + food_customers.t * U_food_customers.t
+    ),
     capacity=capacity,
 )
 

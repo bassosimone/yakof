@@ -17,9 +17,11 @@ class Index:
     # Implementation of autonaming.Namer protocol
     def implements_namer(self) -> None:
         pass
+
     @property
     def name(self) -> str:
         return self.node.name
+
     @name.setter
     def name(self, value: str) -> None:
         self.node.name = value

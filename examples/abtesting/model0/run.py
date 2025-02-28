@@ -28,5 +28,5 @@ def run_with_yakof():
 
 
 if __name__ == "__main__":
-    run_with_dtmodel()
+    # run_with_dtmodel()
     run_with_yakof()

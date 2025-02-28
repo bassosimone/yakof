@@ -11,7 +11,7 @@ import numbers
 import numpy as np
 import pandas as pd
 
-from ..frontend import abstract, bases, graph, spaces
+from ..frontend import abstract, graph, spaces
 from ..numpybackend import evaluator
 
 
@@ -29,7 +29,7 @@ class ContextVariable:
         self.__t = spaces.xyz.placeholder(name)
 
     @property
-    def t(self) -> abstract.Tensor[bases.XYZ]:
+    def t(self) -> abstract.Tensor[spaces.XYZ]:
         return self.__t
 
     @property
@@ -47,7 +47,7 @@ class PresenceVariable:
         return iter(self.__cvs)
 
     @property
-    def t(self) -> abstract.Tensor[bases.XYZ]:
+    def t(self) -> abstract.Tensor[spaces.XYZ]:
         return self.__t
 
     @property
@@ -60,10 +60,10 @@ class Index:
         self,
         name: str = "",
         distribution: Distribution | None = None,
-        value: graph.Scalar | abstract.Tensor[bases.XYZ] | None = None,
+        value: graph.Scalar | abstract.Tensor[spaces.XYZ] | None = None,
     ):
         self.__d: Distribution | None
-        self.__t: abstract.Tensor[bases.XYZ]
+        self.__t: abstract.Tensor[spaces.XYZ]
 
         if value is None and distribution is None:
             raise ValueError("Either value or distribution must be provided")
@@ -85,7 +85,7 @@ class Index:
         return self.__d
 
     @property
-    def t(self) -> abstract.Tensor[bases.XYZ]:
+    def t(self) -> abstract.Tensor[spaces.XYZ]:
         return self.__t
 
     @property
