@@ -28,6 +28,10 @@ Design Decisions
    - Integrated tracepoints and breakpoints
    - Rich debug output including shape information
    - Non-intrusive to normal evaluation path
+   - Bug: due to recursive evaluation, trace output is post-order (after children
+     evaluation) which does not help when there is an exception when evaluating
+     a specific node. We will introduce topological evaluation to get rid of this
+     problem and allow for a better debugging experience.
 
 4. Error Handling:
     - Validation of placeholder bindings
@@ -151,17 +155,17 @@ class StateWithCache(StateWithoutCache):
         return super().get_placeholder_value(key)
 
 
-def _print_node_before_evaluation(node: graph.Node) -> None:
-    """Print node information before evaluation."""
+def _print_node_evaluation(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
+    """Print node information and result after evaluation.
+
+    This function prints comprehensive information about a node after it
+    has been evaluated, including its metadata, formula, and computed result.
+    """
     print("=== begin tracepoint ===")
     print(f"name: {node.name}")
+    print(f"id: {node.id}")
     print(f"type: {node.__class__}")
     print(f"formula: {pretty.format(node)}")
-    print("=== evaluating node ===")
-
-
-def _print_result(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
-    """Print node result after evaluation."""
     print(f"shape: {value.shape}")
     print(f"cached: {cached}")
     print(f"value:\n{value}")
@@ -199,25 +203,19 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         TypeError: if we don't handle a specific node type
         ValueError: when there's no placeholder value
     """
-
-    # Print node information before evaluation if tracing is enabled
-    should_trace = node.flags & graph.NODE_FLAG_TRACE != 0
-    if should_trace:
-        _print_node_before_evaluation(node)
-
     # Check cache first
     cached_result = state.get_node_value(node)
     if cached_result is not None:
-        if should_trace:
-            _print_result(node, cached_result, cached=True)
+        if node.flags & graph.NODE_FLAG_TRACE != 0:
+            _print_node_evaluation(node, cached_result, cached=True)
         return cached_result
 
     # Compute result
     result = _evaluate(node, state)
 
     # Handle debug operations
-    if should_trace:
-        _print_result(node, result)
+    if node.flags & graph.NODE_FLAG_TRACE != 0:
+        _print_node_evaluation(node, result, cached=False)
     if node.flags & graph.NODE_FLAG_BREAK != 0:
         input("Press any key to continue...")
 
