@@ -65,6 +65,7 @@ visitor pattern, which keeps the code simple and maintains extensibility.
 # SPDX-License-Identifier: Apache-2.0
 
 from . import graph
+from typing import Sequence
 
 
 def format(node: graph.Node) -> str:
@@ -158,6 +159,8 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return wrap(f"{left} / {right}")
         if isinstance(node, graph.power):
             return wrap(f"{left} ** {right}")
+        if isinstance(node, graph.maximum):
+            return f"maximum({left}, {right})"
         if isinstance(node, graph.logical_and):
             return wrap(f"{left} & {right}")
         if isinstance(node, graph.logical_or):
@@ -190,5 +193,35 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return f"exp({inner})"
         if isinstance(node, graph.log):
             return f"log({inner})"
+
+    # Conditional operations
+    if isinstance(node, graph.where):
+        condition = _format(node.condition, 0)
+        then_expr = _format(node.then, 0)
+        else_expr = _format(node.otherwise, 0)
+        return f"where({condition}, {then_expr}, {else_expr})"
+
+    if isinstance(node, graph.multi_clause_where):
+        clauses_str = ", ".join(
+            f"({_format(cond, 0)}, {_format(val, 0)})" for cond, val in node.clauses
+        )
+        default_str = _format(node.default_value, 0)
+        return f"multi_clause_where([{clauses_str}], {default_str})"
+
+    # Shape operations
+    if isinstance(node, graph.AxisOp):
+        inner = _format(node.node, 0)
+        axis_str = (
+            str(node.axis) if isinstance(node.axis, int) else str(tuple(node.axis))
+        )
+
+        if isinstance(node, graph.expand_dims):
+            return f"expand_dims({inner}, {axis_str})"
+        if isinstance(node, graph.squeeze):
+            return f"squeeze({inner}, {axis_str})"
+        if isinstance(node, graph.reduce_sum):
+            return f"reduce_sum({inner}, {axis_str})"
+        if isinstance(node, graph.reduce_mean):
+            return f"reduce_mean({inner}, {axis_str})"
 
     return f"<unknown:{type(node).__name__}>"

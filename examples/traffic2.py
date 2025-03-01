@@ -17,7 +17,7 @@ state = executor.State(
         inputs.hours.node: np.array([6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0]),
         inputs.price_sensitivity.node: np.array([0.05, 0.1, 0.15]),
     },
-    flags=graph.NODE_FLAG_TRACE,
+    flags=executor.FLAG_BREAK_ON_NAMED_NODE | executor.FLAG_TRACE,
 )
 
 # Evaluate the model
