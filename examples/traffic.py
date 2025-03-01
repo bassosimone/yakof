@@ -175,7 +175,7 @@ def saveviz(
     plt.tight_layout()
 
     fig.savefig(output_file, dpi=300, bbox_inches='tight')
-    plt.close(fig)  # Close the figure to free memory
+    plt.close(fig)
     print(f"Visualization saved to {output_file}")
 
 #
