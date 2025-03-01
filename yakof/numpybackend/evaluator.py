@@ -55,6 +55,7 @@ from typing import Protocol, runtime_checkable
 import numpy as np
 
 from ..frontend import graph, pretty
+from . import dispatch
 
 
 @runtime_checkable
@@ -169,59 +170,6 @@ def _print_result(value: np.ndarray, cached: bool = False) -> None:
     print("")
 
 
-# This dispatch table maps a binary op in the graph domain
-# to the corresponding numpy operation. Add to this table to
-# add support for more binary operations.
-binary_ops_dispatch_table = {
-    graph.add: np.add,
-    graph.subtract: np.subtract,
-    graph.multiply: np.multiply,
-    graph.divide: np.divide,
-    graph.equal: np.equal,
-    graph.not_equal: np.not_equal,
-    graph.less: np.less,
-    graph.less_equal: np.less_equal,
-    graph.greater: np.greater,
-    graph.greater_equal: np.greater_equal,
-    graph.logical_and: np.logical_and,
-    graph.logical_or: np.logical_or,
-    graph.logical_xor: np.logical_xor,
-    graph.power: np.power,
-    graph.maximum: np.maximum,
-}
-
-
-# Like binary_ops_dispatch_table but for unary operations
-unary_ops_dispatch_table = {
-    graph.logical_not: np.logical_not,
-    graph.exp: np.exp,
-    graph.log: np.log,
-}
-
-
-def __expand_dims(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
-    """Internal expand_dims implementation used by axis_ops_dispatch_table"""
-    return np.expand_dims(x, axis)
-
-
-def __reduce_sum(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
-    """Internal reduce_sum implementation used by axis_ops_dispatch_table"""
-    return np.sum(x, axis=axis)
-
-
-def __reduce_mean(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
-    """Internal reduce_mean implementation used by axis_ops_dispatch_table"""
-    return np.mean(x, axis=axis)
-
-
-# Like binary_ops_dispatch_table but for axis operations
-axis_ops_dispatch_table = {
-    graph.expand_dims: __expand_dims,
-    graph.reduce_sum: __reduce_sum,
-    graph.reduce_mean: __reduce_mean,
-}
-
-
 def evaluate(node: graph.Node, state: State) -> np.ndarray:
     """Evaluates a computation graph node to a NumPy array.
 
@@ -310,7 +258,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
         left = evaluate(node.left, state)
         right = evaluate(node.right, state)
         try:
-            return binary_ops_dispatch_table[type(node)](left, right)
+            return dispatch.binary_operations[type(node)](left, right)
         except KeyError:
             raise TypeError(f"evaluator: unknown binary operation: {type(node)}")
 
@@ -318,7 +266,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
     if isinstance(node, graph.UnaryOp):
         operand = evaluate(node.node, state)
         try:
-            return unary_ops_dispatch_table[type(node)](operand)
+            return dispatch.unary_operations[type(node)](operand)
         except KeyError:
             raise TypeError(f"evaluator: unknown unary operation: {type(node)}")
 
@@ -343,7 +291,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
     if isinstance(node, graph.AxisOp):
         operand = evaluate(node.node, state)
         try:
-            return axis_ops_dispatch_table[type(node)](operand, node.axis)
+            return dispatch.axes_operations[type(node)](operand, node.axis)
         except KeyError:
             raise TypeError(f"evaluator: unknown axis operation: {type(node)}")
 
