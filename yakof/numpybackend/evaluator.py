@@ -213,14 +213,7 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         return cached_result
 
     # Compute result
-    try:
-        result = _evaluate(node, state)
-    except Exception as e:
-        if should_trace:
-            _print_node(node)
-        if node.flags & graph.NODE_FLAG_BREAK != 0:
-            input("Press any key to continue...")
-        raise
+    result = _evaluate(node, state)
 
     # Handle debug operations
     if node.flags & graph.NODE_FLAG_TRACE != 0:
