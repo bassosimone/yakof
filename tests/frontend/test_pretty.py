@@ -259,3 +259,36 @@ def test_unhandled_node_type():
     x = UnhandledNode()
     result = pretty.format(x)
     assert result == "<unknown:UnhandledNode>"
+
+
+def test_named_subexpressions_not_expanded():
+    """Test that named subexpressions aren't expanded in pretty printing."""
+    # Create a named subexpression
+    x = graph.placeholder("x")
+    y = graph.add(x, graph.constant(1.0))
+    y.name = "y"  # Give the subexpression a name
+
+    # Use the named subexpression in a larger expression
+    z = graph.multiply(y, graph.constant(2.0))
+
+    # The pretty-printed result should use the name rather than expanding
+    result = pretty.format(z)
+    assert (
+        result == "y * 2.0"
+    )  # Should use y's name, not expand it to "(x + 1.0) * 2.0"
+
+    # Verify with more complex nested expressions
+    a = graph.exp(y)
+    a.name = "a"
+    b = graph.where(graph.placeholder("cond"), a, graph.constant(3.0))
+
+    result = pretty.format(b)
+    assert result == "where(cond, a, 3.0)"  # Should use a's name, not expand it
+
+    # Test with multiple levels of named expressions
+    c = graph.add(b, graph.constant(4.0))
+    c.name = "c"
+    d = graph.subtract(c, graph.constant(5.0))
+
+    result = pretty.format(d)
+    assert result == "c - 5.0"  # Should use c's name, not expand further
