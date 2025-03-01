@@ -155,7 +155,9 @@ class StateWithCache(StateWithoutCache):
         return super().get_placeholder_value(key)
 
 
-def _print_node_evaluation(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
+def _print_node_evaluation(
+    node: graph.Node, value: np.ndarray, cached: bool = False
+) -> None:
     """Print node information and result after evaluation.
 
     This function prints comprehensive information about a node after it
