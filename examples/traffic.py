@@ -263,13 +263,6 @@ def main() -> None:
     print(f"Mean price-affected demand: {price_affected_demand.mean(axis=1).sum():.1f}")
     print(f"Mean final demand: {actual_demand.mean(axis=1).sum():.1f}")
 
-    # Note: We would need to calculate these values as they're not directly accessible
-    early_shifted: float = actual_demand.sum() - demand_after_removal.sum()
-    late_shifted: float = actual_demand.sum() - demand_after_removal.sum() - early_shifted
-
-    print(f"Mean early shift: {early_shifted/price_sensitivity.size:.1f}")
-    print(f"Mean late shift: {late_shifted/price_sensitivity.size:.1f}")
-
     print("\nPrice Sensitivity Statistics:")
     print(f"Mean: {price_sensitivity.mean():.3f}")
     print(f"Std Dev: {price_sensitivity.std():.3f}")
