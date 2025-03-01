@@ -83,13 +83,13 @@ def format(node: graph.Node) -> str:
         >>> print(pretty.format(y))
         x * 2 + 1
     """
-    expr = _format(node, 0)  # Start with lowest precedence
+    expr = _format(node, True, 0)  # Start with lowest precedence
     if node.name:
         expr = f"{node.name} = {expr}"
     return expr
 
 
-def _format(node: graph.Node, parent_precedence: int) -> str:
+def _format(node: graph.Node, toplevel: bool, parent_precedence: int) -> str:
     """Internal recursive formatter.
 
     Args:
@@ -100,6 +100,18 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
         Formatted string with appropriate parentheses based on
         operator precedence.
     """
+
+    # If we're not at top-level and we have a named node,
+    # stop formatting and return the node name, which means
+    # we're printing formulae aligned with what the user
+    # has written inside the input program/model
+    if not toplevel and node.name:
+        return node.name
+
+    # Immediately flip toplevel to False after the first
+    # iteration to avoid printing the whole graph
+    toplevel = False
+
     # Precedence rules (higher binds tighter)
     PRECEDENCE = {
         # Unary operations
@@ -135,8 +147,6 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
 
     # Base cases
     if isinstance(node, graph.constant):
-        if node.name:
-            return node.name
         return str(node.value)
     if isinstance(node, graph.placeholder):
         return node.name
@@ -144,8 +154,8 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
     # Binary operations
     if isinstance(node, graph.BinaryOp):
         op_precedence = PRECEDENCE.get(type(node), 0)
-        left = _format(node.left, op_precedence)
-        right = _format(node.right, op_precedence)
+        left = _format(node.left, toplevel, op_precedence)
+        right = _format(node.right, toplevel, op_precedence)
 
         # Arithmetic operators
         if isinstance(node, graph.add):
@@ -158,6 +168,8 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return wrap(f"{left} / {right}")
         if isinstance(node, graph.power):
             return wrap(f"{left} ** {right}")
+        if isinstance(node, graph.maximum):
+            return f"maximum({left}, {right})"
         if isinstance(node, graph.logical_and):
             return wrap(f"{left} & {right}")
         if isinstance(node, graph.logical_or):
@@ -182,7 +194,7 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
     # Unary operations
     if isinstance(node, graph.UnaryOp):
         op_precedence = PRECEDENCE.get(type(node), 0)
-        inner = _format(node.node, op_precedence)
+        inner = _format(node.node, toplevel, op_precedence)
 
         if isinstance(node, graph.logical_not):
             return wrap(f"~{inner}")
@@ -190,5 +202,36 @@ def _format(node: graph.Node, parent_precedence: int) -> str:
             return f"exp({inner})"
         if isinstance(node, graph.log):
             return f"log({inner})"
+
+    # Conditional operations
+    if isinstance(node, graph.where):
+        condition = _format(node.condition, toplevel, 0)
+        then_expr = _format(node.then, toplevel, 0)
+        else_expr = _format(node.otherwise, toplevel, 0)
+        return f"where({condition}, {then_expr}, {else_expr})"
+
+    if isinstance(node, graph.multi_clause_where):
+        clauses_str = ", ".join(
+            f"({_format(cond, toplevel, 0)}, {_format(val, toplevel, 0)})"
+            for cond, val in node.clauses
+        )
+        default_str = _format(node.default_value, toplevel, 0)
+        return f"multi_clause_where([{clauses_str}], {default_str})"
+
+    # Shape operations
+    if isinstance(node, graph.AxisOp):
+        inner = _format(node.node, toplevel, 0)
+        axis_str = (
+            str(node.axis) if isinstance(node.axis, int) else str(tuple(node.axis))
+        )
+
+        if isinstance(node, graph.expand_dims):
+            return f"expand_dims({inner}, {axis_str})"
+        if isinstance(node, graph.squeeze):
+            return f"squeeze({inner}, {axis_str})"
+        if isinstance(node, graph.reduce_sum):
+            return f"reduce_sum({inner}, {axis_str})"
+        if isinstance(node, graph.reduce_mean):
+            return f"reduce_mean({inner}, {axis_str})"
 
     return f"<unknown:{type(node).__name__}>"
