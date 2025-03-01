@@ -59,7 +59,7 @@ from typing import Protocol, runtime_checkable
 import numpy as np
 
 from ..frontend import graph, pretty
-from . import dispatch
+from . import debug, dispatch
 
 
 @runtime_checkable
@@ -163,16 +163,8 @@ def _print_node_evaluation(
     This function prints comprehensive information about a node after it
     has been evaluated, including its metadata, formula, and computed result.
     """
-    print("=== begin tracepoint ===")
-    print(f"name: {node.name}")
-    print(f"id: {node.id}")
-    print(f"type: {node.__class__}")
-    print(f"formula: {pretty.format(node)}")
-    print(f"shape: {value.shape}")
-    print(f"cached: {cached}")
-    print(f"value:\n{value}")
-    print("=== end tracepoint ===")
-    print("")
+    debug.print_graph_node(node)
+    debug.print_evaluated_node(value, cached)
 
 
 def evaluate(node: graph.Node, state: State) -> np.ndarray:
