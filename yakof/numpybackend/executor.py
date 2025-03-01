@@ -207,7 +207,9 @@ def __eval_axis_op(state: State, node: graph.Node) -> np.ndarray:
         )
 
 
-_evaluators: tuple[tuple[type, Callable[[State, graph.Node], np.ndarray]], ...] = (
+_EvaluatorFunc = Callable[[State, graph.Node], np.ndarray]
+
+_evaluators: tuple[tuple[type[graph.Node], _EvaluatorFunc], ...] = (
     (graph.constant, __eval_constant_op),
     (graph.placeholder, __eval_placeholder_default),
     (graph.BinaryOp, __eval_binary_op),
