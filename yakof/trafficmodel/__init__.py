@@ -12,8 +12,8 @@ The model operates in multiple dimensions:
 - Field: Combined time and ensemble dimensions for full modeling
 
 The traffic model captures how demand is influenced by:
-1. Price effects: Higher prices reduce demand based on price sensitivity
-2. Time-shifting: Peak-period demand partially shifts to shoulder periods
+1. Price effects: Higher prices reduce demand based on price sensitivity (via formula: 1.0 - sensitivity * log(price/base_price))
+2. Time-shifting: Peak-period demand partially shifts to shoulder periods while preserving total demand
 """
 
 from dataclasses import dataclass
@@ -28,19 +28,31 @@ ScalarBasis = bases.Scalar
 
 
 class TimeBasis:
-    """Represents the time dimension in the traffic model."""
+    """Represents the time dimension in the traffic model.
+
+    Attributes:
+        axes: Tuple containing the time axis identifier
+    """
 
     axes = (time_axis_id,)
 
 
 class EnsembleBasis:
-    """Represents different scenarios or population segments with varying sensitivities."""
+    """Represents different scenarios or population segments with varying sensitivities.
+
+    Attributes:
+        axes: Tuple containing the ensemble axis identifier
+    """
 
     axes = (ensemble_axis_id,)
 
 
 class FieldBasis:
-    """Combined time and ensemble dimensions for the complete modeling space."""
+    """Combined time and ensemble dimensions for the complete modeling space.
+
+    Attributes:
+        axes: Tuple containing both time and ensemble axis identifiers
+    """
 
     axes = (time_axis_id, ensemble_axis_id)
 
@@ -80,15 +92,15 @@ class Inputs:
     """Input parameters for the traffic model.
 
     Attributes:
-        morning_peak_start: Start time of the morning peak period (hour of day)
-        morning_peak_end: End time of the morning peak period (hour of day)
-        base_price: Reference price level used for price sensitivity calculations
-        early_shift_rate: Fraction of peak demand that shifts to earlier periods
-        late_shift_rate: Fraction of peak demand that shifts to later periods
-        base_demand: Baseline demand over time before any modifications
-        price: Time-varying price level
-        hours: Time points for the model (hours of day)
-        price_sensitivity: Sensitivity of different population segments to price changes
+        morning_peak_start (float): Start time of the morning peak period (hour of day)
+        morning_peak_end (float): End time of the morning peak period (hour of day)
+        base_price (float): Reference price level used for price sensitivity calculations
+        early_shift_rate (float): Fraction of peak demand that shifts to earlier periods
+        late_shift_rate (float): Fraction of peak demand that shifts to later periods
+        base_demand (abstract.Tensor[TimeBasis]): Baseline demand over time before any modifications
+        price (abstract.Tensor[TimeBasis]): Time-varying price level
+        hours (abstract.Tensor[TimeBasis]): Time points for the model (hours of day)
+        price_sensitivity (abstract.Tensor[EnsembleBasis]): Sensitivity of different population segments to price changes
     """
 
     morning_peak_start = 7.0
@@ -108,11 +120,11 @@ class Outputs:
     """Output values from the traffic model.
 
     Attributes:
-        base_demand: Original demand pattern over time
-        price_affected_demand: Demand after applying price sensitivity effects
-        demand_after_removal: Demand after removing the shifted portion from peak periods
-        actual_demand: Final demand after all effects (price and time-shifting)
-        price: The price level used for calculations
+        price_affected_demand (abstract.Tensor[FieldBasis]): Demand after applying price sensitivity effects
+                                                             following the formula: base_demand * (1 - sensitivity * log(price/base_price))
+        demand_after_removal (abstract.Tensor[FieldBasis]): Demand after removing the shifted portion from peak periods
+        actual_demand (abstract.Tensor[FieldBasis]): Final demand after all effects (price and time-shifting)
+        nodes (list[graph.Node]): Ordered execution plan for evaluating the model graph
     """
 
     # Output tensors
@@ -130,11 +142,17 @@ def build(inputs: Inputs) -> Outputs:
     This function constructs the full traffic model, applying both price sensitivity
     effects and time-shifting of peak demand to shoulder periods.
 
+    Mathematical model:
+    1. Price effect: price_effect = 1.0 - price_sensitivity * log(price/base_price)
+    2. Price-affected demand: base_demand * price_effect
+    3. Time-shifting: Remove (early_shift_rate + late_shift_rate) fraction of peak demand
+       and redistribute to shoulder periods proportionally
+
     Args:
         inputs: Model input parameters and placeholders
 
     Returns:
-        Model outputs including the final demand pattern
+        Outputs: Model outputs including the final demand pattern with all effects applied
     """
     # Auto-assign names to tensors to make debugging much easier
     with autonaming.context():
