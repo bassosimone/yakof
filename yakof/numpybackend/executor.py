@@ -105,7 +105,8 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
             and no default value.
     """
 
-    # 1. check whether node has been already evaluated
+    # 1. check whether node has been already evaluated (note that this
+    # covers the case of placeholders provided via the state)
     if node in state.values:
         return state.values[node]
 
