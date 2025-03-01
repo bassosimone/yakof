@@ -128,7 +128,10 @@ def saveviz(
 
     # Price Affected Demand
     ax2.plot(
-        timestamps[plot_mask], price_affected_demand.mean(axis=1)[plot_mask], "b-", alpha=0.7
+        timestamps[plot_mask],
+        price_affected_demand.mean(axis=1)[plot_mask],
+        "b-",
+        alpha=0.7,
     )
     ax2.set_title("Price-Affected Demand")
     ax2.set_ylabel("Number of Customers")
@@ -174,9 +177,10 @@ def saveviz(
 
     plt.tight_layout()
 
-    fig.savefig(output_file, dpi=300, bbox_inches='tight')
+    fig.savefig(output_file, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"Visualization saved to {output_file}")
+
 
 #
 # Main Execution
@@ -191,7 +195,9 @@ def main() -> None:
     n_intervals: int = hours_to_model * intervals_per_hour
 
     # Time points for x-axis
-    timestamps: pd.DatetimeIndex = pd.date_range(start="06:00:00", periods=n_intervals, freq="15min")
+    timestamps: pd.DatetimeIndex = pd.date_range(
+        start="06:00:00", periods=n_intervals, freq="15min"
+    )
     hours: np.ndarray = CAFE_OPEN_HOUR + np.arange(n_intervals) / intervals_per_hour
 
     # Calculate plot limits
