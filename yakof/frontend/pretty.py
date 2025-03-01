@@ -65,7 +65,6 @@ visitor pattern, which keeps the code simple and maintains extensibility.
 # SPDX-License-Identifier: Apache-2.0
 
 from . import graph
-from typing import Sequence
 
 
 def format(node: graph.Node) -> str:
