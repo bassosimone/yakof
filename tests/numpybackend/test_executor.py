@@ -514,10 +514,12 @@ def test_placeholder_with_state_value():
     plan = linearize.forest(x_no_default, squared, y_with_default)
 
     # Test case 1: Both placeholders provided in state
-    state1 = executor.State({
-        x_no_default: np.array([1.0, 2.0, 3.0]),
-        y_with_default: np.array([4.0, 5.0, 6.0])  # Overrides default value
-    })
+    state1 = executor.State(
+        {
+            x_no_default: np.array([1.0, 2.0, 3.0]),
+            y_with_default: np.array([4.0, 5.0, 6.0]),  # Overrides default value
+        }
+    )
 
     for node in plan:
         executor.evaluate(state1, node)
@@ -527,10 +529,12 @@ def test_placeholder_with_state_value():
 
     # Test case 2: Only placeholder without default provided in state
     # (the other one should use default value)
-    state2 = executor.State({
-        x_no_default: np.array([7.0, 8.0, 9.0]),
-        # y_with_default not provided, should use default
-    })
+    state2 = executor.State(
+        {
+            x_no_default: np.array([7.0, 8.0, 9.0]),
+            # y_with_default not provided, should use default
+        }
+    )
 
     for node in plan:
         executor.evaluate(state2, node)
@@ -540,10 +544,12 @@ def test_placeholder_with_state_value():
 
     # Test case 3: Only placeholder with default provided in state
     # (the other one should fail)
-    state3 = executor.State({
-        # x_no_default not provided, should fail
-        y_with_default: np.array([10.0, 11.0, 12.0])
-    })
+    state3 = executor.State(
+        {
+            # x_no_default not provided, should fail
+            y_with_default: np.array([10.0, 11.0, 12.0])
+        }
+    )
 
     # This should raise an error when x_no_default is evaluated
     with pytest.raises(executor.PlaceholderValueNotProvided):
@@ -660,7 +666,9 @@ def test_axis_operations():
     # Test invalid axis value
     with pytest.raises(ValueError):  # NumPy raises ValueError for invalid axes
         # Create a valid node type but with invalid axis
-        invalid_axis_node = graph.reduce_sum(x, axis=5)  # x is only 2D, so axis=5 is invalid
+        invalid_axis_node = graph.reduce_sum(
+            x, axis=5
+        )  # x is only 2D, so axis=5 is invalid
         invalid_plan = linearize.forest(invalid_axis_node)
         invalid_state = executor.State({x: x_val})
 
