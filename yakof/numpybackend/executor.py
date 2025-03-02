@@ -49,6 +49,9 @@ class State:
     Make sure to provide values for placeholder nodes ahead of the evaluation
     by initializing the `values` dictionary accordingly.
 
+    Note that, if graph.NODE_FLAG_TRACE is set, the executor will print the
+    nodes provided to the constructor in its __post_init__ method.
+
     Attributes:
         values: A dictionary caching the result of the computation.
         flags: Bitmask containing debug flags (e.g., graph.NODE_FLAG_BREAK).
