@@ -49,7 +49,7 @@ class State:
     Make sure to provide values for placeholder nodes ahead of the evaluation
     by initializing the `values` dictionary accordingly.
 
-    Note that, if graph.NODE_FLAG_TRACE is set, the executor will print the
+    Note that, if graph.NODE_FLAG_TRACE is set, the State will print the
     nodes provided to the constructor in its __post_init__ method.
 
     Attributes:
