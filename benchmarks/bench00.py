@@ -12,11 +12,14 @@ achieves reasonably similar performance compared to SymPy-generated NumPy code.
 
 from typing import Callable
 
+import getopt
 import numpy as np
 import sympy
+import sys
 
-from yakof.backend import graph, numpy_engine
 from yakof.benchmark import NumericFunc, NumericFuncFactory, Results, run
+from yakof.frontend import abstract, bases
+from yakof.numpybackend import evaluator
 
 
 def build_yakof_model() -> NumericFuncFactory:
@@ -29,23 +32,25 @@ def build_yakof_model() -> NumericFuncFactory:
     """
 
     def factory() -> NumericFunc:
+        # Create tensor space using a single bases since data is already
+        # arranged in a 2D grid and we don't need transformations.
+        space = abstract.TensorSpace(bases.XY())
+
         # Build the graph
-        x = graph.placeholder("x0")
-        y = graph.placeholder("x1")
+        x = space.placeholder("x0")
+        y = space.placeholder("x1")
         t1 = x * x + y * y
         t2 = x * y
-        t3 = graph.exp(-0.1 * (t1 - t2))
-        t4 = graph.log(1.0 + t1 + t2)
-        t5 = graph.maximum(t3, t4)
+        t3 = space.exp(-0.1 * (t1 - t2))
+        t4 = space.log(1.0 + t1 + t2)
+        t5 = space.maximum(t3, t4)
         result = t1 / (1.0 + t2 * t2) + t5 * 0.1
 
         # Create the evaluation function
         def evaluate(xx: np.ndarray, yy: np.ndarray) -> np.ndarray:
-            # Note: explicitly using a NullCache to avoid caching results
-            ctx = numpy_engine.PartialEvaluationContext(
-                bindings={"x0": xx, "x1": yy}, cache=numpy_engine.NullCache()
-            )
-            return ctx.evaluate(result)
+            # Note: explicitly using a StateWithoutCache to avoid caching results
+            state = evaluator.StateWithoutCache({"x0": xx, "x1": yy})
+            return evaluator.evaluate(result.node, state)
 
         return evaluate
 
@@ -117,6 +122,23 @@ def main() -> None:
     """Run benchmarks comparing Yakof and SymPy implementations."""
     grid_sizes: list[int] = [100, 500, 1000, 2000]
     n_runs: int = 100
+
+    # Parse command line arguments
+    usage_string = "usage: bench00.py [--help] [--short]"
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "", ["help", "short"])
+    except getopt.GetoptError as err:
+        sys.stderr.write(f"{usage_string}\n")
+        sys.exit(2)
+
+    # Process options
+    for opt, arg in opts:
+        if opt in ("--help",):
+            sys.stdout.write(f"{usage_string}\n")
+            sys.exit(0)
+        elif opt in ("--short",):
+            grid_sizes = [100]
+            n_runs = 1
 
     for size in grid_sizes:
         print(f"\nGrid size: {size}x{size}")

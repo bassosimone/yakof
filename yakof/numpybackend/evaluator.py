@@ -28,6 +28,10 @@ Design Decisions
    - Integrated tracepoints and breakpoints
    - Rich debug output including shape information
    - Non-intrusive to normal evaluation path
+   - Bug: due to recursive evaluation, trace output is post-order (after children
+     evaluation) which does not help when there is an exception when evaluating
+     a specific node. We will introduce topological evaluation to get rid of this
+     problem and allow for a better debugging experience.
 
 4. Error Handling:
     - Validation of placeholder bindings
@@ -55,6 +59,7 @@ from typing import Protocol, runtime_checkable
 import numpy as np
 
 from ..frontend import graph, pretty
+from . import debug, dispatch
 
 
 @runtime_checkable
@@ -150,75 +155,16 @@ class StateWithCache(StateWithoutCache):
         return super().get_placeholder_value(key)
 
 
-def _print_node_before_evaluation(node: graph.Node) -> None:
-    """Print node information before evaluation."""
-    print("=== begin tracepoint ===")
-    print(f"name: {node.name}")
-    print(f"type: {node.__class__}")
-    print(f"formula: {pretty.format(node)}")
-    print("=== evaluating node ===")
+def _print_node_evaluation(
+    node: graph.Node, value: np.ndarray, cached: bool = False
+) -> None:
+    """Print node information and result after evaluation.
 
-
-def _print_result(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
-    """Print node result after evaluation."""
-    print(f"shape: {value.shape}")
-    print(f"cached: {cached}")
-    print(f"value:\n{value}")
-    print("=== end tracepoint ===")
-    print("")
-
-
-# This dispatch table maps a binary op in the graph domain
-# to the corresponding numpy operation. Add to this table to
-# add support for more binary operations.
-binary_ops_dispatch_table = {
-    graph.add: np.add,
-    graph.subtract: np.subtract,
-    graph.multiply: np.multiply,
-    graph.divide: np.divide,
-    graph.equal: np.equal,
-    graph.not_equal: np.not_equal,
-    graph.less: np.less,
-    graph.less_equal: np.less_equal,
-    graph.greater: np.greater,
-    graph.greater_equal: np.greater_equal,
-    graph.logical_and: np.logical_and,
-    graph.logical_or: np.logical_or,
-    graph.logical_xor: np.logical_xor,
-    graph.power: np.power,
-    graph.maximum: np.maximum,
-}
-
-
-# Like binary_ops_dispatch_table but for unary operations
-unary_ops_dispatch_table = {
-    graph.logical_not: np.logical_not,
-    graph.exp: np.exp,
-    graph.log: np.log,
-}
-
-
-def __expand_dims(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
-    """Internal expand_dims implementation used by axis_ops_dispatch_table"""
-    return np.expand_dims(x, axis)
-
-
-def __reduce_sum(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
-    """Internal reduce_sum implementation used by axis_ops_dispatch_table"""
-    return np.sum(x, axis=axis)
-
-
-def __reduce_mean(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
-    """Internal reduce_mean implementation used by axis_ops_dispatch_table"""
-    return np.mean(x, axis=axis)
-
-
-# Like binary_ops_dispatch_table but for axis operations
-axis_ops_dispatch_table = {
-    graph.expand_dims: __expand_dims,
-    graph.reduce_sum: __reduce_sum,
-    graph.reduce_mean: __reduce_mean,
-}
+    This function prints comprehensive information about a node after it
+    has been evaluated, including its metadata, formula, and computed result.
+    """
+    debug.print_graph_node(node)
+    debug.print_evaluated_node(value, cached)
 
 
 def evaluate(node: graph.Node, state: State) -> np.ndarray:
@@ -251,25 +197,19 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         TypeError: if we don't handle a specific node type
         ValueError: when there's no placeholder value
     """
-
-    # Print node information before evaluation if tracing is enabled
-    should_trace = node.flags & graph.NODE_FLAG_TRACE != 0
-    if should_trace:
-        _print_node_before_evaluation(node)
-
     # Check cache first
     cached_result = state.get_node_value(node)
     if cached_result is not None:
-        if should_trace:
-            _print_result(node, cached_result, cached=True)
+        if node.flags & graph.NODE_FLAG_TRACE != 0:
+            _print_node_evaluation(node, cached_result, cached=True)
         return cached_result
 
     # Compute result
     result = _evaluate(node, state)
 
     # Handle debug operations
-    if should_trace:
-        _print_result(node, result)
+    if node.flags & graph.NODE_FLAG_TRACE != 0:
+        _print_node_evaluation(node, result, cached=False)
     if node.flags & graph.NODE_FLAG_BREAK != 0:
         input("Press any key to continue...")
 
@@ -302,7 +242,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
         left = evaluate(node.left, state)
         right = evaluate(node.right, state)
         try:
-            return binary_ops_dispatch_table[type(node)](left, right)
+            return dispatch.binary_operations[type(node)](left, right)
         except KeyError:
             raise TypeError(f"evaluator: unknown binary operation: {type(node)}")
 
@@ -310,7 +250,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
     if isinstance(node, graph.UnaryOp):
         operand = evaluate(node.node, state)
         try:
-            return unary_ops_dispatch_table[type(node)](operand)
+            return dispatch.unary_operations[type(node)](operand)
         except KeyError:
             raise TypeError(f"evaluator: unknown unary operation: {type(node)}")
 
@@ -335,7 +275,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
     if isinstance(node, graph.AxisOp):
         operand = evaluate(node.node, state)
         try:
-            return axis_ops_dispatch_table[type(node)](operand, node.axis)
+            return dispatch.axes_operations[type(node)](operand, node.axis)
         except KeyError:
             raise TypeError(f"evaluator: unknown axis operation: {type(node)}")
 

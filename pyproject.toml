@@ -3,15 +3,7 @@ name = "yakof"
 version = "0.1.0"
 description = "A technology demonstrator for sustainability modeling"
 requires-python = "==3.11.11"
-dependencies = [
-    "dask[distributed]",
-    "matplotlib",
-    "numpy",
-    "pandas",
-    "sympy",
-    "scipy",
-    "typing_extensions",
-]
+dependencies = ["numpy", "sympy"]
 license = "Apache-2.0"
 
 [build-system]

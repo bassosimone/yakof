@@ -2,13 +2,12 @@
 
 ## Overview
 
-YAKOF is a technology demonstrator showing how we could evolve the existing
-[dt-model](https://github.com/tn-aixpa/dt-model) package. The key improvements
-demonstrated are:
+YAKOF is a technology demonstrator showing how we could evolve the existing [dt-model](https://github.com/fbk-most/dt-model) package. The key improvements demonstrated are:
 
-1. Replacement of SymPy with a focused AST framework
-2. Type-safe parameter space modeling
-3. Orientation-aware tensor operations
+1. A custom computation graph framework replacing SymPy
+2. Type-safe tensor spaces with enforced dimensional semantics
+3. Category-inspired morphisms between tensor spaces
+4. Debuggable execution with tracing and autonaming
 
 ## Design Philosophy
 
@@ -17,114 +16,180 @@ This project follows these design principles:
 - Favor simple, composable components over complex, monolithic solutions
 - Handle the common case well and let exceptional cases fail naturally
 - Put complexity in the type system, not in the runtime code
+- Make debugging an integrated part of the design, not an afterthought
 
 ## Core Design Decisions
 
-### 1. Custom AST Framework
+### 1. Computation Graph Framework
 
 **Problem**: The original implementation used SymPy for symbolic computation, which:
-
 - Created an artificial boundary between symbolic and numeric operations
 - Required complex shape manipulation to bridge domains
-- Made it difficult to naturally express NumPy/TensorFlow operations
+- Lacked natural debugging capabilities
 
-**Solution**: A minimal AST framework that:
+**Solution**: Our custom computation graph framework (in `frontend/graph.py`):
+- Maps directly to backend operations (currently NumPy)
+- Supports low-level tensor operations without overhead
+- Contains built-in tracing and debugging facilities
+- Allows linearization for efficient evaluation
 
-- Maps directly to backend (NumPy/TensorFlow) operations
-- Handles tensors and shapes naturally
-- Can support multiple backends (currently NumPy, potentially TensorFlow)
+The graph nodes capture the intent of operations without prescribing implementation details, enabling multiple backends and optimization opportunities.
 
-The AST framework is intentionally limited to operations needed for sustainability
-modeling, avoiding the complexity of a general symbolic computation system.
-
-### 2. Parameter Space Modeling
+### 2. Type-Safe Tensor Spaces
 
 **Problem**: The original implementation required careful management of:
-- Dependency ordering between equations
-- Explicit shape manipulation
-- Type safety across different kinds of parameters
+- Axis semantics (what each dimension means)
+- Shape compatibility in operations
+- Broadcasting rules across different kinds of parameters
 
-**Solution**: Type-safe parameter space modeling that:
-- Uses numpy.meshgrid for natural parameter space representation
-- Eliminates explicit dependency ordering
-- Provides compile-time type safety
+**Solution**: Type-safe tensor spaces (in `frontend/abstract.py`):
+- Encode tensor dimension semantics in the type system
+- Use generics to enforce operations only between compatible spaces
+- Raise compile-time errors for dimension mismatches
 
-### 3. Tensor Orientations
+Tensor spaces are parameterized by their basis, ensuring that operations like addition only happen between tensors from the same space.
 
-**Problem**: In sustainability modeling, tensors can represent:
-- Time series of input data
-- Ensemble variations
-- Field combinations of both
+### 3. Category-Inspired Morphisms
 
-Mixing these incorrectly leads to subtle bugs. Additionally, one needs
-to carefully craft evaluation and correctly lift/project tensors.
+**Problem**: In sustainability modeling, tensors exist in different spaces:
+- Time series (1D)
+- Ensemble variations (1D)
+- Field combinations (multi-dimensional)
 
-**Solution**: Orientation-aware tensor system that:
-- Encodes tensor orientation directly in the type system
-- Makes invalid combinations a compile-time error
-- Provides explicit lifting/projecting operations between spaces
+Transforming between these spaces manually is error-prone.
+
+**Solution**: Space morphisms (in `frontend/morphisms.py`):
+- Provide explicit operations to transform between tensor spaces
+- Enforce correct dimensional semantics
+- Implement canonical axis ordering and transformation
+
+Key morphisms include `ExpandDims` to add dimensions and `ProjectUsingSum` to reduce dimensions while preserving semantics.
+
+### 4. Integrated Debugging
+
+**Problem**: Debugging complex numerical models is challenging, requiring:
+- Understanding the computation graph structure
+- Tracking intermediate values
+- Identifying where errors occur
+
+**Solution**: Integrated debugging facilities:
+- Automatic naming (`frontend/autonaming.py`) that preserves variable names
+- Tracepoints for inspecting intermediate values
+- Breakpoints for interactive debugging
+- Pretty printing for readable model inspection
 
 ## Architecture
 
-The architecture is intentionally "wide" rather than "tall":
+The architecture is composed of focused modules:
 
 ```
-backend/
-  graph.py          # Core tensor operations
-  orientation.py    # Typed tensor orientations
-  numpy_engine.py   # NumPy evaluation backend
-
-# High-level modeling APIs focused on existing use cases
-fieldspace/
-phasespace/
+yakof/
+│
+├── atomic/             # Thread-safe atomic operations
+│
+├── benchmark/          # Performance benchmarking utilities
+│
+├── frontend/          # Core computational abstractions
+│   ├── abstract.py    # Tensor spaces and tensors
+│   ├── autoenum.py    # Type-safe enumeration support
+│   ├── autonaming.py  # Automatic naming utilities
+│   ├── bases.py       # Canonical tensor bases
+│   ├── graph.py       # Computation graph nodes
+│   ├── linearize.py   # Topological sorting for evaluation
+│   ├── morphisms.py   # Transformations between tensor spaces
+│   ├── pretty.py      # Human-readable graph representation
+│   └── spaces.py      # Pre-defined tensor spaces
+│
+├── minisimulator/     # Minimal simulation utilities
+│
+├── numpybackend/     # NumPy backend implementation
+│   ├── debug.py      # Debugging utilities
+│   ├── dispatch.py   # Operation dispatch tables
+│   ├── evaluator.py  # Recursive graph evaluator
+│   └── executor.py   # Linearized graph executor
+│
+├── cafemodel/        # Example cafe sustainability model
+│
+└── trafficmodel/     # Example traffic demand model
 ```
-
-Adding new operations requires only:
-1. Adding operation to graph.py
-2. Implementing evaluation in numpy_engine.py
-3. (Optional) Adding to orientation.py if needed
 
 ## Type Safety Guarantees
 
 The type system enforces:
-1. Tensor orientation safety
-2. Parameter space consistency
-3. Backend operation compatibility
 
-Runtime checks are minimal and focused on:
-1. Input validation where required by the domain
-2. Letting underlying numerical operations fail naturally
+1. **Tensor space compatibility**:
+   - Operations only allowed between tensors of the same space
+   - Compile-time detection of space mismatches
 
-## Testing Strategy
+2. **Morphism correctness**:
+   - Source and destination spaces must be compatible
+   - Transformation axes must match the spaces' dimensions
 
-Following these principles:
-1. Test the core tensor operations thoroughly
-2. Test type safety at compile time
-3. Let numerical errors surface through NumPy
-4. Focus integration tests on modeling patterns
+3. **Basis consistency**:
+   - Each basis defines its axes as a tuple of integers
+   - Ensures consistent dimensional semantics
+
+Example from the code:
+```python
+def add(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+    """Element-wise addition of two tensors."""
+    ensure_same_basis(self.basis, t1.space.basis)
+    ensure_same_basis(self.basis, t2.space.basis)
+    return self.new_tensor(graph.add(t1.node, t2.node))
+```
+
+## Evaluation Strategies
+
+The system supports multiple evaluation strategies:
+
+1. **Recursive evaluation** (`numpybackend/evaluator.py`):
+   - Depth-first traversal of the computation graph
+   - Optional caching of intermediate results
+   - Simpler implementation but less efficient for large graphs
+
+2. **Linearized evaluation** (`numpybackend/executor.py`):
+   - Topologically sorted execution plan
+   - Predictable execution order for debugging
+   - More efficient for large graphs
+
+Both strategies handle debugging operations like tracepoints and breakpoints.
+
+## Example Models
+
+The package includes two example models demonstrating the framework:
+
+1. **Cafe Model** (`cafemodel`):
+   - Models cafe operations with capacity constraints
+   - Demonstrates enumerations for weather and time of day
+   - Shows sustainability analysis across multiple contexts
+
+2. **Traffic Model** (`trafficmodel`):
+   - Models traffic demand patterns with price sensitivity
+   - Demonstrates time-shifting effects across multiple dimensions
+   - Shows complex tensor operations and projections
 
 ## Migration Path
 
-To integrate into dt-model
-1. Document design decisions, discuss and reach consensus
-2. Create specific issues for integration
-3. Implement and merging changes incrementally
-4. Maintain backwards compatibility unless impractical
+To integrate into dt-model:
+
+1. Create a compatibility layer for existing models
+2. Gradually migrate components to use the new framework
+3. Introduce type-safe tensor spaces to critical components first
+4. Add debugging facilities to simplify transition
 
 ## Future Work
 
-1. TensorFlow backend implementation
-2. Additional numerical operation support as needed
-3. Documentation of modeling patterns
-4. Parallel operations using Dask or similar
+1. TensorFlow/PyTorch backend implementation
+2. Just-in-time compilation for performance optimization
+3. Distributed computation support for large models
+4. Extended visualization and analysis tools
 
 ## Conclusion
 
-YAKOF demonstrates how focused improvements in type safety and architectural clarity
-can evolve dt-model while maintaining simplicity and composability. The design choices
-prioritize:
+YAKOF demonstrates a path forward for sustainability modeling that:
+- Makes dimension errors impossible through the type system
+- Provides clear semantics for tensor transformations
+- Makes debugging a central part of the modeling process
+- Supports multiple backends and evaluation strategies
 
-1. Making invalid states unrepresentable and reducing the amount of code
-required to reshape tensors according to the problem's geometry
-2. Keeping the implementation simple and maintainable
-3. Supporting natural expression of sustainability models
+By focusing on tensor space semantics rather than just shapes, the framework enables more robust and maintainable sustainability models.
