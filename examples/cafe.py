@@ -30,13 +30,22 @@ def main():
     mab = minisimulator.ModelArgumentsBuilder()
 
     # Add the presence variables
+    min_customers, max_customers, num_points = 0, 100, 10
     mab.add_linear_range(
         model_inputs.customers_sitin.node,
-        minisimulator.LinearRange(start=0, stop=100, points=5),
+        minisimulator.LinearRange(
+            start=min_customers,
+            stop=max_customers,
+            points=num_points,
+        ),
     )
     mab.add_linear_range(
         model_inputs.customers_takeaway.node,
-        minisimulator.LinearRange(start=0, stop=100, points=5),
+        minisimulator.LinearRange(
+            start=min_customers,
+            stop=max_customers,
+            points=num_points,
+        ),
     )
 
     # Add the base service capacity
@@ -88,7 +97,8 @@ def main():
     )
 
     # Create the model arguments
-    args = mab.build(4)
+    ensemble_size = 1000
+    args = mab.build(ensemble_size)
 
     # --- Numerical Simulation ---
 
@@ -101,6 +111,31 @@ def main():
     # Evaluate each node in the linearized model
     for node in model_def.nodes:
         executor.evaluate(state, node)
+
+    # --- Results ---
+
+    # Extract, project, and print the seating_sustainable results
+    seating_sustainable = state.values[model_def.seating_sustainable.node]
+    seating_sustainable = seating_sustainable.sum(axis=2)
+    seating_sustainable = seating_sustainable / ensemble_size
+    print("=== Seating Sustainability ===")
+    print(seating_sustainable)
+    print("")
+
+    # Extract, project, and print the service_sustainable results
+    service_sustainable = state.values[model_def.service_sustainable.node]
+    service_sustainable = service_sustainable.sum(axis=2)
+    service_sustainable = service_sustainable / ensemble_size
+    print("=== Service Sustainability ===")
+    print(service_sustainable)
+    print("")
+
+    # Print the overall sustainability region
+    sustainable = seating_sustainable * service_sustainable
+    sustainable = sustainable > 0.5
+    print("=== Sustainability Region ===")
+    print(sustainable)
+    print("")
 
 
 if __name__ == "__main__":
