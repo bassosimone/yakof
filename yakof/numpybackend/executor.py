@@ -25,13 +25,6 @@ from ..frontend import graph
 from . import debug, dispatch
 
 
-FLAG_BREAK_ON_NAMED_NODE = 1 << 0
-"""Configures the executor to break on nodes with a non-empty name."""
-
-FLAG_TRACE = 1 << 1
-"""Configures the executor to trace the computation."""
-
-
 class NodeValueNotFound(Exception):
     """Raised when a node value is not found in the state."""
 
@@ -58,11 +51,18 @@ class State:
 
     Attributes:
         values: A dictionary caching the result of the computation.
-        flags: Bitmask containing debug flags (e.g., FLAG_BREAK_ON_NAMED_NODE).
+        flags: Bitmask containing debug flags (e.g., FLAG_BREAK).
     """
 
     values: dict[graph.Node, np.ndarray]
     flags: int = 0
+
+    def __post_init__(self):
+        if self.flags & graph.NODE_FLAG_TRACE != 0:
+            nodes = sorted(self.values.keys(), key=lambda n: n.id)
+            for node in nodes:
+                debug.print_graph_node(node)
+                debug.print_evaluated_node(self.values[node], cached=True)
 
     def get_node_value(self, node: graph.Node) -> np.ndarray:
         """Helper function to access the value associated with a node.
@@ -111,7 +111,8 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
         return state.values[node]
 
     # 2. check whether we need to trace this node
-    tracing = node.flags & graph.NODE_FLAG_TRACE != 0 or state.flags & FLAG_TRACE != 0
+    flags = node.flags | state.flags
+    tracing = flags & graph.NODE_FLAG_TRACE
     if tracing:
         debug.print_graph_node(node)
 
@@ -123,10 +124,7 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
         debug.print_evaluated_node(result, cached=False)
 
     # 5. check whether we need to stop after evaluating this node
-    breaking = node.flags & graph.NODE_FLAG_BREAK != 0 or (
-        state.flags & FLAG_BREAK_ON_NAMED_NODE != 0 and node.name
-    )
-    if breaking:
+    if flags & graph.NODE_FLAG_BREAK != 0:
         input("executor: press any key to continue...")
         print("")
 
