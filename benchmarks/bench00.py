@@ -133,10 +133,10 @@ def main() -> None:
 
     # Process options
     for opt, arg in opts:
-        if opt in ("-h", "--help"):
+        if opt in ("--help"):
             sys.stdout.write(f"{usage_string}\n")
             sys.exit(0)
-        elif opt in ("-s", "--short"):
+        elif opt in ("--short"):
             grid_sizes = [100]
             n_runs = 1
 
