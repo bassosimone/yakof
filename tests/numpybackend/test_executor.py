@@ -296,9 +296,7 @@ def test_debug_flags(capsys, monkeypatch):
     named_node.name = "named_addition"
     plan = linearize.forest(named_node)
 
-    state = executor.State(
-        {x: np.array([1.0, 2.0, 3.0])}, flags=executor.FLAG_BREAK_ON_NAMED_NODE
-    )
+    state = executor.State({x: np.array([1.0, 2.0, 3.0])}, flags=executor.FLAG_BREAK)
     for node in plan:
         executor.evaluate(state, node)
 
