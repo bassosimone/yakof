@@ -97,10 +97,12 @@ class TestDiscreteDistribution:
     def test_with_uniform_probabilities(self):
         dd = minisimulator.DiscreteDistribution.with_uniform_probabilities([1, 2, 3])
         assert dd.choices == [1, 2, 3]
-        assert dd.probabilities == [1/3, 1/3, 1/3]
+        assert dd.probabilities == [1 / 3, 1 / 3, 1 / 3]
 
     def test_with_discrete_probabilities(self):
-        dd = minisimulator.DiscreteDistribution.with_discrete_probabilities([(1, 0.2), (2, 0.3), (3, 0.5)])
+        dd = minisimulator.DiscreteDistribution.with_discrete_probabilities(
+            [(1, 0.2), (2, 0.3), (3, 0.5)]
+        )
         assert dd.choices == [1, 2, 3]
         assert dd.probabilities == [0.2, 0.3, 0.5]
 
