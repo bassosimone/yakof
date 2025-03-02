@@ -102,10 +102,10 @@ class Type(Generic[E]):
     """
 
     def __init__(self, space: abstract.TensorSpace[E], name: str) -> None:
-        self._name = name
         self.basevalue = _next_id(_id_generator) << _shift
         self.gen = atomic.Int()
         self.space = space
+        self.tensor = self.space.placeholder(name=name)
 
     # autonaming.Namer protocol implementation
     def implements_namer(self) -> None:
@@ -114,12 +114,12 @@ class Type(Generic[E]):
     @property
     def name(self) -> str:
         """This method is part of the autonaming.Namer protocol"""
-        return self._name
+        return self.tensor.name
 
     @name.setter
     def name(self, value: str) -> None:
         """This method is part of the autonaming.Namer protocol"""
-        self._name = value
+        self.tensor.name = value
 
 
 class Value(Generic[E]):
