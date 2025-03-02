@@ -62,6 +62,26 @@ class EnsembleBasis:
     axes = (ensemble_axis_id,)
 
 
+class WeatherBasis:
+    """Represents weather conditions affecting cafe operations.
+
+    Attributes:
+        axes: Tuple containing the ensemble axis identifier
+    """
+
+    axes = (ensemble_axis_id,)
+
+
+class TimeOfDayBasis:
+    """Represents different times of day affecting cafe operations.
+
+    Attributes:
+        axes: Tuple containing the ensemble axis identifier
+    """
+
+    axes = (ensemble_axis_id,)
+
+
 class FieldBasis:
     """Combined dimensions for the complete cafe modeling space.
 
@@ -77,6 +97,10 @@ sitin_space = abstract.TensorSpace(SitinBasis())
 takeaway_space = abstract.TensorSpace(TakeawayBasis())
 
 ensemble_space = abstract.TensorSpace(EnsembleBasis())
+
+weather_space = abstract.TensorSpace(WeatherBasis())
+
+time_of_day_space = abstract.TensorSpace(TimeOfDayBasis())
 
 field_space = abstract.TensorSpace(FieldBasis())
 
@@ -116,12 +140,12 @@ class Inputs:
         self.customers_takeaway = takeaway_space.placeholder("")
 
         # Context: weather
-        self.weather_enum = autoenum.Type(ensemble_space, "")
+        self.weather_enum = autoenum.Type(weather_space, "")
         self.weather_sunny = autoenum.Value(self.weather_enum, "")
         self.weather_rainy = autoenum.Value(self.weather_enum, "")
 
         # Context: time
-        self.time_enum = autoenum.Type(ensemble_space, "")
+        self.time_enum = autoenum.Type(time_of_day_space, "")
         self.time_morning = autoenum.Value(self.time_enum, "")
         self.time_lunch = autoenum.Value(self.time_enum, "")
         self.time_afternoon = autoenum.Value(self.time_enum, "")
