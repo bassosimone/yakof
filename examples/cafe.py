@@ -8,6 +8,8 @@ This example shows how to:
 4. Analyze the sustainability region with ensemble sampling
 """
 
+import numpy as np
+
 from yakof import cafemodel, minisimulator
 from yakof.frontend import graph
 from yakof.numpybackend import executor
@@ -25,6 +27,9 @@ def main():
     model_def = cafemodel.build(model_inputs)
 
     # --- Numerical Setup ---
+
+    # Use a fixed random seed to obtain reproducible output
+    np.random.seed(4)
 
     # Prepare for building the model input arguments
     mab = minisimulator.ModelArgumentsBuilder()
@@ -97,7 +102,7 @@ def main():
     )
 
     # Create the model arguments
-    ensemble_size = 1000
+    ensemble_size = 10000
     args = mab.build(ensemble_size)
 
     # --- Numerical Simulation ---

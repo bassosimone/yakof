@@ -189,6 +189,10 @@ def saveviz(
 
 def main() -> None:
     """Run combined effects model analysis."""
+
+    # Use a fixed random seed to obtain reproducible output
+    np.random.seed(4)
+
     # Setup time grid (15-minute intervals)
     intervals_per_hour: int = 4
     hours_to_model: int = 6
