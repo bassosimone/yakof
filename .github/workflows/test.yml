@@ -31,6 +31,9 @@ jobs:
       - name: Run traffic example
         run: uv run python examples/traffic.py
 
+      - name: Run bench00.py benchmark in short mode
+        run: uv run python benchmarks/bench00.py --short
+
       - name: Run tests with pytest
         run: uv run pytest
 

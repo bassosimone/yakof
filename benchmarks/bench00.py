@@ -12,8 +12,10 @@ achieves reasonably similar performance compared to SymPy-generated NumPy code.
 
 from typing import Callable
 
+import getopt
 import numpy as np
 import sympy
+import sys
 
 from yakof.benchmark import NumericFunc, NumericFuncFactory, Results, run
 from yakof.frontend import abstract, bases
@@ -120,6 +122,23 @@ def main() -> None:
     """Run benchmarks comparing Yakof and SymPy implementations."""
     grid_sizes: list[int] = [100, 500, 1000, 2000]
     n_runs: int = 100
+
+    # Parse command line arguments
+    usage_string = "usage: bench00.py [--help] [--short]"
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "", ["help", "short"])
+    except getopt.GetoptError as err:
+        sys.stderr.write(f"{usage_string}\n")
+        sys.exit(2)
+
+    # Process options
+    for opt, arg in opts:
+        if opt in ("--help",):
+            sys.stdout.write(f"{usage_string}\n")
+            sys.exit(0)
+        elif opt in ("--short",):
+            grid_sizes = [100]
+            n_runs = 1
 
     for size in grid_sizes:
         print(f"\nGrid size: {size}x{size}")
