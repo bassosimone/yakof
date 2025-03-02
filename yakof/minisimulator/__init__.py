@@ -277,23 +277,14 @@ class ModelArgumentsBuilder:
     def __init__(self):
         self.params: dict[graph.Node, Distribution | LinearRange] = {}
 
-    def add_linear_range(self, node: graph.Node, lrange: LinearRange) -> None:
-        """Add a linear range for a given node.
-
-        Args:
-            node: The node to associate with the linear range
-            lrange: The linear range to use for sampling values
-        """
-        self.params[node] = lrange
-
-    def add_distribution(self, node: graph.Node, distr: Distribution) -> None:
-        """Add a distribution for a given node.
+    def add(self, node: graph.Node, dlr: Distribution | LinearRange) -> None:
+        """Add a distribution or linear range for a given node.
 
         Args:
             node: The node to associate with the distribution
-            distr: The distribution to use for sampling values
+            distr: The Distribution or LinearRange for generating values
         """
-        self.params[node] = distr
+        self.params[node] = dlr
 
     def build(self, space_size: int) -> dict[graph.Node, np.ndarray]:
         """Build the model arguments by sampling values from the specified distributions.

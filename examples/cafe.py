@@ -36,7 +36,7 @@ def main():
 
     # Add the presence variables
     min_customers, max_customers, num_points = 0, 100, 10
-    mab.add_linear_range(
+    mab.add(
         model_inputs.customers_sitin.node,
         minisimulator.LinearRange(
             start=min_customers,
@@ -44,7 +44,7 @@ def main():
             points=num_points,
         ),
     )
-    mab.add_linear_range(
+    mab.add(
         model_inputs.customers_takeaway.node,
         minisimulator.LinearRange(
             start=min_customers,
@@ -54,31 +54,31 @@ def main():
     )
 
     # Add the base service capacity
-    mab.add_distribution(
+    mab.add(
         model_inputs.base_service_capacity.node,
         minisimulator.NormalDistribution(mean=4, std=1),
     )
 
     # Add the seat turnover rate
-    mab.add_distribution(
+    mab.add(
         model_inputs.seat_turnover_rate.node,
         minisimulator.NormalDistribution(mean=1.4, std=0.1),
     )
 
     # Add the base sitin service rate
-    mab.add_distribution(
+    mab.add(
         model_inputs.base_sitin_service_rate.node,
         minisimulator.NormalDistribution(mean=10, std=1),
     )
 
     # Add the base takeaway service rate
-    mab.add_distribution(
+    mab.add(
         model_inputs.base_takeaway_service_rate.node,
         minisimulator.NormalDistribution(mean=40, std=4),
     )
 
     # Add the time discrete distribution
-    mab.add_distribution(
+    mab.add(
         model_inputs.time_enum.tensor.node,
         minisimulator.DiscreteDistribution.with_uniform_probabilities(
             [
@@ -91,7 +91,7 @@ def main():
     )
 
     # Add the weather discrete distribution
-    mab.add_distribution(
+    mab.add(
         model_inputs.weather_enum.tensor.node,
         minisimulator.DiscreteDistribution.with_discrete_probabilities(
             [
