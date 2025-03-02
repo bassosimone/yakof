@@ -685,10 +685,7 @@ def test_state_post_init_tracing(capsys):
     y_val = np.array([4.0, 5.0, 6.0])
 
     # Create state with tracing flag
-    state = executor.State(
-        {x: x_val, y: y_val},
-        flags=graph.NODE_FLAG_TRACE
-    )
+    state = executor.State({x: x_val, y: y_val}, flags=graph.NODE_FLAG_TRACE)
 
     # Check that tracing output was generated during initialization
     captured = capsys.readouterr()
