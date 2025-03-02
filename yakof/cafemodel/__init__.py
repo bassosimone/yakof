@@ -28,6 +28,7 @@ class ScalarBasis:
     Attributes:
         axes: Empty tuple indicating no dimensions
     """
+
     axes = ()
 
 
@@ -37,6 +38,7 @@ class SitinBasis:
     Attributes:
         axes: Tuple containing the sit-in axis identifier
     """
+
     axes = (sitin_axis_id,)
 
 
@@ -46,6 +48,7 @@ class TakeawayBasis:
     Attributes:
         axes: Tuple containing the takeaway axis identifier
     """
+
     axes = (takeaway_axis_id,)
 
 
@@ -55,6 +58,7 @@ class EnsembleBasis:
     Attributes:
         axes: Tuple containing the ensemble axis identifier
     """
+
     axes = (ensemble_axis_id,)
 
 
@@ -64,6 +68,7 @@ class FieldBasis:
     Attributes:
         axes: Tuple containing sit-in, takeaway and ensemble axis identifiers
     """
+
     axes = (sitin_axis_id, takeaway_axis_id, ensemble_axis_id)
 
 
@@ -150,6 +155,7 @@ class Model:
         service_load: Ratio of demand to capacity for service
         nodes: Ordered execution plan for evaluating the model graph
     """
+
     seating_sustainable: abstract.Tensor[FieldBasis]
     service_sustainable: abstract.Tensor[FieldBasis]
     seating_load: abstract.Tensor[FieldBasis]
@@ -267,5 +273,5 @@ def build(inputs: Inputs) -> Model:
         service_sustainable=service_sustainable,
         seating_load=seating_load,
         service_load=service_load,
-        nodes=evaluation_plan
+        nodes=evaluation_plan,
     )

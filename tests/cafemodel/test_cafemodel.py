@@ -17,7 +17,9 @@ def test_cafe_model():
 
     # Set up test input values
     customers_sitin = np.array([10, 20, 5])  # Different numbers of sit-in customers
-    customers_takeaway = np.array([15, 30, 10])  # Different numbers of takeaway customers
+    customers_takeaway = np.array(
+        [15, 30, 10]
+    )  # Different numbers of takeaway customers
 
     # Get the correct enum values from the model
     weather_sunny_value = inputs.weather_sunny.value
@@ -28,15 +30,31 @@ def test_cafe_model():
     time_evening_value = inputs.time_evening.value
 
     # Weather and time scenarios (2 weather types × 4 time periods)
-    weather_values = np.array([
-        weather_sunny_value, weather_sunny_value, weather_sunny_value, weather_sunny_value,
-        weather_rainy_value, weather_rainy_value, weather_rainy_value, weather_rainy_value
-    ])
+    weather_values = np.array(
+        [
+            weather_sunny_value,
+            weather_sunny_value,
+            weather_sunny_value,
+            weather_sunny_value,
+            weather_rainy_value,
+            weather_rainy_value,
+            weather_rainy_value,
+            weather_rainy_value,
+        ]
+    )
 
-    time_values = np.array([
-        time_morning_value, time_lunch_value, time_afternoon_value, time_evening_value,
-        time_morning_value, time_lunch_value, time_afternoon_value, time_evening_value
-    ])
+    time_values = np.array(
+        [
+            time_morning_value,
+            time_lunch_value,
+            time_afternoon_value,
+            time_evening_value,
+            time_morning_value,
+            time_lunch_value,
+            time_afternoon_value,
+            time_evening_value,
+        ]
+    )
 
     # Capacity values (can vary by scenario but using constants for test)
     indoor_seating = np.full(8, 10)
@@ -73,8 +91,16 @@ def test_cafe_model():
     service_load = state.values[model.service_load.node]
 
     # Basic shape checks
-    assert seating_sustainable.shape == (3, 1, 8), "Seating sustainability has incorrect shape"
-    assert service_sustainable.shape == (3, 3, 8), "Service sustainability has incorrect shape"
+    assert seating_sustainable.shape == (
+        3,
+        1,
+        8,
+    ), "Seating sustainability has incorrect shape"
+    assert service_sustainable.shape == (
+        3,
+        3,
+        8,
+    ), "Service sustainability has incorrect shape"
 
     # Check expected behaviors
 
@@ -86,21 +112,29 @@ def test_cafe_model():
     # In sunny weather, sustainability should be better due to outdoor seating
     sunny_seating_sustainable = seating_sustainable[customer_idx[0], 0, 0]
     rainy_seating_sustainable = seating_sustainable[customer_idx[0], 0, 4]
-    assert sunny_seating_sustainable or not rainy_seating_sustainable, \
-        "Sunny weather should have better or equal seating sustainability than rainy"
+    assert (
+        sunny_seating_sustainable or not rainy_seating_sustainable
+    ), "Sunny weather should have better or equal seating sustainability than rainy"
 
     # 2. Service capacity should be highest during lunch hours
     #    Check load during lunch hours (index 1 and 5) vs evening (index 3 and 7)
-    lunch_service_load = service_load[customer_idx[0], customer_idx[1], 1]  # Lunch time index
-    evening_service_load = service_load[customer_idx[0], customer_idx[1], 3]  # Evening time index
-    assert lunch_service_load < evening_service_load, \
-        "Lunch time should have lower service load due to increased capacity"
+    lunch_service_load = service_load[
+        customer_idx[0], customer_idx[1], 1
+    ]  # Lunch time index
+    evening_service_load = service_load[
+        customer_idx[0], customer_idx[1], 3
+    ]  # Evening time index
+    assert (
+        lunch_service_load < evening_service_load
+    ), "Lunch time should have lower service load due to increased capacity"
 
     # 3. Verify general relationship between load and sustainability
     for i in range(seating_load.shape[0]):
         for j in range(seating_load.shape[1]):
             for k in range(seating_load.shape[2]):
-                assert (seating_load[i, j, k] <= 1.0) == seating_sustainable[i, j, k], \
-                    f"Seating sustainability at {i},{j},{k} doesn't match load threshold"
-                assert (service_load[i, j, k] <= 1.0) == service_sustainable[i, j, k], \
-                    f"Service sustainability at {i},{j},{k} doesn't match load threshold"
+                assert (seating_load[i, j, k] <= 1.0) == seating_sustainable[
+                    i, j, k
+                ], f"Seating sustainability at {i},{j},{k} doesn't match load threshold"
+                assert (service_load[i, j, k] <= 1.0) == service_sustainable[
+                    i, j, k
+                ], f"Service sustainability at {i},{j},{k} doesn't match load threshold"
