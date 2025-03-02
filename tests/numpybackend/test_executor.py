@@ -284,7 +284,7 @@ def test_debug_flags(capsys, monkeypatch):
     z = graph.add(x, graph.constant(5.0))
     plan = linearize.forest(z)
 
-    state = executor.State({x: np.array([1.0, 2.0, 3.0])}, flags=executor.FLAG_TRACE)
+    state = executor.State({x: np.array([1.0, 2.0, 3.0])}, flags=graph.NODE_FLAG_TRACE)
     for node in plan:
         executor.evaluate(state, node)
 
@@ -296,9 +296,7 @@ def test_debug_flags(capsys, monkeypatch):
     named_node.name = "named_addition"
     plan = linearize.forest(named_node)
 
-    state = executor.State(
-        {x: np.array([1.0, 2.0, 3.0])}, flags=executor.FLAG_BREAK_ON_NAMED_NODE
-    )
+    state = executor.State({x: np.array([1.0, 2.0, 3.0])}, flags=graph.NODE_FLAG_BREAK)
     for node in plan:
         executor.evaluate(state, node)
 
