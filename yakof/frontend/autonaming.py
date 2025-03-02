@@ -2,24 +2,38 @@
 Automatic Naming
 ================
 
-Provides a context manager to automatically name tensors for debugging purposes.
+Provides mechanisms to automatically name tensors for debugging purposes,
+including both a context manager and a decorator.
 
 Basic Usage
 -----------
 
-Here's a simple example:
+Using the context manager:
 
     >>> from yakof.frontend import abstract, autonaming
     >>> space = abstract.TensorSpace(abstract.bases.X)
     >>> with autonaming.context():
-    ...     x = space.placeholder()  # named 'x'
-    ...     y = space.placeholder()  # named 'y'
-    ...     z = x + y                # named 'z'
+    ...     x = space.placeholder("")  # named 'x'
+    ...     y = space.placeholder("")  # named 'y'
+    ...     z = x + y                  # named 'z'
+
+Using the decorator with class attributes:
+
+    >>> from yakof.frontend import abstract, autonaming
+    >>> class Model:
+    ...     @autonaming.decorator
+    ...     def __init__(self):
+    ...         self.x = space.placeholder("")  # named 'x'
+    ...         self.y = space.placeholder("")  # named 'y'
+    ...         self.z = self.x + self.y        # named 'z'
 
 Implementation Notes
 --------------------
 
 The context manager tracks variable assignments in the current scope and automatically
+names unnamed objects that implement the Nameable protocol.
+
+The decorator tracks attribute assignments to class instances and automatically
 names unnamed objects that implement the Nameable protocol.
 
 Supported Patterns
@@ -28,14 +42,22 @@ Supported Patterns
 1. Direct assignments in the context frame:
 
     >>> with autonaming.context():
-    ...     x = space.placeholder()  # named 'x'
-    ...     y = make_placeholder()   # named 'y'
+    ...     x = space.placeholder("")  # named 'x'
+    ...     y = make_placeholder("")   # named 'y'
 
 2. Operations on named tensors:
 
     >>> with autonaming.context():
-    ...     x = space.placeholder()  # named 'x'
-    ...     y = x + 1               # named 'y'
+    ...     x = space.placeholder("")  # named 'x'
+    ...     y = x + 1                  # named 'y'
+
+3. Class attribute assignments with the decorator:
+
+    >>> class Model:
+    ...     @autonaming.decorator
+    ...     def __init__(self):
+    ...         self.x = space.placeholder("")  # named 'x'
+    ...         self.result = self.x * 2        # named 'result'
 
 Unsupported Patterns
 ~~~~~~~~~~~~~~~~~~~~
@@ -43,14 +65,14 @@ Unsupported Patterns
 1. Objects created in comprehensions:
 
     >>> with autonaming.context():
-    ...     tensors = [space.placeholder() for _ in range(3)]  # NOT named
+    ...     tensors = [space.placeholder("") for _ in range(3)]  # NOT named
     ...     x = tensors[0]  # named 'x'
 
 2. Objects created in nested scopes:
 
     >>> with autonaming.context():
     ...     def make_tensor():
-    ...         return space.placeholder()  # NOT named
+    ...         return space.placeholder("")  # NOT named
     ...     x = make_tensor()  # named 'x'
 
 Aliasing and Name Conflicts
@@ -59,13 +81,13 @@ Aliasing and Name Conflicts
 When the same tensor is assigned to multiple names:
 
     >>> with autonaming.context():
-    ...     x = space.placeholder()  # Gets named 'x'
-    ...     y = x                    # Warning: attempting to rename
+    ...     x = space.placeholder("")  # Gets named 'x'
+    ...     y = x                      # Warning: attempting to rename
 
-The context manager:
-1. Uses the first name it encounters for the tensor
-2. Emits a warning for subsequent naming attempts
-3. Suggests adjusting code to avoid aliasing
+The mechanisms:
+1. Use the first name they encounter for the tensor
+2. Emit a warning for subsequent naming attempts
+3. Suggest adjusting code to avoid aliasing
 
 Note: The order in which names are processed depends on Python's dictionary
 iteration order. While this is stable within a Python version since 3.7,
@@ -78,6 +100,8 @@ Best Practices
 
 DO:
 - Use meaningful, unique names for tensors
+- Use the context manager for local variables
+- Use the decorator for class attributes
 - Use the context manager for debugging purposes
 
 DON'T:
@@ -86,7 +110,7 @@ DON'T:
 - Create tensors in comprehensions or nested functions
 """
 
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import inspect
 import logging
@@ -117,6 +141,22 @@ class Nameable(Protocol):
     def name(self, value: str) -> None: ...
 
 
+# TODO(bassosimone): consider taking advantage of the `graph.Node.id`
+# field to walk through the nameables respecting the order in which they
+# were defined in the code, which makes renames possible.
+
+
+def _maybe_autoname(var: Any, name: str) -> None:
+    if not isinstance(var, Nameable):
+        return
+    if var.name and var.name != name:
+        logging.warning(f"autonaming: attempting to rename {var.name} to {name}")
+        logging.warning(f"autonaming: debugging code will use {var.name}")
+        logging.warning(f"autonaming: adjust your code to avoid aliasing tensors")
+        return
+    var.name = name
+
+
 class context:
     """
     Context manager for automatically assigning names to Nameable objects.
@@ -124,7 +164,7 @@ class context:
     Assigning multiple names to the same tensor, such as in the following example:
 
         >>> with autonaming.context():
-        ...     x = space.placeholder()
+        ...     x = space.placeholder("")
         ...     y = x
 
     will cause one of the two names at ~random to be used when debugging. There
@@ -155,15 +195,41 @@ class context:
         new_vars = set(frame.f_locals.keys()) - self._initial_locals
         for name in new_vars:
             var = frame.f_locals[name]
-            if not isinstance(var, Nameable):
-                continue
-            if var.name:
-                logging.warning(
-                    f"autonaming: attempting to rename {var.name} to {name}"
-                )
-                logging.warning(f"autonaming: debugging code will use {var.name}")
-                logging.warning(
-                    f"autonaming: consider adjusting your code to avoid aliasing tensors"
-                )
-                continue
-            var.name = name
+            _maybe_autoname(var, name)
+
+
+def decorator(method):
+    """
+    Decorator that automatically names Nameable attributes in methods.
+
+    This is particularly useful for naming class attributes created in __init__
+    methods, where the context manager cannot detect attribute assignments.
+
+    Example:
+        >>> class Model:
+        ...     @autonaming.decorator
+        ...     def __init__(self):
+        ...         self.x = space.placeholder("")  # named 'x'
+        ...         self.y = space.placeholder("")  # named 'y'
+    """
+
+    def wrapper(self, *args, **kwargs):
+        # Get initial attributes
+        initial_attrs = set(vars(self).keys() if hasattr(self, "__dict__") else [])
+
+        # Call the original method
+        result = method(self, *args, **kwargs)
+
+        # Find new attributes
+        new_attrs = (
+            set(vars(self).keys() if hasattr(self, "__dict__") else []) - initial_attrs
+        )
+
+        # Apply naming to new attributes
+        for attr_name in new_attrs:
+            attr_value = getattr(self, attr_name)
+            _maybe_autoname(attr_value, attr_name)
+
+        return result
+
+    return wrapper
