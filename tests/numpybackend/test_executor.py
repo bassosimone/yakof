@@ -672,3 +672,29 @@ def test_axis_operations():
 
         for node in invalid_plan:
             executor.evaluate(invalid_state, node)
+
+
+def test_state_post_init_tracing(capsys):
+    """Test that State.__post_init__ traces initial values when NODE_FLAG_TRACE is set."""
+    # Create nodes
+    x = graph.placeholder("x")
+    y = graph.placeholder("y")
+
+    # Test data
+    x_val = np.array([1.0, 2.0, 3.0])
+    y_val = np.array([4.0, 5.0, 6.0])
+
+    # Create state with tracing flag
+    state = executor.State({x: x_val, y: y_val}, flags=graph.NODE_FLAG_TRACE)
+
+    # Check that tracing output was generated during initialization
+    captured = capsys.readouterr()
+    output = captured.out
+
+    # Verify that both nodes were traced in the output
+    assert f"name: {x.name}" in output
+    assert f"name: {y.name}" in output
+    assert "=== begin tracepoint ===" in output
+
+    # Verify the cached indication is shown
+    assert "cached: True" in output
