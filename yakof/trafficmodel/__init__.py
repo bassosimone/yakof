@@ -16,7 +16,7 @@ The traffic model captures how demand is influenced by:
 2. Time-shifting: Peak-period demand partially shifts to shoulder periods while preserving total demand
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..frontend import abstract, autonaming, bases, graph, linearize, morphisms
 
@@ -103,11 +103,11 @@ class Inputs:
         price_sensitivity (abstract.Tensor[EnsembleBasis]): Sensitivity of different population segments to price changes
     """
 
-    morning_peak_start = 7.0
-    morning_peak_end = 9.0
-    base_price = 1.0
-    early_shift_rate = 0.3
-    late_shift_rate = 0.1
+    morning_peak_start: float = field(default=7.0)
+    morning_peak_end: float = field(default=9.0)
+    base_price: float = field(default=1.0)
+    early_shift_rate: float = field(default=0.3)
+    late_shift_rate: float = field(default=0.1)
     base_demand = time_space.placeholder("base_demand")
     price = time_space.placeholder("price")
     hours = time_space.placeholder("hours")
