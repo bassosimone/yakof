@@ -184,3 +184,37 @@ def test_type_parameter_consistency():
     # The following would be type errors if actually attempted:
     # bad_value = autoenum.Value[TestBasis](other_enum, "BadValue")
     # test_tensor == other_value.tensor  # Would fail at compile-time
+
+
+def test_enum_type_tensor_placeholder(test_space):
+    """Test that enum types have a properly initialized placeholder tensor."""
+    enum_type = autoenum.Type(test_space, "TestEnum")
+
+    # Verify the tensor is initialized correctly
+    assert enum_type.tensor is not None
+    assert enum_type.tensor.space is test_space
+    assert isinstance(enum_type.tensor, abstract.Tensor)
+    assert isinstance(enum_type.tensor.node, graph.placeholder)
+    assert enum_type.tensor.name == "TestEnum"
+
+    # Verify we can use it in comparisons/operations
+    test_tensor = test_space.placeholder("test")
+    eq_result = test_tensor == enum_type.tensor
+    assert eq_result.node.__class__.__name__ == "equal"
+
+
+def test_enum_type_placeholder_autonaming():
+    """Test that enum type placeholder tensors work with autonaming."""
+    test_space = abstract.TensorSpace(TestBasis())
+
+    with autonaming.context():
+        weather_enum = autoenum.Type(test_space, "")
+
+    # The placeholder tensor should have the same name as the enum type
+    assert weather_enum.name == "weather_enum"
+    assert weather_enum.tensor.name == "weather_enum"
+
+    # Verify we can change the name and it propagates
+    weather_enum.name = "climate_enum"
+    assert weather_enum.name == "climate_enum"
+    assert weather_enum.tensor.name == "climate_enum"
