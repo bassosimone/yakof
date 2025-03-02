@@ -230,7 +230,7 @@ def main() -> None:
     )
 
     # Build the traffic model
-    model: trafficmodel.Outputs = trafficmodel.build(inputs)
+    model: trafficmodel.Model = trafficmodel.build(inputs)
 
     # Set up state with our input data
     state: executor.State = executor.State(

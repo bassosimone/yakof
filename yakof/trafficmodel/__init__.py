@@ -116,8 +116,8 @@ class Inputs:
 
 # Outputs
 @dataclass(frozen=True)
-class Outputs:
-    """Output values from the traffic model.
+class Model:
+    """Ready to evaluate traffic model.
 
     Attributes:
         price_affected_demand (abstract.Tensor[FieldBasis]): Demand after applying price sensitivity effects
@@ -136,7 +136,7 @@ class Outputs:
     nodes: list[graph.Node]
 
 
-def build(inputs: Inputs) -> Outputs:
+def build(inputs: Inputs) -> Model:
     """Build the traffic model with price effects and time-shifting.
 
     This function constructs the full traffic model, applying both price sensitivity
@@ -257,7 +257,7 @@ def build(inputs: Inputs) -> Outputs:
         actual_demand.node,
     )
 
-    return Outputs(
+    return Model(
         price_affected_demand=price_affected_demand,
         demand_after_removal=demand_after_removal,
         actual_demand=actual_demand,
