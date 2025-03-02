@@ -51,7 +51,7 @@ class State:
 
     Attributes:
         values: A dictionary caching the result of the computation.
-        flags: Bitmask containing debug flags (e.g., FLAG_BREAK).
+        flags: Bitmask containing debug flags (e.g., graph.FLAG_BREAK).
     """
 
     values: dict[graph.Node, np.ndarray]
