@@ -176,7 +176,6 @@ def test_consecutive_enum_spaces():
     assert firstvalue == maxvalue + 1
 
 
-
 def test_id_generation():
     """Test the _next_id helper function directly."""
     counter = atomic.Int()
