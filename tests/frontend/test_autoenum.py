@@ -34,9 +34,8 @@ def test_enum_type_creation(test_space):
     assert enum_type.name == "TestEnum"
     assert enum_type.space is test_space
     assert enum_type.basevalue > 0
-    assert (
-        enum_type.basevalue % (1 << autoenum.BITS_PER_ENUM_SPACE) == 0
-    )  # Should be left-shifted
+    # Should be left-shifted
+    assert enum_type.basevalue % (1 << autoenum.BITS_PER_ENUM_SPACE) == 0
 
 
 def test_enum_value_creation(test_space):
