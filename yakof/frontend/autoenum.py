@@ -92,7 +92,7 @@ def _next_id(gen: atomic.Int) -> int:
     Raises:
         ValueError: If the counter exceeds the maximum allowed value
     """
-    value = gen.add(1) - 1
+    value = gen.add(1) - 1  # start from zero but honour atomicity
     if value > max_unscaled_enum_value:
         raise ValueError("Too many enum values")
     return value
