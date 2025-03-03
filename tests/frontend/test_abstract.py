@@ -571,3 +571,129 @@ def test_id_through_tensor_operations():
     # Verify underlying node IDs match
     for op in operations:
         assert op.id == op.node.id
+
+
+def test_tensor_operations_with_scalars():
+    """Test operations that now accept scalar inputs."""
+    space = abstract.TensorSpace(DummyBasis())
+    x = space.placeholder("x")
+
+    # Test power with scalar exponent
+    pow_scalar = space.power(x, 2.0)
+    assert isinstance(pow_scalar.node, graph.power)
+    assert pow_scalar.node.left is x.node
+    assert isinstance(pow_scalar.node.right, graph.constant)
+    assert pow_scalar.node.right.value == 2.0
+
+    # Test maximum with scalar arguments
+    max_scalar1 = space.maximum(x, 5.0)
+    assert isinstance(max_scalar1.node, graph.maximum)
+    assert max_scalar1.node.left is x.node
+    assert isinstance(max_scalar1.node.right, graph.constant)
+    assert max_scalar1.node.right.value == 5.0
+
+    max_scalar2 = space.maximum(5.0, x)
+    assert isinstance(max_scalar2.node, graph.maximum)
+    assert isinstance(max_scalar2.node.left, graph.constant)
+    assert max_scalar2.node.left.value == 5.0
+    assert max_scalar2.node.right is x.node
+
+    # Test where with scalar values
+    cond = space.placeholder("cond")
+    where_scalar1 = space.where(cond, x, 1.0)
+    assert isinstance(where_scalar1.node, graph.where)
+    assert where_scalar1.node.condition is cond.node
+    assert where_scalar1.node.then is x.node
+    assert isinstance(where_scalar1.node.otherwise, graph.constant)
+    assert where_scalar1.node.otherwise.value == 1.0
+
+    where_scalar2 = space.where(cond, 2.0, x)
+    assert isinstance(where_scalar2.node, graph.where)
+    assert where_scalar2.node.condition is cond.node
+    assert isinstance(where_scalar2.node.then, graph.constant)
+    assert where_scalar2.node.then.value == 2.0
+    assert where_scalar2.node.otherwise is x.node
+
+    where_scalar3 = space.where(cond, 3.0, 4.0)
+    assert isinstance(where_scalar3.node, graph.where)
+    assert where_scalar3.node.condition is cond.node
+    assert isinstance(where_scalar3.node.then, graph.constant)
+    assert where_scalar3.node.then.value == 3.0
+    assert isinstance(where_scalar3.node.otherwise, graph.constant)
+    assert where_scalar3.node.otherwise.value == 4.0
+
+
+def test_multi_clause_where_with_scalars():
+    """Test multi_clause_where with scalar values in clauses and default value."""
+    space = abstract.TensorSpace(DummyBasis())
+    cond1 = space.placeholder("cond1")
+    cond2 = space.placeholder("cond2")
+    x = space.placeholder("x")
+
+    # Test with scalar values in clauses
+    clauses = [(cond1, 1.0), (cond2, x)]
+    result1 = space.multi_clause_where(clauses, 0.0)
+    assert isinstance(result1.node, graph.multi_clause_where)
+    assert len(result1.node.clauses) == 2
+
+    # Check first clause
+    assert result1.node.clauses[0][0] is cond1.node
+    assert isinstance(result1.node.clauses[0][1], graph.constant)
+    assert result1.node.clauses[0][1].value == 1.0
+
+    # Check second clause
+    assert result1.node.clauses[1][0] is cond2.node
+    assert result1.node.clauses[1][1] is x.node
+
+    # Check default value
+    assert isinstance(result1.node.default_value, graph.constant)
+    assert result1.node.default_value.value == 0.0
+
+    # Test with tensor default value
+    result2 = space.multi_clause_where([(cond1, 2.0)], x)
+    assert isinstance(result2.node, graph.multi_clause_where)
+    assert len(result2.node.clauses) == 1
+    assert result2.node.clauses[0][0] is cond1.node
+    assert isinstance(result2.node.clauses[0][1], graph.constant)
+    assert result2.node.clauses[0][1].value == 2.0
+    assert result2.node.default_value is x.node
+
+    # Test with all scalar values
+    result3 = space.multi_clause_where([(cond1, 3.0), (cond2, 4.0)], 5.0)
+    assert isinstance(result3.node, graph.multi_clause_where)
+    assert len(result3.node.clauses) == 2
+    assert result3.node.clauses[0][0] is cond1.node
+    assert isinstance(result3.node.clauses[0][1], graph.constant)
+    assert result3.node.clauses[0][1].value == 3.0
+    assert result3.node.clauses[1][0] is cond2.node
+    assert isinstance(result3.node.clauses[1][1], graph.constant)
+    assert result3.node.clauses[1][1].value == 4.0
+    assert isinstance(result3.node.default_value, graph.constant)
+    assert result3.node.default_value.value == 5.0
+
+
+def test_error_cases_with_scalar_operations():
+    """Test error cases that might occur with scalar operations."""
+    space1 = abstract.TensorSpace(DummyBasis())
+
+    # Create a different basis
+    class OtherBasis:
+        axes = (99, 100)
+
+    space2 = abstract.TensorSpace(OtherBasis())
+
+    x = space1.placeholder("x")
+    y = space2.placeholder("y")
+
+    # Create a scalar tensor in space1
+    scalar_in_space1 = space1.constant(5.0)
+
+    # Mixing scalar from one space with tensor from another should fail
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        space2.power(y, scalar_in_space1)  # type: ignore
+
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        space2.maximum(y, scalar_in_space1)  # type: ignore
+
+    with pytest.raises(ValueError, match="Tensors must have the same basis"):
+        space2.where(y > 0, scalar_in_space1, 0.0)  # type: ignore

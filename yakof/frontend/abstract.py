@@ -288,8 +288,9 @@ class TensorSpace(Generic[B]):
         ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.exp(t.node))
 
-    def power(self, t: Tensor[B], exp: Tensor[B]) -> Tensor[B]:
+    def power(self, t: Tensor[B], exp: Tensor[B] | graph.Scalar) -> Tensor[B]:
         """Raise tensor to the power of another tensor."""
+        exp = self.ensure_tensor(exp)
         ensure_same_basis(self.basis, t.space.basis)
         ensure_same_basis(self.basis, exp.space.basis)
         return self.new_tensor(graph.power(t.node, exp.node))
@@ -299,26 +300,38 @@ class TensorSpace(Generic[B]):
         ensure_same_basis(self.basis, t.space.basis)
         return self.new_tensor(graph.log(t.node))
 
-    def maximum(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
+    def maximum(
+        self,
+        t1: Tensor[B] | graph.Scalar,
+        t2: Tensor[B] | graph.Scalar,
+    ) -> Tensor[B]:
         """Compute element-wise maximum of two tensors."""
+        t1 = self.ensure_tensor(t1)
+        t2 = self.ensure_tensor(t2)
         ensure_same_basis(self.basis, t1.space.basis)
         ensure_same_basis(self.basis, t2.space.basis)
         return self.new_tensor(graph.maximum(t1.node, t2.node))
 
     def where(
-        self, cond: Tensor[C], then: Tensor[B], otherwise: Tensor[B]
+        self,
+        cond: Tensor[C],
+        then: Tensor[B] | graph.Scalar,
+        otherwise: Tensor[B] | graph.Scalar,
     ) -> Tensor[B]:
         """Select elements based on condition."""
+        then = self.ensure_tensor(then)
+        otherwise = self.ensure_tensor(otherwise)
         ensure_same_basis(self.basis, then.space.basis)
         ensure_same_basis(self.basis, otherwise.space.basis)
         return self.new_tensor(graph.where(cond.node, then.node, otherwise.node))
 
     def multi_clause_where(
         self,
-        clauses: Sequence[tuple[Tensor[C], Tensor[B]]],
+        clauses: Sequence[tuple[Tensor[C], Tensor[B] | graph.Scalar]],
         default_value: Tensor[B] | graph.Scalar,
     ) -> Tensor[B]:
         """Select elements based on multiple conditions."""
+        clauses = [(cond, self.ensure_tensor(value)) for cond, value in clauses]
         for cond, value in clauses:
             ensure_same_basis(self.basis, value.space.basis)
 
