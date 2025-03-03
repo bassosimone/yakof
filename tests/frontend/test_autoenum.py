@@ -34,7 +34,9 @@ def test_enum_type_creation(test_space):
     assert enum_type.name == "TestEnum"
     assert enum_type.space is test_space
     assert enum_type.basevalue > 0
-    assert enum_type.basevalue % (1 << autoenum.BITS_PER_ENUM_SPACE) == 0  # Should be left-shifted
+    assert (
+        enum_type.basevalue % (1 << autoenum.BITS_PER_ENUM_SPACE) == 0
+    )  # Should be left-shifted
 
 
 def test_enum_value_creation(test_space):
@@ -120,7 +122,10 @@ def test_many_enum_values():
     enum_type = autoenum.Type(test_space, "LargeEnum")
 
     # Create a moderate number of values
-    values = [autoenum.Value(enum_type, f"Value{i}") for i in range(autoenum.max_unscaled_enum_value)]
+    values = [
+        autoenum.Value(enum_type, f"Value{i}")
+        for i in range(autoenum.max_unscaled_enum_value)
+    ]
 
     # Check they're all unique
     unique_values = {v.value for v in values}
