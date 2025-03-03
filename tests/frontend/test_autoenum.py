@@ -34,7 +34,7 @@ def test_enum_type_creation(test_space):
     assert enum_type.name == "TestEnum"
     assert enum_type.space is test_space
     assert enum_type.basevalue > 0
-    assert enum_type.basevalue % (1 << autoenum._shift) == 0  # Should be left-shifted
+    assert enum_type.basevalue % (1 << autoenum.BITS_PER_ENUM_SPACE) == 0  # Should be left-shifted
 
 
 def test_enum_value_creation(test_space):
@@ -133,7 +133,7 @@ def test_value_id_overflow():
     enum_type = autoenum.Type(test_space, "OverflowTest")
 
     # Manually set the counter to near the limit
-    enum_type.gen.add((1 << autoenum._shift) - 3)
+    enum_type.gen.add((1 << autoenum.BITS_PER_ENUM_SPACE) - 3)
 
     # Create two values (should work)
     value1 = autoenum.Value(enum_type, "Value1")
@@ -158,7 +158,7 @@ def test_id_generation():
     assert id3 == 3
 
     # Test overflow
-    counter.add((1 << autoenum._shift) - 3)
+    counter.add((1 << autoenum.BITS_PER_ENUM_SPACE) - 3)
     with pytest.raises(ValueError):
         autoenum._next_id(counter)
 

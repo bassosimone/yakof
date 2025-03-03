@@ -59,8 +59,17 @@ _id_generator = atomic.Int()
 """Atomic integer generator for unique enum type IDs."""
 
 
-_shift = 8
-"""Bit shift used to separate enum type IDs from value IDs within the type."""
+BITS_PER_ENUM_SPACE = 6
+"""Maximum number of bits for each enum space.
+
+This means that the first enum type will range between 0 and 2^BITS_PER_ENUM_SPACE - 1,
+and then we enter into the second enum type, and so on.
+
+We selected this value such that we're using small numbers, which make debugging
+easy, but also ensuring we're providing enough space for enum types.
+"""
+
+max_unscaled_enum_value = (1 << BITS_PER_ENUM_SPACE) - 1
 
 
 E = TypeVar("E")
@@ -79,9 +88,8 @@ def _next_id(gen: atomic.Int) -> int:
     Raises:
         ValueError: If the counter exceeds the maximum allowed value
     """
-    # TODO(bassosimone): maybe check before incrementing?
-    value = gen.add(1)
-    if value >= (1 << _shift):
+    value = gen.add(1) - 1
+    if value > max_unscaled_enum_value:
         raise ValueError("Too many enum values")
     return value
 
@@ -103,7 +111,7 @@ class Type(Generic[E]):
     """
 
     def __init__(self, space: abstract.TensorSpace[E], name: str) -> None:
-        self.basevalue = _next_id(_id_generator) << _shift
+        self.basevalue = _next_id(_id_generator) << BITS_PER_ENUM_SPACE
         self.gen = atomic.Int()
         self.space = space
         self.tensor = self.space.placeholder(name=name)
