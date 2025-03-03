@@ -301,7 +301,9 @@ class TensorSpace(Generic[B]):
         return self.new_tensor(graph.log(t.node))
 
     def maximum(
-        self, t1: Tensor[B] | graph.Scalar, t2: Tensor[B] | graph.Scalar
+        self,
+        t1: Tensor[B] | graph.Scalar,
+        t2: Tensor[B] | graph.Scalar,
     ) -> Tensor[B]:
         """Compute element-wise maximum of two tensors."""
         t1 = self.ensure_tensor(t1)
