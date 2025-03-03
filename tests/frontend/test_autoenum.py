@@ -150,6 +150,33 @@ def test_value_id_overflow():
     assert len(allvalues) == autoenum.max_values_per_enum_space
 
 
+def test_consecutive_enum_spaces():
+    """Ensure that enum spaces are created with consecutive values."""
+    # Create a first enumeration space
+    test_space = abstract.TensorSpace(TestBasis())
+    enum1 = autoenum.Type(test_space, "Enum1")
+
+    # Exhaust the whole enum space
+    allvalues = set()
+    while True:
+        try:
+            value = autoenum.Value(enum1, "")
+            allvalues.add(value)
+        except ValueError:
+            break
+
+    # Get the max value
+    maxvalue = max(v.value for v in allvalues)
+
+    # Create a second enumeration space
+    enum2 = autoenum.Type(test_space, "Enum2")
+    firstvalue = autoenum.Value(enum2, "").value
+
+    # Make sure they are contiguous
+    assert firstvalue == maxvalue + 1
+
+
+
 def test_id_generation():
     """Test the _next_id helper function directly."""
     counter = atomic.Int()
