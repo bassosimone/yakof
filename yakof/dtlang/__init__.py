@@ -132,11 +132,11 @@ class Model:
             raise NotImplementedError("This model only supports 2D grids")
         cache[self.pvs[0].node] = cast(
             np.ndarray,
-            np.expand_dims(grid[self.pvs[0]], axis=(1,2)),  # X, y, z
+            np.expand_dims(grid[self.pvs[0]], axis=(0,2)),  # x, Y, z
         )
         cache[self.pvs[1].node] = cast(
             np.ndarray,
-            np.expand_dims(grid[self.pvs[1]], axis=(0, 2))  # x, Y, z
+            np.expand_dims(grid[self.pvs[1]], axis=(1, 2))  # X, y, z
         )
         x_size = grid[self.pvs[0]].shape[0]
         y_size = grid[self.pvs[1]].shape[0]

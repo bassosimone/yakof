@@ -63,10 +63,8 @@ model = Model(
     "coffee_shop",
     cvs=[CV_weekday],
     pvs=[
-        # TODO(bassosimone): I have swapped them and am now getting
-        # the same result now, which is kind of... wut?!
-        food_customers,
         drink_customers,
+        food_customers,
     ],
     indexes=[
         seat_capacity,
