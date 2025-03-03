@@ -10,10 +10,6 @@ from dt_model import (
 )
 
 
-# Context Variables
-days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-CV_weekday = UniformCategoricalContextVariable("weekday", [Symbol(v) for v in days])
-
 # Presence Variables
 drink_customers = PresenceVariable(
     name="drink_customers",

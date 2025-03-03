@@ -1,7 +1,7 @@
 import numpy as np
 from sympy import Symbol
 
-from yakof.dtcompiler import (
+from yakof.dtlang import (
     PresenceVariable,
     Constraint,
     Model,
@@ -19,18 +19,15 @@ food_customers = PresenceVariable(
 )
 
 # Capacity Index
-capacity = Index("capacity", value=50)
+capacity = Index("capacity", 50)
 
 # Usage Index
-U_drink_customers = Index("drink service usage factor", value=1)
-U_food_customers = Index("food service usage factor", value=1)
+U_drink_customers = Index("drink service usage factor", 1)
+U_food_customers = Index("food service usage factor", 1)
 
 # Constraints
 C_drink_customers = Constraint(
-    usage=Index(
-        value=drink_customers.t * U_drink_customers.t
-        + food_customers.t * U_food_customers.t
-    ),
+    usage=drink_customers * U_drink_customers + food_customers * U_food_customers,
     capacity=capacity,
 )
 
