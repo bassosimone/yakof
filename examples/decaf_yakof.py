@@ -8,6 +8,8 @@ from yakof.dtlang import (
     Model,
     PresenceVariable,
     UniformCategoricalContextVariable,
+    piecewise,
+    where,
 )
 
 # === Context Variables ===
@@ -47,15 +49,13 @@ seat_turnover_rate = Index("seat_turnover_rate", 1.4)
 
 # === Derived Indexes ===
 
-from yakof.frontend import spaces  # XXX - I need to avoid this import somehow!
-
-seating_capacity = spaces.xyz.where(
+seating_capacity = where(
     weather == "sunny",
     seating_indoor_capacity + seating_outdoor_capacity,
     seating_indoor_capacity,
 )
 
-service_capacity = spaces.xyz.multi_clause_where(
+service_capacity = piecewise(
     (
         (time_of_day == "morning", base_service_capacity * 2),
         (time_of_day == "lunch", base_service_capacity * 3),
@@ -64,11 +64,11 @@ service_capacity = spaces.xyz.multi_clause_where(
     default_value=base_service_capacity * 0.5,
 )
 
-efficiency_factor = spaces.xyz.multi_clause_where(
+efficiency_factor = piecewise(
     (
-        (time_of_day == "morning", spaces.xyz.constant(1.2)),
-        (time_of_day == "lunch", spaces.xyz.constant(1.3)),
-        (time_of_day == "afternoon", spaces.xyz.constant(1.0)),
+        (time_of_day == "morning", 1.2),
+        (time_of_day == "lunch", 1.3),
+        (time_of_day == "afternoon", 1.0),
     ),
     default_value=0.9,
 )

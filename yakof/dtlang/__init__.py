@@ -4,13 +4,29 @@
 
 from __future__ import annotations
 
-from typing import Iterator, Protocol, Sequence, cast, runtime_checkable
+from typing import (
+    Generic,
+    Iterator,
+    Protocol,
+    Sequence,
+    TypeVar,
+    cast,
+    runtime_checkable,
+)
 
 import numpy as np
 import random
 
 from yakof.frontend import abstract, autoenum, bases, graph, linearize, spaces
 from yakof.numpybackend import executor
+
+
+where = spaces.xyz.where
+"""Alias for the where in the spaces.xyz space, for convenience."""
+
+piecewise = spaces.xyz.multi_clause_where
+"""Alias for the multi_clause_where in the spaces.xyz space, providing
+the piecewise function typically used by the `dt-model`."""
 
 
 @runtime_checkable
