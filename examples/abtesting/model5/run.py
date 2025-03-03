@@ -1,10 +1,13 @@
 import numpy as np
 
 
+from dt_model import Ensemble
+
+
 def run_with_module(module):
-    fake_ensemble = [
-        (1, {"weekday": "monday"}),
-    ]
+    ensemble = Ensemble(
+        module.model, {module.CV_weekday: module.days}, cv_ensemble_size=7
+    )
 
     grid = {
         module.drink_customers: np.linspace(0, 100, 10),
@@ -12,7 +15,7 @@ def run_with_module(module):
     }
 
     print("Now we can evaluate our model")
-    print(module.model.evaluate(grid, fake_ensemble))
+    print(module.model.evaluate(grid, ensemble))
 
 
 def run_with_dtmodel():

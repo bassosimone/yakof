@@ -7,8 +7,9 @@ from __future__ import annotations
 from typing import Iterator, Protocol, Sequence, runtime_checkable
 
 import numpy as np
+import random
 
-from yakof.frontend import abstract, bases, graph, spaces
+from yakof.frontend import abstract, autoenum, bases, graph, spaces
 from yakof.numpybackend import evaluator
 
 
@@ -39,8 +40,36 @@ class Index(abstract.Tensor[bases.XYZ]):
 
 
 class ContextVariable(Index):
-    def __init__(self, name: str) -> None:
-        super().__init__("", graph.placeholder(name))
+    pass
+
+
+# TODO(bassosimone): shrink this thing a bit and merge with non-uniform
+class UniformCategoricalContextVariable(ContextVariable):
+    def __init__(self, name: str, values: Sequence[str]) -> None:
+        self.__enum = autoenum.Type(spaces.z, name)
+        super().__init__(name, self.__enum.tensor.node)
+        self.__size = len(values)
+        self.__values = values
+        self.__mapping: dict[str, autoenum.Value[bases.Z]] = {}
+        for value in values:
+            self.__mapping[value] = autoenum.Value(self.__enum, value)
+
+    def get_tensor_for_value(self, value: str) -> abstract.Tensor[bases.Z]:
+        return self.__mapping[value].tensor
+
+    def support_size(self) -> int:
+        return self.__size
+
+    def sample(self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False) -> list:
+        # TODO: subset (if defined) should be a subset of the support (also: with repetitions?)
+
+        (values, size) = (self.__values, self.__size) if subset is None else (subset, len(subset))
+
+        if force_sample or nr < size:
+            assert nr > 0
+            return [(1/nr, r) for r in random.choices(values, k=nr)]
+
+        return [(1/size, v) for v in values]
 
 
 class PresenceVariable(Index):
