@@ -78,6 +78,7 @@ sitin_service_rate = base_sitin_service_rate * efficiency_factor
 
 # === Constraints ===
 
+# Seating constraint
 actual_seating_capacity = seating_capacity * seat_turnover_rate
 seating = Constraint(usage=customers_sitin, capacity=actual_seating_capacity)
 
