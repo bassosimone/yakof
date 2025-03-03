@@ -146,7 +146,7 @@ def test_value_id_overflow():
             break
 
     # Ensure that we have the expected number of values
-    assert len(allvalues) == autoenum.max_values_per_enum_space
+    assert len(allvalues) == autoenum.num_values_per_enum_space
 
 
 def test_consecutive_enum_spaces():
