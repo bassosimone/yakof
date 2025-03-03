@@ -59,7 +59,7 @@ _id_generator = atomic.Int()
 """Atomic integer generator for unique enum type IDs."""
 
 
-_shift = 20
+_shift = 8
 """Bit shift used to separate enum type IDs from value IDs within the type."""
 
 
@@ -79,6 +79,7 @@ def _next_id(gen: atomic.Int) -> int:
     Raises:
         ValueError: If the counter exceeds the maximum allowed value
     """
+    # TODO(bassosimone): maybe check before incrementing?
     value = gen.add(1)
     if value >= (1 << _shift):
         raise ValueError("Too many enum values")
