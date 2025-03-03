@@ -54,7 +54,7 @@ class UniformCategoricalContextVariable(ContextVariable):
         for value in values:
             self.__mapping[value] = autoenum.Value(self.__enum, value)
 
-    def get_tensor_for_value(self, value: str) -> abstract.Tensor[bases.Z]:
+    def __getitem__(self, value: str) -> abstract.Tensor[bases.Z]:
         return self.__mapping[value].tensor
 
     def support_size(self) -> int:
@@ -66,10 +66,13 @@ class UniformCategoricalContextVariable(ContextVariable):
         (values, size) = (self.__values, self.__size) if subset is None else (subset, len(subset))
 
         if force_sample or nr < size:
-            assert nr > 0
-            return [(1/nr, r) for r in random.choices(values, k=nr)]
+            ratio = 1/nr
+            keys = random.choices(values, k=nr)
+        else:
+            ratio = 1/size
+            keys = values
 
-        return [(1/size, v) for v in values]
+        return [(ratio, self.__mapping[k].value) for k in keys]
 
 
 class PresenceVariable(Index):
@@ -94,7 +97,7 @@ class Constraint:
 
 EnsembleWeight = float
 
-EnsembleVariables = dict[str, np.ndarray]
+EnsembleVariables = dict[ContextVariable, np.ndarray]
 
 Ensemble = Iterator[tuple[EnsembleWeight, EnsembleVariables]]
 
@@ -147,6 +150,10 @@ class Model:
         for _, entry in ensemble:
             for name, value in entry.items():
                 value = np.expand_dims(value, axis=(0, 1))  # x, y, Z
+                # FIXME: this is wrong but for now it's okay until we attempt
+                # to actually use these variables, which we don't do for now
+                #
+                # The proper fix would be to switch the execution model
                 state.set_placeholder_value(name, value)
 
         # 5. Create placeholders for the index depending on random variates
@@ -164,7 +171,10 @@ class Model:
                 result = np.asarray(1.0) - constraint.capacity.distribution.cdf(usage)
             else:
                 result = usage <= evaluator.evaluate(constraint.capacity.node, state)
-            field *= result * weights
+            field *= result
 
-        # 7. project the constraints over X, Y space by summing over Z
+        # 7. Apply the ensemble weights to the field
+        field *= weights
+
+        # 8. project the constraints over X, Y space by summing over Z
         return np.sum(field, axis=2)
