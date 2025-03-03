@@ -34,7 +34,7 @@ def test_enum_type_creation(test_space):
     assert enum_type.name == "TestEnum"
     assert enum_type.space is test_space
     assert enum_type.basevalue > 0
-    assert enum_type.basevalue % (1 << autoenum._shift) == 0  # Should be left-shifted
+    assert enum_type.basevalue % (1 << autoenum.BITS_PER_ENUM_SPACE) == 0  # Should be left-shifted
 
 
 def test_enum_value_creation(test_space):
@@ -120,11 +120,11 @@ def test_many_enum_values():
     enum_type = autoenum.Type(test_space, "LargeEnum")
 
     # Create a moderate number of values
-    values = [autoenum.Value(enum_type, f"Value{i}") for i in range(100)]
+    values = [autoenum.Value(enum_type, f"Value{i}") for i in range(autoenum.max_unscaled_enum_value)]
 
     # Check they're all unique
     unique_values = {v.value for v in values}
-    assert len(unique_values) == 100
+    assert len(unique_values) == autoenum.max_unscaled_enum_value
 
 
 def test_value_id_overflow():
@@ -132,16 +132,17 @@ def test_value_id_overflow():
     test_space = abstract.TensorSpace(TestBasis())
     enum_type = autoenum.Type(test_space, "OverflowTest")
 
-    # Manually set the counter to near the limit
-    enum_type.gen.add((1 << autoenum._shift) - 3)
+    # Exhaust the whole enum space
+    allvalues = set()
+    while True:
+        try:
+            value = autoenum.Value(enum_type, "")
+            allvalues.add(value)
+        except ValueError:
+            break
 
-    # Create two values (should work)
-    value1 = autoenum.Value(enum_type, "Value1")
-    value2 = autoenum.Value(enum_type, "Value2")
-
-    # Next one should raise an error
-    with pytest.raises(ValueError, match="Too many enum values"):
-        value3 = autoenum.Value(enum_type, "Value3")
+    # Ensure that we have the expected number of values
+    assert len(allvalues) == autoenum.max_values_per_enum_space
 
 
 def test_id_generation():
@@ -153,12 +154,12 @@ def test_id_generation():
     id2 = autoenum._next_id(counter)
     id3 = autoenum._next_id(counter)
 
-    assert id1 == 1
-    assert id2 == 2
-    assert id3 == 3
+    assert id1 == 0
+    assert id2 == 1
+    assert id3 == 2
 
     # Test overflow
-    counter.add((1 << autoenum._shift) - 3)
+    counter.add((1 << autoenum.BITS_PER_ENUM_SPACE) - 3)
     with pytest.raises(ValueError):
         autoenum._next_id(counter)
 
