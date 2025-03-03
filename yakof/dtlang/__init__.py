@@ -86,7 +86,7 @@ class UniformCategoricalContextVariable(ContextVariable):
             ratio = 1 / size
             keys = values
 
-        rv =  [(ratio, self.__mapping[k].value) for k in keys]
+        rv = [(ratio, self.__mapping[k].value) for k in keys]
         print("ELLIOT", "rv", rv)
         return rv
 
