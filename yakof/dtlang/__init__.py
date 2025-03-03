@@ -4,13 +4,13 @@
 
 from __future__ import annotations
 
-from typing import Iterator, Protocol, Sequence, runtime_checkable
+from typing import Iterator, Protocol, Sequence, cast, runtime_checkable
 
 import numpy as np
 import random
 
-from yakof.frontend import abstract, autoenum, bases, graph, spaces
-from yakof.numpybackend import evaluator
+from yakof.frontend import abstract, autoenum, bases, graph, linearize, spaces
+from yakof.numpybackend import executor
 
 
 @runtime_checkable
@@ -125,18 +125,18 @@ class Model:
         ensemble: Ensemble,
     ):
         # 1. Create empty state with empty bindings
-        state = evaluator.StateWithCache({})
+        cache: dict[graph.Node, np.ndarray] = {}
 
         # 2. Fill the placeholders for the presence variables
         if len(self.pvs) != 2:
             raise NotImplementedError("This model only supports 2D grids")
-        state.set_placeholder_value(
-            self.pvs[0].name,
-            np.expand_dims(grid[self.pvs[0]], axis=(1, 2)),  # X, y, z
+        cache[self.pvs[0].node] = cast(
+            np.ndarray,
+            np.expand_dims(grid[self.pvs[0]], axis=(1,2)),  # X, y, z
         )
-        state.set_placeholder_value(
-            self.pvs[1].name,
-            np.expand_dims(grid[self.pvs[1]], axis=(0, 2)),  # x, Y, z
+        cache[self.pvs[1].node] = cast(
+            np.ndarray,
+            np.expand_dims(grid[self.pvs[1]], axis=(0, 2))  # x, Y, z
         )
         x_size = grid[self.pvs[0]].shape[0]
         y_size = grid[self.pvs[1]].shape[0]
@@ -148,33 +148,43 @@ class Model:
 
         # 4. Create Z-aligned placeholders for the ensemble values
         for _, entry in ensemble:
-            for name, value in entry.items():
+            for cv, value in entry.items():
                 value = np.expand_dims(value, axis=(0, 1))  # x, y, Z
-                # FIXME: this is wrong but for now it's okay until we attempt
-                # to actually use these variables, which we don't do for now
-                #
-                # The proper fix would be to switch the execution model
-                state.set_placeholder_value(name, value)
+                cache[cv.node] = value
 
         # 5. Create placeholders for the index depending on random variates
         for index in self.indexes:
             if index.distribution != None:
                 value = index.distribution.rvs(size=ensemble_size)
                 value = np.expand_dims(value, axis=(0, 1))  # x, y, Z
-                state.set_placeholder_value(index.name, value)
+                cache[index.node] = value
 
-        # 6. Evaluate the constraints
+        # 6. Build the list of graph nodes to evaluate
+        allnodes: list[graph.Node] = []
+        for constraint in self.constraints:
+            allnodes.append(constraint.usage.node)
+            if constraint.capacity.distribution == None:
+                allnodes.append(constraint.capacity.node)
+
+        # 7. Sort and evaluate the graph in topological order
+        state = executor.State(values=cache, flags=0)
+        for node in linearize.forest(*allnodes):
+            executor.evaluate(state, node)
+
+        # 8. Compute the sustainability field based on the results
         field = np.ones((x_size, y_size, ensemble_size))
         for constraint in self.constraints:
-            usage = evaluator.evaluate(constraint.usage.node, state)
+            # TODO(bassosimone): is it possible to make the following
+            # code less ugly? I don't like this `if` being here
+            usage = cache[constraint.usage.node]
             if constraint.capacity.distribution != None:
                 result = np.asarray(1.0) - constraint.capacity.distribution.cdf(usage)
             else:
-                result = usage <= evaluator.evaluate(constraint.capacity.node, state)
+                result = usage <= cache[constraint.capacity.node]
             field *= result
 
-        # 7. Apply the ensemble weights to the field
+        # 9. Apply the ensemble weights to the field
         field *= weights
 
-        # 8. project the constraints over X, Y space by summing over Z
+        # 10. project the constraints over X, Y space by summing over Z
         return np.sum(field, axis=2)

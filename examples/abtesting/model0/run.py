@@ -2,6 +2,8 @@ import numpy as np
 
 
 def run_with_module(module):
+    # TODO(bassosimone): this is not the correct representation of the ensemble
+    # and will crash the `yakof` model evaluation. What do do here?
     fake_ensemble = [
         (1, {"weekday": "monday"}),
     ]

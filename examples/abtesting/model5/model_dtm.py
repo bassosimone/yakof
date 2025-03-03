@@ -62,7 +62,10 @@ service_constraint = Constraint(
 model = Model(
     "coffee_shop",
     cvs=[CV_weekday],
-    pvs=[drink_customers, food_customers],
+    pvs=[
+        drink_customers,
+        food_customers,
+    ],
     indexes=[
         seat_capacity,
         U_drink_seat,

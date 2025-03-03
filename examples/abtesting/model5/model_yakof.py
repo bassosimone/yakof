@@ -62,7 +62,12 @@ service_constraint = Constraint(
 model = Model(
     "coffee_shop",
     cvs=[CV_weekday],
-    pvs=[drink_customers, food_customers],
+    pvs=[
+        # TODO(bassosimone): I have swapped them and am now getting
+        # the same result now, which is kind of... wut?!
+        food_customers,
+        drink_customers,
+    ],
     indexes=[
         seat_capacity,
         U_drink_seat,

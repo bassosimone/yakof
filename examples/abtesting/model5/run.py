@@ -10,8 +10,8 @@ def run_with_module(module):
     )
 
     grid = {
-        module.drink_customers: np.linspace(0, 100, 10),
-        module.food_customers: np.linspace(0, 100, 10),
+        module.drink_customers: np.linspace(0, 100, 11),
+        module.food_customers: np.linspace(0, 100, 11),
     }
 
     print("Now we can evaluate our model")
