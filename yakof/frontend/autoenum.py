@@ -65,7 +65,7 @@ BITS_PER_ENUM_SPACE = 6
 This means that the first enum type will range between 0 and 2^BITS_PER_ENUM_SPACE - 1,
 and then we enter into the second enum type, and so on.
 
-We selected this value such that we're using small numbers, which make debugging
+We selected this value such that we're using small numbers, which makes debugging
 easy, but also ensuring we're providing enough space for enum types.
 """
 
