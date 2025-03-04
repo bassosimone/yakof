@@ -2,8 +2,7 @@
 ..............
 """
 
-from yakof.dtmodel.glue import (
-#from yakof.dtlang import (
+from yakof.dtlang import (
     Constraint,
     Index,
     Model,
