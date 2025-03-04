@@ -2,7 +2,8 @@
 ..............
 """
 
-from yakof.dtlang import (
+from yakof.dtmodel.glue import (
+#from yakof.dtlang import (
     Constraint,
     Index,
     Model,
@@ -117,14 +118,14 @@ from dt_model import Ensemble  # XXX get rid of this import
 
 from yakof.frontend import graph
 
-ensemble = Ensemble(model, {})  # XXX need to make the scenario WAI
+ensemble = Ensemble(model, {})  # type: ignore
 
 grid = {
     customers_sitin: np.linspace(0, 100, 5),
     customers_takeaway: np.linspace(0, 100, 5),
 }
 
-field = model.evaluate(grid, ensemble, debugflags=graph.NODE_FLAG_TRACE)
+field = model.evaluate(grid, ensemble)
 
 print("=== Sustainability ===")
 print(field)
