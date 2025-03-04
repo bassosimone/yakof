@@ -21,12 +21,37 @@ from yakof.frontend import abstract, autoenum, bases, graph, linearize, spaces
 from yakof.numpybackend import executor
 
 
-where = spaces.xyz.where
-"""Alias for the where in the spaces.xyz space, for convenience."""
+def Piecewise(
+    *clauses: tuple[
+        abstract.Tensor[bases.XYZ] | graph.Scalar,  # expression in XYZ space
+        abstract.Tensor[bases.Z] | graph.Scalar,  # condition in Z space
+    ]
+) -> abstract.Tensor[bases.XYZ]:
+    """XXX this function uses an uppercase name to be compatible with the
+    name we're actually using inside the original source code XXX"""
+    # 1. Bail if there are no clauses
+    if len(clauses) < 1:
+        raise ValueError("Piecewise: at least one clause is required")
 
-piecewise = spaces.xyz.multi_clause_where
-"""Alias for the multi_clause_where in the spaces.xyz space, providing
-the piecewise function typically used by the `dt-model`."""
+    # 2. Check whether there is a default case and otherwise
+    # default to returning the zero tensor (ugh!)
+    default_value: abstract.Tensor[bases.XYZ] | graph.Scalar = 0.0
+    last_clause = clauses[-1]
+    if last_clause[1] is True:
+        default_value = last_clause[0]
+        clauses = clauses[:-1]
+
+    # 3. Prepare the reversed clauses adapting the types
+    reversed: list[tuple[abstract.Tensor[bases.Z], abstract.Tensor[bases.XYZ]]] = []
+    for expr, cond in clauses:
+        if isinstance(expr, graph.Scalar):
+            expr = spaces.xyz.constant(expr)
+        if isinstance(cond, graph.Scalar):
+            cond = spaces.z.constant(cond)
+        reversed.append((cond, expr))
+
+    # 4. We're now all set call multi_clause_where
+    return spaces.xyz.multi_clause_where(reversed, default_value)
 
 
 @runtime_checkable
@@ -88,9 +113,6 @@ class UniformCategoricalContextVariable(ContextVariable):
         self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
     ) -> list:
         # TODO: subset (if defined) should be a subset of the support (also: with repetitions?)
-
-        print("ELLIOT", "sample", nr, subset, force_sample)
-
         (values, size) = (
             (self.__values, self.__size) if subset is None else (subset, len(subset))
         )
@@ -103,7 +125,6 @@ class UniformCategoricalContextVariable(ContextVariable):
             keys = values
 
         rv = [(ratio, self.__mapping[k].value) for k in keys]
-        print("ELLIOT", "rv", rv)
         return rv
 
 

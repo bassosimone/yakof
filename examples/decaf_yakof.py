@@ -6,10 +6,9 @@ from yakof.dtlang import (
     Constraint,
     Index,
     Model,
+    Piecewise,
     PresenceVariable,
     UniformCategoricalContextVariable,
-    piecewise,
-    where,
 )
 
 # === Context Variables ===
@@ -49,28 +48,23 @@ seat_turnover_rate = Index("seat_turnover_rate", 1.4)
 
 # === Derived Indexes ===
 
-seating_capacity = where(
-    weather == "sunny",
-    seating_indoor_capacity + seating_outdoor_capacity,
-    seating_indoor_capacity,
+seating_capacity = Piecewise(
+    (seating_indoor_capacity + seating_outdoor_capacity, weather == "sunny"),
+    (seating_indoor_capacity, True),
 )
 
-service_capacity = piecewise(
-    (
-        (time_of_day == "morning", base_service_capacity * 2),
-        (time_of_day == "lunch", base_service_capacity * 3),
-        (time_of_day == "afternoon", base_service_capacity),
-    ),
-    default_value=base_service_capacity * 0.5,
+service_capacity = Piecewise(
+    (base_service_capacity * 2, time_of_day == "morning"),
+    (base_service_capacity * 3, time_of_day == "lunch"),
+    (base_service_capacity, time_of_day == "afternoon"),
+    (base_service_capacity * 0.5, True),
 )
 
-efficiency_factor = piecewise(
-    (
-        (time_of_day == "morning", 1.2),
-        (time_of_day == "lunch", 1.3),
-        (time_of_day == "afternoon", 1.0),
-    ),
-    default_value=0.9,
+efficiency_factor = Piecewise(
+    (1.2, time_of_day == "morning"),
+    (1.3, time_of_day == "lunch"),
+    (1.0, time_of_day == "afternoon"),
+    (0.9, True),
 )
 
 takeaway_service_rate = base_takeaway_service_rate * efficiency_factor
