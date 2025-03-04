@@ -30,6 +30,6 @@ class PresenceVariable(geometry.Tensor):
         cvs_deps: Sequence of context variables that this presence variable depends on
     """
 
-    def __init__(self, name: str, cvs_deps: Sequence[ContextVariable]) -> None:
+    def __init__(self, name: str, cvs: Sequence[ContextVariable]) -> None:
         super().__init__(geometry.space, graph.placeholder(name))
-        self.cvs = cvs_deps
+        self.cvs = cvs

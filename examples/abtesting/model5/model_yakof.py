@@ -2,7 +2,6 @@ from yakof.dtlang import (
     UniformCategoricalContextVariable,
     PresenceVariable,
     Constraint,
-    Ensemble,
     Model,
     Index,
 )
