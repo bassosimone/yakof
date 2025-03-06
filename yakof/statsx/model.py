@@ -26,7 +26,7 @@ Weight = float
 """Weight associated with a sampled value, represents importance in an ensemble."""
 
 Value = TypeVar("Value", float, int, contravariant=True)
-"""Type variable for continuous or categorical values."""
+"""Type variable for continuous (float) or categorical (int) values."""
 
 
 @dataclass(frozen=True)
@@ -50,8 +50,27 @@ class Sampler(Protocol, Generic[Value]):
     distributions through a single interface.
 
     Methods:
-        support_size: Returns the size of the support of the distribution.
-        sample: Samples weighted values from the distribution.
+        support_size():
+            Returns the size of the distribution's support, for discrete
+            distributions, or None, for continuous distributions.
+
+        sample(count=1, *, subset=None, force_sample=False):
+            Samples `count` values from the distribution.
+
+            The implementation uses one of two sampling methods:
+            - Random Variates Sampling: When count < support size, generating
+              random samples with equal weights (1/count)
+            - PDF-Based Sampling: When sampling the full support or a subset,
+              returning each value with a weight proportional to its probability
+
+            The choice between methods affects how the resulting samples should
+            be interpreted and used in downstream applications.
+
+            Args:
+                count: Number of samples to draw
+                subset: Optional subset of values to sample from
+                force_sample: Forces random variates sampling even when
+                    sampling the full support
     """
 
     def support_size(self) -> int | None: ...

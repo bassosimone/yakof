@@ -35,7 +35,7 @@ def test_uniform_categorical_sampler():
 
     # Create both samplers
     legacy = dt_model.UniformCategoricalContextVariable("test", values)
-    new = statsx.UniformCategoricalSampler(values)
+    new = statsx.CategoricalSampler(set(values))
 
     # Test with different sample counts
     for count in [1, 3, 5, 10]:
@@ -128,7 +128,7 @@ def test_uniform_categorical_all_values():
 
     # Create both samplers
     legacy = dt_model.UniformCategoricalContextVariable("test", values)
-    new = statsx.UniformCategoricalSampler(values)
+    new = statsx.CategoricalSampler(set(values))
 
     # Sample all values (count >= support size)
     legacy_samples = [LegacySample.from_tuple(s) for s in legacy.sample(3)]
@@ -295,7 +295,7 @@ def test_force_sample():
 
     # Create both samplers
     legacy = dt_model.UniformCategoricalContextVariable("test", values)
-    new = statsx.UniformCategoricalSampler(values)
+    new = statsx.CategoricalSampler(set(values))
 
     # Sample with force_sample=True
     legacy_samples = [

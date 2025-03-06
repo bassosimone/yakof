@@ -2,18 +2,14 @@
 Continuous Distribution Sampling
 ================================
 
-This module provides implementations for sampling from continuous probability distributions.
+This module implements sampling from continuous distributions.
 
-It includes:
-    - Distribution: A protocol compatible with scipy.stats distributions
-    - Sampler: For sampling from continuous distributions
-
-Continuous distributions represent outcomes with infinite possible values.
-This module is designed to work seamlessly with scipy.stats distributions
-as well as any other implementation of the Distribution protocol.
+Continuous distributions represent outcomes with infinite possible
+values. This module is designed to work seamlessly with scipy.stats
+distributions and other compatible implementations.
 
 Users should import from the top-level statsx package rather than
-importing this module directly.
+importing from this module directly.
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -30,8 +26,10 @@ from . import scipy
 class ContinuousSampler:
     """Samples from a continuous probability distribution.
 
+    The sampler generates samples with assigned weights for use in ensembles.
+
     Args:
-        dist: A distribution object implementing the ContinuousDistribution protocol.
+        dist: A distribution implementing the ScipyRVContinuous protocol.
     """
 
     def __init__(self, dist: scipy.ScipyRVContinuous) -> None:
@@ -40,7 +38,6 @@ class ContinuousSampler:
     def support_size(self) -> None:
         """Returns None as continuous distributions have infinite support."""
         return None
-
 
     def sample(
         self,
@@ -51,10 +48,24 @@ class ContinuousSampler:
     ) -> Sequence[model.Sample[float]]:
         """Sample values from this continuous distribution.
 
+        This method uses two different sampling approaches depending on the context:
+
+        1. Random Variates Sampling (default or when force_sample=True):
+           - Generates random samples using the distribution's random variate function
+           - Each sample has equal weight (1/count)
+           - For continuous distributions, this is typically the preferred method
+             unless specific points need to be evaluated
+
+        2. PDF-Based Sampling (when a subset is provided and count >= len(subset)):
+           - Evaluates the probability density at each point in the subset
+           - Returns each value with weight proportional to its probability density
+           - Useful when you need to evaluate specific points (e.g., grid points)
+             with appropriate weights
+
         Args:
             count: Number of samples to draw.
             subset: Optional subset of values to sample from.
-            force_sample: Whether to force sampling even if count >= support_size.
+            force_sample: Forces random variates sampling.
 
         Returns:
             A list of samples with weights and values.
@@ -63,54 +74,42 @@ class ContinuousSampler:
         if count <= 0:
             raise ValueError("count must be a positive integer")
 
-        # Case 1: No subset provided - always generate random samples
-        if subset is None:
-            # Generate random samples from the distribution
-            samples = self.dist.rvs(size=count)
-            if isinstance(samples, (float, int)):  # Handle case of single sample
-                samples = [samples]
+        return (
+            self.__sample_using_rvs(count)
+            if force_sample or subset is None or count < len(subset)
+            else self.__sample_using_pdf(count, subset)
+        )
 
-            # Each sample gets equal weight
-            sample_weight = 1 / count
-            return [
-                model.Sample(weight=sample_weight, value=float(val))
-                for val in samples
-            ]
+    def __sample_using_rvs(self, count: int) -> Sequence[model.Sample[float]]:
+        """Samples from the distribution using random variates sampling."""
 
-        # Case 2: Subset provided and count >= subset size and not forced sampling
-        # In this case, return all subset values with normalized PDF weights
-        if not force_sample and count >= len(subset):
-            # Calculate PDF values for each value in the subset
-            pdf_values = self.dist.pdf(subset)
+        # Generate random samples from the distribution
+        samples = self.dist.rvs(size=count)
 
-            # Handle the case where pdf_values is a single number
-            if isinstance(pdf_values, (float, int)):
-                pdf_values = [pdf_values]
-
-            # Normalize the PDF values
-            total_pdf = sum(pdf_values)
-            if total_pdf <= 0:
-                # Fallback to uniform weights if PDF sum is non-positive
-                uniform_weight = 1.0 / len(subset)
-                return [
-                    model.Sample(weight=uniform_weight, value=float(val))
-                    for val in subset
-                ]
-
-            # Return all subset values with normalized PDF values as weights
-            return [
-                model.Sample(weight=float(pdf / total_pdf), value=float(val))
-                for pdf, val in zip(pdf_values, subset)
-            ]
-
-        # Case 3: Subset provided but count < subset size or force_sample=True
-        # In this case, sample from the subset
-        sampled_indices = random.choices(range(len(subset)), k=count)
-        sampled_values = [subset[idx] for idx in sampled_indices]
+        # Handle case of single sample
+        if isinstance(samples, (float, int)):
+            samples = [samples]
 
         # Each sample gets equal weight
         sample_weight = 1 / count
+        return [model.Sample(weight=sample_weight, value=float(val)) for val in samples]
+
+    def __sample_using_pdf(
+        self,
+        count: int,
+        subset: Sequence[float],
+    ) -> Sequence[model.Sample[float]]:
+        """Samples from the distribution using the probability density function."""
+
+        # Compute the probability of each value in the subset
+        prob = self.dist.pdf(np.asarray(subset))
+
+        # Handle case of single sample
+        if isinstance(prob, (float, int)):
+            prob = [prob]
+
+        # Normalize and return the probabilities
+        total_prob = np.sum(prob)
         return [
-            model.Sample(weight=sample_weight, value=float(val))
-            for val in sampled_values
+            model.Sample(weight=p / total_prob, value=v) for p, v in zip(prob, subset)
         ]
