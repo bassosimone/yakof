@@ -3,7 +3,7 @@ name = "yakof"
 version = "0.1.0"
 description = "A technology demonstrator for sustainability modeling"
 requires-python = "==3.11.11"
-dependencies = ["numpy", "sympy"]
+dependencies = ["dt-model", "numpy", "sympy"]
 license = "Apache-2.0"
 
 [build-system]
@@ -17,3 +17,6 @@ dev = ["black>=24.10.0", "pytest>=7.0.0", "pytest-cov>=4.0.0"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "--cov=yakof --cov-report=xml --cov-report=term-missing"
+
+[tool.uv.sources]
+dt-model = { git = "https://github.com/fbk-most/dt-model", rev = "main" }
