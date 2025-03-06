@@ -65,7 +65,7 @@ wheels = [
 [[package]]
 name = "dt-model"
 version = "0.0.1"
-source = { git = "https://github.com/fbk-most/dt-model?rev=fix%2Fpythonversion#f25f90bc81546fc4d4149e62b384c970f15f2a77" }
+source = { git = "https://github.com/fbk-most/dt-model?rev=main#efded93eee8956508faa265b3c5e071a48d11b23" }
 dependencies = [
     { name = "numpy" },
     { name = "pandas" },
@@ -292,7 +292,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dt-model", git = "https://github.com/fbk-most/dt-model?rev=fix%2Fpythonversion" },
+    { name = "dt-model", git = "https://github.com/fbk-most/dt-model?rev=main" },
     { name = "numpy" },
     { name = "sympy" },
 ]
