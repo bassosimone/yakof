@@ -30,7 +30,7 @@ This package implements two complementary sampling approaches:
    - Provides complete coverage of the probability space
 
 The package automatically selects the appropriate method based on the sampling
-requirements, but you can force RVS  using the force_sample parameter.
+requirements, but you can force RVS using the force_sample parameter.
 
 Usage
 -----
