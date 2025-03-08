@@ -115,9 +115,9 @@ class Sampler(Generic[T]):
         We support two distinct sampling modes:
 
             1. Random Variates Sampling: we extract `nr` random variates from
-            the transformed distribution. Each sample has a weight of 1/nr and
-            a probability equal to its probability in the distribution. This
-            means that the same point may appear multiple times in the output.
+            the transformed distribution. This means that the same point may
+            appear multiple times in the output. Each sample has a weight of 1/nr
+            and a probability equal to its probability in the distribution.
 
             2. Exhaustive Sampling: we return all the samples within the
             probability mass class. This mode is only available for discrete
@@ -141,7 +141,7 @@ class Sampler(Generic[T]):
 
         # Defer to the _sample method - implementation note: we use a
         # separate class method to make self.dist inaccessible and thus
-        # avoid potentially programming errors.
+        # avoid potential programming errors.
         return self._sample(dist, nr, subset, force_sample)
 
     @classmethod
