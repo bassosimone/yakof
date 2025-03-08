@@ -74,11 +74,11 @@ class Sampler(Generic[T]):
         self.dist = dist
 
     @staticmethod
-    def _validate_count(count: int) -> int:
-        """Validates that the count is a positive integer."""
-        if count <= 0:
-            raise ValueError("count must be a positive integer")
-        return count
+    def _validate_nr(nr: int) -> int:
+        """Validates that the `nr` is a positive integer."""
+        if nr <= 0:
+            raise ValueError("nr must be a positive integer")
+        return nr
 
     def sample(
         self,
@@ -131,7 +131,7 @@ class Sampler(Generic[T]):
         Otherwise, we use exhaustive sampling.
         """
         # === Validation ===
-        nr = self._validate_count(nr)
+        nr = self._validate_nr(nr)
 
         # === Subset ===
         #
