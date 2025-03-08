@@ -18,6 +18,10 @@ creating several continuous and discrete distributions.
 
 # SPDX-License-Identifier: Apache-2.0
 
+from .continuous import Density
+
+from .discrete import Mass
+
 from .generalized import (
     DensityOrMass,
     normal_density,
@@ -27,7 +31,9 @@ from .generalized import (
 )
 
 __all__ = [
+    "Density",
     "DensityOrMass",
+    "Mass",
     "normal_density",
     "uniform_density",
     "mass",
