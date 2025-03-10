@@ -2,15 +2,18 @@
 Linearization of Computation Graphs
 ===================================
 
-This module provides functions to linearize computation graphs into execution plans.
-It performs topological sorting of graph nodes, ensuring dependencies are evaluated
-before the nodes that depend on them.
+This module provides functions to linearize computation graphs into execution
+plans. It performs topological sorting of graph nodes, ensuring dependencies are
+evaluated before the nodes that depend on them.
+
+While we could directly rely on the node's creation ID to perform sorting on
+the graph, relying on topological sorting makes the code slightly more robust
+because it allows us to detect loops at sorting time.
 
 The linearization process:
 1. Starts from output nodes and traverses the graph
 2. Ensures all dependencies are scheduled before their dependents
-3. Maintains creation order where possible (for nodes with no dependency relationship)
-4. Handles common graph structures (binary operations, conditionals, etc.)
+3. Handles common graph structures (conditionals, etc.)
 
 This is useful for:
 - Creating efficient execution plans for evaluators
@@ -29,20 +32,17 @@ def forest(*leaves: graph.Node) -> list[graph.Node]:
     """
     Linearize a computation forest (multiple output nodes) into an execution plan.
 
-    In a computation graph, "leaves" refer to the output nodes that have no
-    dependents (nothing depends on them). These are typically the final results
-    of your computation. We start linearization from these leaf nodes and work
-    backwards to find all dependencies.
-
-    This function creates a linearized execution plan from multiple leaf/output nodes,
-    ensuring all dependencies are evaluated before the nodes that depend on them.
-    When multiple paths exist through the graph, the original creation order is
-    preserved where possible.
+    The nodes passed to this function are called "leaves" because (1) they
+    represents the nodes you'd like to evaluate and (2) these nodes are
+    typically the final results of the computation, which should not depend
+    on any other nodes. We start linearization from such leaf nodes and
+    work backwards to schedule all dependencies in order. That said, it's
+    possible to apply this algorithm to any node within your graph. The
+    result would be the linear scheduling from such node's point of view.
 
     Args:
-        *leaves: Output/leaf nodes of the computation graph as separate arguments.
-                These should be the final outputs of your computation.
-                Use unpacking (*list_of_nodes) to pass a list of nodes.
+        *leaves: the nodes to start the linearization process from. Use the
+            unpacking operator `*` to pass a list of nodes.
 
     Returns:
         Topologically sorted list of nodes forming an execution plan
@@ -61,44 +61,54 @@ def forest(*leaves: graph.Node) -> list[graph.Node]:
         >>> # List of outputs
         >>> plan = linearize.forest(*output_list)
     """
+
+    # plan contains the linearized output
     plan: list[graph.Node] = []
-    visiting: set[graph.Node] = set()  # For cycle detection
+
+    # visting allows to detect cycles when visiting nodes
+    visiting: set[graph.Node] = set()
+
+    # visited caches the nodes we've already visited
     visited: set[graph.Node] = set()
 
-    def visit(node: graph.Node) -> None:
+    def _visit(node: graph.Node) -> None:
+        """Internal function that visits a given node."""
+
+        # Ensure we only visit a node at most once
         if node in visited:
             return
 
-        # Check for cycles
+        # Ensure there are no cycles (the input should be a DAG anyway)
         if node in visiting:
             raise ValueError(
                 f"linearize: cycle detected in computation graph at node {node.name or f'<unnamed node {node.id}>'}"
             )
 
+        # Register that we're visiting this node
         visiting.add(node)
 
-        # Get dependencies based on node type
+        # Get dependent nodes based on this node's type
         deps = _get_dependencies(node)
-
-        # Sort dependencies by creation ID for deterministic ordering
-        # when multiple paths exist
-        deps.sort(key=lambda n: n.id)
 
         # Visit all dependencies first
         for dep in deps:
-            visit(dep)
+            _visit(dep)
 
-        # Done with this node
+        # We are not visting this node anymore
         visiting.remove(node)
+
+        # We have visited this node
         visited.add(node)
+
+        # We can append this node to the final plan
         plan.append(node)
 
-    # Sort inputs by creation ID for deterministic ordering
-    for node in sorted(leaves, key=lambda n: n.id):
-        visit(node)
+    # Start visiting from the leaf nodes
+    for node in leaves:
+        _visit(node)
 
-    # Sort outputs by creation ID for deterministic ordering
-    return sorted(plan, key=lambda n: n.id)
+    # Return the linearized plan to the caller
+    return plan
 
 
 def _get_dependencies(node: graph.Node) -> list[graph.Node]:
@@ -114,21 +124,28 @@ def _get_dependencies(node: graph.Node) -> list[graph.Node]:
     Raises:
         TypeError: If the node type is unknown
     """
+
     if isinstance(node, graph.BinaryOp):
         return [node.left, node.right]
-    elif isinstance(node, graph.UnaryOp):
+
+    if isinstance(node, graph.UnaryOp):
         return [node.node]
-    elif isinstance(node, graph.where):
+
+    if isinstance(node, graph.where):
         return [node.condition, node.then, node.otherwise]
-    elif isinstance(node, graph.multi_clause_where):
-        deps = [node.default_value]
+
+    if isinstance(node, graph.multi_clause_where):
+        deps: list[graph.Node] = []
         for cond, value in node.clauses:
             deps.append(cond)
             deps.append(value)
+        deps.append(node.default_value)
         return deps
-    elif isinstance(node, graph.AxisOp):
+
+    if isinstance(node, graph.AxisOp):
         return [node.node]
-    elif isinstance(node, (graph.constant, graph.placeholder)):
+
+    if isinstance(node, (graph.constant, graph.placeholder)):
         return []
-    else:
-        raise TypeError(f"linearize: unknown node type: {type(node)}")
+
+    raise TypeError(f"linearize: unknown node type: {type(node)}")
