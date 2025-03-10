@@ -183,8 +183,7 @@ class Sampler(Generic[T]):
     def _exhaustive_sampling(dist: probability.Mass[T]) -> ListOfSamples[T]:
         return ListOfSamples(
             samples=[
-                Sample(probability=y, value=x, weight=y)
-                for x, y in dist.dist.items()
+                Sample(probability=y, value=x, weight=y) for x, y in dist.dist.items()
             ]
         )
 
