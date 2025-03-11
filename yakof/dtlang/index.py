@@ -4,7 +4,7 @@ Index Implementation
 
 This module implements the `Index` type, which represents either a constant
 value or a placeholder for sampling from a random distribution. In either case,
-we compile the Indes into a graph.placeholder tensor in the XYZ space.
+we compile the Index into a graph.placeholder tensor in the XYZ space.
 """
 
 from typing import Protocol, cast, runtime_checkable

@@ -59,9 +59,7 @@ def test_piecewise_basics():
     # Ensure the result is the expected one
     expect = np.array([2, 27, 256])
     rv = state.values[pw.node]
-    assert len(rv) == len(expect)
-    for idx in range(len(expect)):
-        assert rv[idx] == expect[idx]
+    assert np.all(rv == expect)
 
 
 def test_piecewise_with_scalars():
