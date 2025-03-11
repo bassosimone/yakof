@@ -29,8 +29,8 @@ from . import geometry
 from ..frontend import autoenum, graph
 
 
-SampleProbability = float
-"""The probability of a value sampled from an EnsembleSampler."""
+SampleWeight = float
+"""The weight of a value sampled from an EnsembleSampler."""
 
 SampleValue = float
 """SampledValue is the value sampled from an EnsembleSampler."""
@@ -54,7 +54,7 @@ class EnsembleSampler(Protocol):
         *,
         subset: Sequence[str] | None = None,
         force_sample: bool = False,
-    ) -> list[tuple[SampleProbability, SampleValue]]: ...
+    ) -> list[tuple[SampleWeight, SampleValue]]: ...
 
 
 class CategoricalContextVariable(geometry.Tensor):
@@ -109,7 +109,7 @@ class CategoricalContextVariable(geometry.Tensor):
         *,
         subset: Sequence[str] | None = None,
         force_sample: bool = False,
-    ) -> list[tuple[SampleProbability, SampleValue]]:
+    ) -> list[tuple[SampleWeight, SampleValue]]:
         """Sample values from this categorical distribution.
 
         Args:

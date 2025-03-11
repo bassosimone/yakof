@@ -280,6 +280,7 @@ source = { editable = "." }
 dependencies = [
     { name = "dt-model" },
     { name = "numpy" },
+    { name = "scipy" },
     { name = "sympy" },
 ]
 
@@ -294,6 +295,7 @@ dev = [
 requires-dist = [
     { name = "dt-model", git = "https://github.com/fbk-most/dt-model?rev=main" },
     { name = "numpy" },
+    { name = "scipy" },
     { name = "sympy" },
 ]
 
