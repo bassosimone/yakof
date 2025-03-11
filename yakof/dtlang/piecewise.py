@@ -22,7 +22,7 @@ Clause = tuple[Expr, Cond]
 
 
 def Piecewise(*clauses: Clause) -> geometry.Tensor:
-    """Converts the provide clauses arranged according to the sympy.Piecewise
+    """Converts the provided clauses arranged according to the sympy.Piecewise
     convention into a graph.multi_clause_where computation tensor in XYZ.
 
     Args:
@@ -34,7 +34,6 @@ def Piecewise(*clauses: Clause) -> geometry.Tensor:
     Raises:
         ValueError: If no clauses are provided.
     """
-    # Ensure that we remove all the clauses after a true clause
     return _to_tensor(_filter_clauses(clauses))
 
 

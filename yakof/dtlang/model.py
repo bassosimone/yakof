@@ -66,6 +66,10 @@ class Model:
         Returns:
             A numpy array representing the constraint satisfaction field
         """
+        # TODO(bassosimone): to some extent, this could also be a method of
+        # the actual Constraint class, since the distribution already specifies
+        # we're operating in the numpy domain. The same argument could
+        # potentially hold for the evaluation of the indexes.
         usage = cache[constr.usage.node]
         if isinstance(constr.capacity, CumulativeDistribution):
             return np.asarray(1.0) - constr.capacity.cdf(usage)
@@ -91,6 +95,11 @@ class Model:
         Raises:
             NotImplementedError: If more than 2 presence variables are specified
         """
+        # TODO(bassosimone): the original implementation is also saving the
+        # value of each constraint, which is very useful for debugging. I am
+        # a bit torn with respect to this. For now, I have not added this
+        # because I wanted this class to be immutable. Need to think a bit more.
+
         # 1. Create empty state with empty bindings
         cache: dict[graph.Node, np.ndarray] = {}
 
@@ -129,6 +138,9 @@ class Model:
         # 5. Create placeholders for the indexes
         for index in self.indexes:
             if isinstance(index, Index):
+                # TODO(bassosimone): keep in mind that random variates sampling
+                # here is partially incorrect, because we're not extending the
+                # ensemble space and draw "enough" samples from the distribution.
                 value = index.distribution.rvs(size=ensemble_size)
                 value = np.expand_dims(value, axis=(0, 1))  # x, y, Z
                 cache[index.node] = value

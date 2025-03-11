@@ -3,7 +3,7 @@ Context Variables
 =================
 
 This module implements context variables (i.e., variables associated
-with uncertainty) to graph.placeholder tensors in the XYZ space.
+with uncertainty) as graph.placeholder tensors in the XYZ space.
 
 Two kind of context variables are supported:
 
@@ -91,6 +91,10 @@ class CategoricalContextVariable(geometry.Tensor):
         # 4. Generate and save the enumeration IDs for each value
         self.__mapping = {v: autoenum.Value(self.__enum, v) for v in self.__values}
 
+    # TODO(bassosimone): consider also adding support for inequality. FWIW, I am much
+    # more torn in terms of implementing `<` since, in principle, there is no strong
+    # guarantee that the support of enumerations will be totally ordered.
+
     # Redefine the lazy equality to allow for comparison with the original strings
     def __eq__(self, value: str) -> geometry.Tensor:  # type: ignore
         return geometry.space.equal(self.__enum.tensor, self.__mapping[value].tensor)
@@ -113,8 +117,8 @@ class CategoricalContextVariable(geometry.Tensor):
         """Sample values from this categorical distribution.
 
         Args:
-            nr: Number of samples to draw.
-            subset: Optional subset of values to sample from.
+            nr: Upper bound for the number of samples to draw.
+            subset: Optional subset of values to draw from.
             force_sample: Whether to force sampling even if nr >= support_size.
 
         Returns:
@@ -122,16 +126,22 @@ class CategoricalContextVariable(geometry.Tensor):
         """
         # TODO: subset (if defined) should be a subset of the support (also: with repetitions?)
 
+        # 1. Use either the whole support or a subset thereof
         keys, size = list(self.__values.keys()), self.support_size()
         if subset is not None:
             keys, size = subset, len(subset)
 
+        # 2. Honour the request to sample and return the whole support
+        # where reasonable, to get a better coverage.
         if force_sample or nr < size:
             ratio = 1 / nr
+            # TODO(bassosimone): this line is wrong and we would need to
+            # also include the weights into sampling
             keys = random.choices(keys, k=nr)
         else:
             ratio = 1 / size
 
+        # 3. Actually generate the ensemble input
         return [(ratio, float(self.__mapping[k].value)) for k in keys]
 
 

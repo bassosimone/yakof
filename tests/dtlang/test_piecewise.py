@@ -59,9 +59,7 @@ def test_piecewise_basics():
     # Ensure the result is the expected one
     expect = np.array([2, 27, 256])
     rv = state.values[pw.node]
-    assert len(rv) == len(expect)
-    for idx in range(len(expect)):
-        assert rv[idx] == expect[idx]
+    assert np.all(rv == expect)
 
 
 def test_piecewise_with_scalars():
@@ -112,20 +110,22 @@ def test_piecewise_with_constant_conditions():
 
     # Create piecewise with constant conditions
     pw = piecewise.Piecewise(
-        (expr1, False),       # Constant False condition
-        (expr2, True),        # Constant True condition
-        (expr3, True),        # This should be ignored as it's after a True condition
+        (expr1, False),  # Constant False condition
+        (expr2, True),  # Constant True condition
+        (expr3, True),  # This should be ignored as it's after a True condition
     )
 
     # Linearize the execution plan
     plan = linearize.forest(pw.node)
 
     # Set up evaluation state with tensor values
-    state = executor.State({
-        expr1.node: np.array([10, 20, 30]),
-        expr2.node: np.array([40, 50, 60]),
-        expr3.node: np.array([70, 80, 90]),
-    })
+    state = executor.State(
+        {
+            expr1.node: np.array([10, 20, 30]),
+            expr2.node: np.array([40, 50, 60]),
+            expr3.node: np.array([70, 80, 90]),
+        }
+    )
 
     # Evaluate the piecewise function
     for node in plan:
@@ -140,15 +140,17 @@ def test_piecewise_with_constant_conditions():
     # Test with just default case (single True condition) and a false condition
     # to avoid empty condition list error
     pw_default = piecewise.Piecewise(
-        (expr2, False),     # False condition (needed to avoid empty condition list)
-        (expr1, True),      # Default case
+        (expr2, False),  # False condition (needed to avoid empty condition list)
+        (expr1, True),  # Default case
     )
 
     plan_default = linearize.forest(pw_default.node)
-    state_default = executor.State({
-        expr1.node: np.array([10, 20, 30]),
-        expr2.node: np.array([40, 50, 60]),
-    })
+    state_default = executor.State(
+        {
+            expr1.node: np.array([10, 20, 30]),
+            expr2.node: np.array([40, 50, 60]),
+        }
+    )
 
     for node in plan_default:
         executor.evaluate(state_default, node)
