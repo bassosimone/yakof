@@ -192,15 +192,11 @@ def test_model_with_more_than_two_presence_variables():
         pvs=[x, y, z],  # Three presence variables
         indexes=[idx],
         capacities=[],
-        constraints=[constraint]
+        constraints=[constraint],
     )
 
     # Set up grid
-    grid = {
-        x: np.array([1, 2, 3]),
-        y: np.array([4, 5, 6]),
-        z: np.array([7, 8, 9])
-    }
+    grid = {x: np.array([1, 2, 3]), y: np.array([4, 5, 6]), z: np.array([7, 8, 9])}
 
     ensemble = Ensemble(model, {weekday: ["monday"]})  # type: ignore
 
