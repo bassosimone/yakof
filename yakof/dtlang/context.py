@@ -3,7 +3,7 @@ Context Variables
 =================
 
 This module implements context variables (i.e., variables associated
-with uncertainty) to graph.placeholder tensors in the XYZ space.
+with uncertainty) as graph.placeholder tensors in the XYZ space.
 
 Two kind of context variables are supported:
 
