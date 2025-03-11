@@ -8,7 +8,8 @@ import numpy as np
 
 
 def test_abtesting():
-    # TODO(bassosimone): force using the same random seed
+    # TODO(bassosimone): force using the same random seed. This is not
+    # an issue for this test case but it's an issue in general.
 
     # Run using the original dt_model implementation
     rv_a = a.run()
