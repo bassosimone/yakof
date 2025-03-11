@@ -100,7 +100,3 @@ def run() -> np.ndarray:
     }
 
     return model.evaluate(grid, ensemble)
-
-
-if __name__ == "__main__":
-    print(run())
