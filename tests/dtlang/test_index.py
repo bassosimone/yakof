@@ -29,3 +29,18 @@ def test_index_with_distribution():
     values = idx.distribution.rvs(100)
     assert len(values) == 100
     assert all(0 <= v <= 1 for v in values)
+
+
+def test_index_with_custom_distribution():
+    """Test Index with a custom distribution class."""
+
+    class CustomDistribution:
+        def rvs(self, size=1):
+            return np.ones(size) * 42
+
+    custom_dist = CustomDistribution()
+    idx = index.Index("custom", custom_dist)
+
+    values = idx.distribution.rvs(10)
+    assert len(values) == 10
+    assert all(v == 42 for v in values)
