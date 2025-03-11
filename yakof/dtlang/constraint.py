@@ -38,12 +38,15 @@ class Constraint:
     Args:
         usage: A tensor representing resource consumption
         capacity: Either a tensor or a distribution representing available capacity
+        name: Optional constraint name
     """
 
     def __init__(
         self,
         usage: geometry.Tensor,
         capacity: geometry.Tensor | CumulativeDistribution,
+        name: str = "",
     ) -> None:
         self.usage = usage
         self.capacity = capacity
+        self.name = name
