@@ -4,13 +4,13 @@ from typing import Callable
 
 import numpy as np
 from scipy import stats
-from sympy import Symbol
 
-from _base import SymbolExtender
 from .context_variable import ContextVariable
 
+from ...frontend import graph
 
-class PresenceVariable(SymbolExtender):
+
+class PresenceVariable:
     """
     Class to represent a presence variable.
     """
@@ -21,7 +21,8 @@ class PresenceVariable(SymbolExtender):
         cvs: list[ContextVariable],
         distribution: Callable | None = None,
     ) -> None:
-        super().__init__(name)
+        self.name = name
+        self.node = graph.placeholder(name)
         self.cvs = cvs
         self.distribution = distribution
 
@@ -45,6 +46,9 @@ class PresenceVariable(SymbolExtender):
             List of sampled values.
         """
         assert nr > 0
+
+        # TODO(bassosimone): I have currently broken the mapping
+        # between a symbol and its name here...
 
         all_cvs = []
         # TODO: check this functionality
