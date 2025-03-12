@@ -1,23 +1,28 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
+
 import random
 
 from scipy.stats import rv_continuous
 
-from ._base import SymbolExtender
+from ...frontend import graph
 
 
-class ContextVariable(SymbolExtender):
+class ContextVariable(ABC):
     """
     Class to represent a context variable.
     """
 
     def __init__(self, name: str) -> None:
-        super().__init__(name)
+        self.name = name
+        self.node = graph.placeholder(name)
 
+    @abstractmethod
     def support_size(self) -> int:
         pass
 
+    @abstractmethod
     def sample(
         self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
     ) -> list:
