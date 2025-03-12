@@ -5,11 +5,11 @@ from .symbol import SymbolValue
 
 
 def _ensure_node(value: graph.Node | SymbolValue | graph.Scalar) -> graph.Node:
-    return (
-        value.node
-        if isinstance(value, SymbolValue)
-        else graph.constant(value) if isinstance(value, graph.Scalar) else value
-    )
+    if isinstance(value, graph.Node):
+        return value
+    if isinstance(value, SymbolValue):
+        return value.node
+    return graph.constant(value)
 
 
 def Eq(
