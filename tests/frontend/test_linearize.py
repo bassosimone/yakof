@@ -7,7 +7,7 @@ import pytest
 from yakof.frontend import graph, linearize
 
 
-def find_node_by_identity(plan, target_node):
+def find_node(plan, target_node):
     """Find the index of a node in the plan using identity comparison.
 
     We MUST use this method for finding the nodes because nodes override
@@ -32,8 +32,8 @@ def test_simple_chain():
     assert len(plan) == 5
 
     # Check node order - dependencies should come before dependents
-    assert find_node_by_identity(plan, a) < find_node_by_identity(plan, b)
-    assert find_node_by_identity(plan, b) < find_node_by_identity(plan, c)
+    assert find_node(plan, a) < find_node(plan, b)
+    assert find_node(plan, b) < find_node(plan, c)
 
     # All nodes should be in the plan
     assert set(n.id for n in plan) == set(n.id for n in {a, b, c, b.right, c.right})
@@ -52,16 +52,12 @@ def test_diamond_graph():
     assert len(plan) == 6
 
     # x should come before both branches
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, left_branch)
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, right_branch)
+    assert find_node(plan, x) < find_node(plan, left_branch)
+    assert find_node(plan, x) < find_node(plan, right_branch)
 
     # Both branches should come before output
-    assert find_node_by_identity(plan, left_branch) < find_node_by_identity(
-        plan, output
-    )
-    assert find_node_by_identity(plan, right_branch) < find_node_by_identity(
-        plan, output
-    )
+    assert find_node(plan, left_branch) < find_node(plan, output)
+    assert find_node(plan, right_branch) < find_node(plan, output)
 
 
 def test_multi_output():
@@ -76,8 +72,8 @@ def test_multi_output():
     assert len(plan) == 5
 
     # Dependencies should come before dependents
-    assert find_node_by_identity(plan, a) < find_node_by_identity(plan, b)
-    assert find_node_by_identity(plan, a) < find_node_by_identity(plan, c)
+    assert find_node(plan, a) < find_node(plan, b)
+    assert find_node(plan, a) < find_node(plan, c)
 
 
 def test_shared_subgraph():
@@ -98,10 +94,10 @@ def test_shared_subgraph():
     assert len([n for n in plan if n is common]) == 1
 
     # Check dependencies
-    assert find_node_by_identity(plan, a) < find_node_by_identity(plan, common)
-    assert find_node_by_identity(plan, b) < find_node_by_identity(plan, common)
-    assert find_node_by_identity(plan, common) < find_node_by_identity(plan, out1)
-    assert find_node_by_identity(plan, common) < find_node_by_identity(plan, out2)
+    assert find_node(plan, a) < find_node(plan, common)
+    assert find_node(plan, b) < find_node(plan, common)
+    assert find_node(plan, common) < find_node(plan, out1)
+    assert find_node(plan, common) < find_node(plan, out2)
 
 
 def test_cycle_detection():
@@ -129,9 +125,9 @@ def test_conditional_nodes():
     plan = linearize.forest(where_result)
 
     # Check dependencies
-    assert find_node_by_identity(plan, cond) < find_node_by_identity(plan, where_result)
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, where_result)
-    assert find_node_by_identity(plan, y) < find_node_by_identity(plan, where_result)
+    assert find_node(plan, cond) < find_node(plan, where_result)
+    assert find_node(plan, x) < find_node(plan, where_result)
+    assert find_node(plan, y) < find_node(plan, where_result)
 
     # Multi-clause where
     clauses = [(cond, x), (graph.less(x, y), graph.constant(1.0))]
@@ -140,9 +136,9 @@ def test_conditional_nodes():
     plan = linearize.forest(multi_where)
 
     # Check dependencies
-    assert find_node_by_identity(plan, cond) < find_node_by_identity(plan, multi_where)
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, multi_where)
-    assert find_node_by_identity(plan, y) < find_node_by_identity(plan, multi_where)
+    assert find_node(plan, cond) < find_node(plan, multi_where)
+    assert find_node(plan, x) < find_node(plan, multi_where)
+    assert find_node(plan, y) < find_node(plan, multi_where)
 
 
 def test_complex_graph():
@@ -167,17 +163,17 @@ def test_complex_graph():
     plan = linearize.forest(h)
 
     # Check dependencies
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, a)
-    assert find_node_by_identity(plan, y) < find_node_by_identity(plan, b)
-    assert find_node_by_identity(plan, a) < find_node_by_identity(plan, c)
-    assert find_node_by_identity(plan, b) < find_node_by_identity(plan, c)
-    assert find_node_by_identity(plan, y) < find_node_by_identity(plan, d)
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, e)
-    assert find_node_by_identity(plan, e) < find_node_by_identity(plan, f)
-    assert find_node_by_identity(plan, d) < find_node_by_identity(plan, g)
-    assert find_node_by_identity(plan, f) < find_node_by_identity(plan, g)
-    assert find_node_by_identity(plan, c) < find_node_by_identity(plan, h)
-    assert find_node_by_identity(plan, g) < find_node_by_identity(plan, h)
+    assert find_node(plan, x) < find_node(plan, a)
+    assert find_node(plan, y) < find_node(plan, b)
+    assert find_node(plan, a) < find_node(plan, c)
+    assert find_node(plan, b) < find_node(plan, c)
+    assert find_node(plan, y) < find_node(plan, d)
+    assert find_node(plan, x) < find_node(plan, e)
+    assert find_node(plan, e) < find_node(plan, f)
+    assert find_node(plan, d) < find_node(plan, g)
+    assert find_node(plan, f) < find_node(plan, g)
+    assert find_node(plan, c) < find_node(plan, h)
+    assert find_node(plan, g) < find_node(plan, h)
 
 
 def test_axes_operations():
@@ -191,8 +187,8 @@ def test_axes_operations():
     plan = linearize.forest(reduced)
 
     # Check node ordering
-    assert find_node_by_identity(plan, x) < find_node_by_identity(plan, expanded)
-    assert find_node_by_identity(plan, expanded) < find_node_by_identity(plan, reduced)
+    assert find_node(plan, x) < find_node(plan, expanded)
+    assert find_node(plan, expanded) < find_node(plan, reduced)
 
 
 def test_multiple_independent_graphs():
@@ -208,8 +204,8 @@ def test_multiple_independent_graphs():
     # Check plan - independent graphs can be linearized in any order
     # but dependencies should still be respected
     assert len(plan) == 4
-    assert find_node_by_identity(plan, a) < find_node_by_identity(plan, a_result)
-    assert find_node_by_identity(plan, b) < find_node_by_identity(plan, b_result)
+    assert find_node(plan, a) < find_node(plan, a_result)
+    assert find_node(plan, b) < find_node(plan, b_result)
 
 
 def test_deterministic_ordering():
