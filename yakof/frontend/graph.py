@@ -83,6 +83,29 @@ Design Decisions
 3. Node Identity:
    - Nodes are identified by their instance identity
    - Enables graph traversal and transformation
+
+Node Identity and Equality
+--------------------------
+
+Nodes in this module override Python's standard equality operators (`==`, `!=`, etc.)
+to create new graph operations rather than test for object equality.
+
+For example:
+    x == y   # Creates a graph.equal operation node
+    x < y    # Creates a graph.less operation node
+
+When you need to check if two nodes are the same object (identity comparison),
+use Python's `is` operator instead:
+
+    x is y   # Tests if x and y are the same object
+
+This behavior impacts code that needs to find nodes in collections like lists:
+
+    # Won't work as expected:
+    nodes.index(my_node)  # Uses `==` internally
+
+    # Correct approach:
+    next(i for i, n in enumerate(nodes) if n is my_node)
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -141,11 +164,8 @@ class Node:
         self.id = _id_generator.add(1)
 
     def __hash__(self) -> int:
-        # Note: introducing hashing by identity in the class inheritance
-        # chain to ensure that overriding the equality operator type signature
-        # in derived classes does not break assigning to dicts.
-        #
-        # See also the implementation of Node.__eq__ in abstract.py.
+        # Note: we need to implement identity based hashing because we
+        # override the `__eq__` method to support lazy equality.
         return id(self)
 
     # Arithmetic operators
@@ -175,7 +195,7 @@ class Node:
 
     # Comparison operators
     #
-    # See corresponding comment in graph.py
+    # See the companion `__hash__` comment.
     def __eq__(self, other: Node | Scalar) -> Node:  # type: ignore
         return equal(self, ensure_node(other))
 
