@@ -9,10 +9,13 @@ import pandas as pd
 from sympy import lambdify
 from scipy import interpolate, ndimage, stats
 
-from ..symbols.constraint import Constraint
+from ..symbols.constraint import Constraint, CumulativeDistribution
 from ..symbols.context_variable import ContextVariable
-from ..symbols.index import Index
+from ..symbols.index import Index, Sampleable
 from ..symbols.presence_variable import PresenceVariable
+
+from ...frontend import graph, linearize
+from ...numpybackend import executor
 
 
 class Model:
@@ -45,41 +48,71 @@ class Model:
     def evaluate(self, grid, ensemble):
         assert self.grid is None
         c_weight = np.array([c[0] for c in ensemble])
-        c_values = pd.DataFrame([c[1] for c in ensemble])
-        c_size = c_values.shape[0]
-        c_subs = {}
-        for index in self.indexes:
-            if index.cvs is None:
-                if isinstance(index.value, numbers.Number):
-                    c_subs[index] = [index.value] * c_size
-                else:
-                    c_subs[index] = index.value.rvs(size=c_size)
-            else:
-                args = [c_values[cv].values for cv in index.cvs]
-                c_subs[index] = index.value(*args)
+        c_size = c_weight.shape[0]
+
+        # Initialize empty placeholders
+        c_subs: dict[graph.Node, np.ndarray] = {}
+
+        # === Initializing context variables ===
+
+        collector: dict[ContextVariable, list[float]] = {}
+        for _, entry in ensemble:
+            for cv, value in entry.items():
+                # TODO(bassosimone): this is very dirty
+                if isinstance(value, graph.constant):
+                    value = value.value
+                collector.setdefault(cv, []).append(value)
+
+        for key, values in collector.items():
+            c_subs[key.node] = np.asarray(values)
+
+        # === Numeric evaluation of indexes ===
+
+        # Evaluate each index in the model
+        for index in self.indexes + self.capacities:
+            # Handle the case where we need to draw random samples
+            if isinstance(index.value, Sampleable):
+                c_subs[index.node] = np.asarray(index.value.rvs(size=c_size))
+
+        # === Expanding the dimensions ===
+
+        # Expand the dimensions of the values computed so far
+        for key in c_subs:
+            c_subs[key] = np.expand_dims(c_subs[key], axis=(0, 1))
+
+        # Expand the dimensions of presence variables and add
+        # them to the current set of placeholders
+        assert len(self.pvs) == 2  # TODO: generalize
+        for i, pv in enumerate(self.pvs):
+            c_subs[pv.node] = np.expand_dims(grid[pv], axis=(i, 2))
+
+        # === Numeric evaluation of constraints ===
+
+        state = executor.State(c_subs, graph.NODE_FLAG_TRACE)
         grid_shape = (grid[self.pvs[0]].size, grid[self.pvs[1]].size)
         field = np.ones(grid_shape)
         field_elements = {}
-        assert len(self.pvs) == 2  # TODO: generalize
-        p_values = [
-            np.expand_dims(grid[pv], axis=(i, 2)) for i, pv in enumerate(self.pvs)
-        ]
-        c_values = [
-            np.expand_dims(c_subs[index], axis=(0, 1)) for index in self.indexes
-        ]
         for constraint in self.constraints:
-            usage = lambdify(self.pvs + self.indexes, constraint.usage, "numpy")(
-                *p_values, *c_values
-            )
+
+            # Evaluate the usage
+            for node in linearize.forest(constraint.usage):
+                executor.evaluate(state, node)
+            usage = c_subs[constraint.usage]
+
+            # Evaluate the capacity
             capacity = constraint.capacity
-            # TODO: model type in declaration
-            if isinstance(capacity.value, numbers.Number):
-                unscaled_result = usage <= capacity.value
+            if not isinstance(capacity, CumulativeDistribution):
+                for node in linearize.forest(capacity):
+                    executor.evaluate(state, node)
+                unscaled_result = usage <= c_subs[capacity]
             else:
-                unscaled_result = 1.0 - capacity.value.cdf(usage)
+                unscaled_result = 1.0 - capacity.cdf(usage)
+
+            # Apply weights and store the result
             result = np.broadcast_to(np.dot(unscaled_result, c_weight), grid_shape)
             field_elements[constraint] = result
             field *= result
+
         self.index_vals = c_subs
         self.grid = grid
         self.field = field

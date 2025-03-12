@@ -40,13 +40,13 @@ class Index:
         self.cvs = cvs
         if isinstance(value, Sampleable):
             self.value = value
-            self.node = cast(graph.Node, graph.placeholder(name))
+            self.node = graph.placeholder(name)
         elif isinstance(value, graph.Scalar):
             self.value = value
-            self.node = cast(graph.Node, graph.constant(value, name))
+            self.node = graph.constant(value, name)
         else:
             self.value = value
-            self.node = cast(graph.Node, graph.placeholder(name))
+            self.node = value  # TODO(bassosimone): maybe this is a bit rough
 
 
 class UniformDistIndex(Index):
