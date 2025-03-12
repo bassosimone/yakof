@@ -1,9 +1,17 @@
 from __future__ import annotations
 
-import typing
+from typing import Protocol, runtime_checkable
 
-if typing.TYPE_CHECKING:
-    from sympy import Symbol
+import numpy as np
+
+from ...frontend import graph
+
+
+@runtime_checkable
+class CumulativeDistribution(Protocol):
+    """Protocol for classes allowing to sample from a cumulative distribution."""
+
+    def cdf(self, x: float | np.ndarray, *args, **kwds) -> float | np.ndarray: ...
 
 
 class Constraint:
@@ -14,7 +22,11 @@ class Constraint:
     """
 
     def __init__(
-        self, usage: Symbol, capacity: Symbol, group: str | None = None, name: str = ""
+        self,
+        usage: graph.Node,
+        capacity: graph.Node | CumulativeDistribution,
+        group: str | None = None,
+        name: str = "",
     ) -> None:
         self.usage = usage
         self.capacity = capacity
