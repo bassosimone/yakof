@@ -1,15 +1,27 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Protocol, cast, runtime_checkable
 
-from sympy import lambdify
 from scipy import stats
 
-from ._base import SymbolExtender
+import numpy as np
+
 from .context_variable import ContextVariable
 
+from ...frontend import graph
 
-class Index(SymbolExtender):
+
+@runtime_checkable
+class Sampleable(Protocol):
+
+    def rvs(
+        self,
+        size: int | tuple[int, ...] | None = None,
+        **kwargs,
+    ) -> float | np.ndarray: ...
+
+
+class Index:
     """
     Class to represent an index variable.
     """
@@ -17,19 +29,24 @@ class Index(SymbolExtender):
     def __init__(
         self,
         name: str,
-        value: Any,
+        value: graph.Node | graph.Scalar | Sampleable,
         cvs: list[ContextVariable] | None = None,
         group: str | None = None,
         ref_name: str | None = None,
     ) -> None:
-        super().__init__(name)
+        self.name = name
         self.group = group
         self.ref_name = ref_name if ref_name is not None else name
         self.cvs = cvs
-        if cvs is not None:
-            self.value = lambdify(cvs, value, "numpy")
+        if isinstance(value, Sampleable):
+            self.value = value
+            self.node = cast(graph.Node, graph.placeholder(name))
+        elif isinstance(value, graph.Scalar):
+            self.value = value
+            self.node = cast(graph.Node, graph.constant(value, name))
         else:
             self.value = value
+            self.node = cast(graph.Node, graph.placeholder(name))
 
 
 class UniformDistIndex(Index):
@@ -46,7 +63,13 @@ class UniformDistIndex(Index):
         ref_name: str | None = None,
     ) -> None:
         super().__init__(
-            name, stats.uniform(loc=loc, scale=scale), group=group, ref_name=ref_name
+            name,
+            cast(
+                Sampleable,
+                stats.uniform(loc=loc, scale=scale),
+            ),
+            group=group,
+            ref_name=ref_name,
         )
         self._loc = loc
         self._scale = scale
@@ -91,7 +114,10 @@ class LognormDistIndex(Index):
     ) -> None:
         super().__init__(
             name,
-            stats.lognorm(loc=loc, scale=scale, s=s),
+            cast(
+                Sampleable,
+                stats.lognorm(loc=loc, scale=scale, s=s),
+            ),
             group=group,
             ref_name=ref_name,
         )
@@ -149,7 +175,10 @@ class TriangDistIndex(Index):
     ) -> None:
         super().__init__(
             name,
-            stats.triang(loc=loc, scale=scale, c=c),
+            cast(
+                Sampleable,
+                stats.triang(loc=loc, scale=scale, c=c),
+            ),
             group=group,
             ref_name=ref_name,
         )
@@ -211,6 +240,7 @@ class ConstIndex(Index):
         if self._v != new_v:
             self._v = new_v
             self.value = new_v
+            self.node = graph.constant(new_v, self.name)
 
     def __str__(self):
         return f"const_idx({self.v})"
@@ -224,18 +254,12 @@ class SymIndex(Index):
     def __init__(
         self,
         name: str,
-        value: Any,
+        value: graph.Node,
         cvs: list[ContextVariable] | None = None,
         group: str | None = None,
         ref_name: str | None = None,
     ) -> None:
         super().__init__(name, value, cvs, group=group, ref_name=ref_name)
-        self.cvs = cvs
-        if cvs is not None:
-            self.value = lambdify(cvs, value, "numpy")
-        else:
-            self.value = value
-
         self.sym_value = value
 
     def __str__(self):
