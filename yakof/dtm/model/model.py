@@ -48,57 +48,67 @@ class Model:
 
     def evaluate(self, grid, ensemble):
         assert self.grid is None
+
+        # [pre] extract the weights and the size of the ensemble
         c_weight = np.array([c[0] for c in ensemble])
         c_size = c_weight.shape[0]
 
-        # Initialize empty placeholders
+        # [pre] create empty placeholders
         c_subs: dict[graph.Node, np.ndarray] = {}
 
-        # Initialize global unique symbol names
+        # [pre] add global unique symbols
         for entry in symbol.symbol_table.values():
             c_subs[entry.node] = np.array(entry.name)
 
-        # Initialize context variables
+        # [pre] add context variables
         collector: dict[ContextVariable, list[float]] = {}
         for _, entry in ensemble:
             for cv, value in entry.items():
                 collector.setdefault(cv, []).append(value)
-
         for key, values in collector.items():
             c_subs[key.node] = np.asarray(values)
 
-        # Initialize indexes and capacities depending on distributions
+        # [pre] evaluate the indexes depending on distributions
+        #
+        # TODO(bassosimone): the size used here is too small
         for index in self.indexes + self.capacities:
-            # Handle the case where we need to draw random samples
             if isinstance(index.value, Sampleable):
                 c_subs[index.node] = np.asarray(index.value.rvs(size=c_size))
 
-        # Expanding the dimensions
+        # [eval] expand dimensions for all values computed thus far
         for key in c_subs:
             c_subs[key] = np.expand_dims(c_subs[key], axis=(0, 1))
 
+        # [eval] add presence variables and expand dimensions
         assert len(self.pvs) == 2  # TODO: generalize
         for i, pv in enumerate(self.pvs):
             c_subs[pv.node] = np.expand_dims(grid[pv], axis=(i, 2))
 
-        # Numeric evaluation of constraints
+        # [eval] collect all the nodes to evaluate
+        all_nodes: list[graph.Node] = []
+        for constraint in self.constraints:
+            all_nodes.append(constraint.usage)
+            if not isinstance(constraint.capacity, CumulativeDistribution):
+                all_nodes.append(constraint.capacity)
+        for index in self.indexes + self.capacities:
+            all_nodes.append(index.node)
+
+        # [eval] actually evaluate all the nodes
         state = executor.State(c_subs, graph.NODE_FLAG_TRACE)
+        for node in linearize.forest(*all_nodes):
+            executor.evaluate(state, node)
+
+        # [post] compute the sustainability field
         grid_shape = (grid[self.pvs[0]].size, grid[self.pvs[1]].size)
         field = np.ones(grid_shape)
         field_elements = {}
         for constraint in self.constraints:
-            # TODO(bassosimone): switch to single pass evaluation
-
-            # Evaluate the usage
-            for node in linearize.forest(constraint.usage):
-                executor.evaluate(state, node)
+            # Get usage
             usage = c_subs[constraint.usage]
 
-            # Evaluate the capacity
+            # Get capacity
             capacity = constraint.capacity
             if not isinstance(capacity, CumulativeDistribution):
-                for node in linearize.forest(capacity):
-                    executor.evaluate(state, node)
                 unscaled_result = usage <= c_subs[capacity]
             else:
                 unscaled_result = 1.0 - capacity.cdf(usage)
@@ -108,13 +118,7 @@ class Model:
             field_elements[constraint] = result
             field *= result
 
-        # If there are unevaluated indexes, evaluate them. The original
-        # code did this, and we should continue doing it.
-        #
-        # TODO(bassosimone): integrate into single-pass evaluation.
-        for node in linearize.forest(*[x.node for x in self.indexes + self.capacities]):
-            executor.evaluate(state, node)
-
+        # [post] store the results
         self.index_vals = c_subs
         self.grid = grid
         self.field = field
