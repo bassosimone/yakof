@@ -16,6 +16,7 @@ from ..symbols.presence_variable import PresenceVariable
 
 from ...frontend import graph, linearize
 from ...numpybackend import executor
+from ...sympyke import symbol
 
 
 class Model:
@@ -52,6 +53,11 @@ class Model:
 
         # Initialize empty placeholders
         c_subs: dict[graph.Node, np.ndarray] = {}
+
+        # === Initializing global unique symbol names ===
+
+        for entry in symbol.symbol_table.values():
+            c_subs[entry.node] = np.array(entry.value)
 
         # === Initializing context variables ===
 

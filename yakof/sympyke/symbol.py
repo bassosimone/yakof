@@ -2,28 +2,37 @@
 ...
 """
 
+from dataclasses import dataclass
 from ..frontend import graph
 
 import threading
 
 
+@dataclass(frozen=True)
+class SymbolValue:
+    node: graph.placeholder
+    value: str
+
+
 class _SymbolTable:
     def __init__(self):
-        self._table: dict[str, graph.constant] = {}
+        self._table: dict[str, SymbolValue] = {}
         self._lock = threading.Lock()
-        self._id = 0
 
     def get(self, name: str):
         with self._lock:
             if name not in self._table:
-                id = self._id
-                self._id = self._id + 1
-                self._table[name] = graph.constant(id)
+                self._table[name] = SymbolValue(graph.placeholder(name), name)
             return self._table[name]
 
+    def values(self) -> list[SymbolValue]:
+        with self._lock:
+            values = list(self._table.values())
+        return values
 
-_symbol_singleton = _SymbolTable()
+
+symbol_table = _SymbolTable()
 
 
-def Symbol(name: str) -> graph.constant:
-    return _symbol_singleton.get(name)
+def Symbol(name: str) -> SymbolValue:
+    return symbol_table.get(name)
