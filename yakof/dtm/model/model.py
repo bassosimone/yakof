@@ -57,7 +57,7 @@ class Model:
         # === Initializing global unique symbol names ===
 
         for entry in symbol.symbol_table.values():
-            c_subs[entry.node] = np.array(entry.value)
+            c_subs[entry.node] = np.array(entry.name)
 
         # === Initializing context variables ===
 

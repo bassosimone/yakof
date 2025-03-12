@@ -62,7 +62,7 @@ class UniformCategoricalContextVariable(ContextVariable):
     def __init__(self, name: str, values: list) -> None:
         super().__init__(name)
         self.values = [
-            value.value if isinstance(value, SymbolValue) else value for value in values
+            value.name if isinstance(value, SymbolValue) else value for value in values
         ]
         self.size = len(self.values)
 
@@ -93,7 +93,7 @@ class CategoricalContextVariable(ContextVariable):
     def __init__(self, name: str, distribution: dict) -> None:
         super().__init__(name)
         self.distribution = {
-            k.value if isinstance(k, SymbolValue) else k: v
+            k.name if isinstance(k, SymbolValue) else k: v
             for k, v in distribution.items()
         }
         self.values = list(self.distribution.keys())

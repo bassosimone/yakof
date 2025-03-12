@@ -1,5 +1,9 @@
 """
-...
+Minimal support for symbols
+===========================
+
+This module implements minimal support for sympy-like symbols
+so that we can write dt_model models.
 """
 
 from dataclasses import dataclass
@@ -10,8 +14,10 @@ import threading
 
 @dataclass(frozen=True)
 class SymbolValue:
+    """Contains the symbol graph node and the symbol name."""
+
     node: graph.placeholder
-    value: str
+    name: str
 
 
 class _SymbolTable:
@@ -32,7 +38,12 @@ class _SymbolTable:
 
 
 symbol_table = _SymbolTable()
+"""Table containing all the defined symbols."""
 
 
 def Symbol(name: str) -> SymbolValue:
+    """Constructor to create a new SymbolValue by name.
+
+    Subsequent invocations with the same name return the same SymbolValue.
+    """
     return symbol_table.get(name)
