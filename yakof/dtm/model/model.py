@@ -246,6 +246,7 @@ class Model:
 
     def variation(self, new_name, *, change_indexes=None, change_capacities=None):
         # TODO: check if changes are valid (ie they change elements present in the model)
+
         if change_indexes is None:
             new_indexes = self.indexes
             change_indexes = {}
@@ -256,6 +257,7 @@ class Model:
                     new_indexes.append(change_indexes[index])
                 else:
                     new_indexes.append(index)
+
         if change_capacities is None:
             new_capacities = self.capacities
             change_capacities = {}
@@ -266,6 +268,9 @@ class Model:
                     new_capacities.append(change_capacities[capacity])
                 else:
                     new_capacities.append(capacity)
+
+        # TODO(bassosimone): subs is a sympy specific feature that
+        # seems quite difficult to reimplement in yakof
         new_constraints = []
         for constraint in self.constraints:
             new_constraints.append(
@@ -276,6 +281,7 @@ class Model:
                     name=constraint.name,
                 )
             )
+
         return Model(
             new_name, self.cvs, self.pvs, new_indexes, new_capacities, new_constraints
         )
