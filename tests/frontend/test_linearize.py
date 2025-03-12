@@ -56,8 +56,12 @@ def test_diamond_graph():
     assert find_node_by_identity(plan, x) < find_node_by_identity(plan, right_branch)
 
     # Both branches should come before output
-    assert find_node_by_identity(plan, left_branch) < find_node_by_identity(plan, output)
-    assert find_node_by_identity(plan, right_branch) < find_node_by_identity(plan, output)
+    assert find_node_by_identity(plan, left_branch) < find_node_by_identity(
+        plan, output
+    )
+    assert find_node_by_identity(plan, right_branch) < find_node_by_identity(
+        plan, output
+    )
 
 
 def test_multi_output():
