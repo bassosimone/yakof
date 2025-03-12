@@ -2,7 +2,6 @@
 ...
 """
 
-
 from ..frontend import graph
 
 import threading
@@ -21,6 +20,7 @@ class _SymbolTable:
                 self._id = self._id + 1
                 self._table[name] = graph.constant(id)
             return self._table[name]
+
 
 _symbol_singleton = _SymbolTable()
 

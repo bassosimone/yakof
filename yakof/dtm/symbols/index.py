@@ -14,7 +14,14 @@ class Index(SymbolExtender):
     Class to represent an index variable.
     """
 
-    def __init__(self, name: str, value: Any, cvs: list[ContextVariable] | None = None, group: str | None = None, ref_name: str | None = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        value: Any,
+        cvs: list[ContextVariable] | None = None,
+        group: str | None = None,
+        ref_name: str | None = None,
+    ) -> None:
         super().__init__(name)
         self.group = group
         self.ref_name = ref_name if ref_name is not None else name
@@ -24,13 +31,23 @@ class Index(SymbolExtender):
         else:
             self.value = value
 
+
 class UniformDistIndex(Index):
     """
     Class to represent an index as a uniform distribution
     """
 
-    def __init__(self, name: str, loc: float, scale: float, group: str | None = None, ref_name: str | None = None) -> None:
-        super().__init__(name, stats.uniform(loc=loc, scale=scale), group=group, ref_name=ref_name)
+    def __init__(
+        self,
+        name: str,
+        loc: float,
+        scale: float,
+        group: str | None = None,
+        ref_name: str | None = None,
+    ) -> None:
+        super().__init__(
+            name, stats.uniform(loc=loc, scale=scale), group=group, ref_name=ref_name
+        )
         self._loc = loc
         self._scale = scale
 
@@ -57,13 +74,27 @@ class UniformDistIndex(Index):
     def __str__(self):
         return f"uniform_dist_idx({self.loc}, {self.scale})"
 
+
 class LognormDistIndex(Index):
     """
     Class to represent an index as a longnorm distribution
     """
 
-    def __init__(self, name: str, loc: float, scale: float, s: float, group: str | None = None, ref_name: str | None = None) -> None:
-        super().__init__(name, stats.lognorm(loc=loc, scale=scale, s=s), group=group, ref_name=ref_name)
+    def __init__(
+        self,
+        name: str,
+        loc: float,
+        scale: float,
+        s: float,
+        group: str | None = None,
+        ref_name: str | None = None,
+    ) -> None:
+        super().__init__(
+            name,
+            stats.lognorm(loc=loc, scale=scale, s=s),
+            group=group,
+            ref_name=ref_name,
+        )
         self._loc = loc
         self._scale = scale
         self._s = s
@@ -107,8 +138,21 @@ class TriangDistIndex(Index):
     Class to represent an index as a longnorm distribution
     """
 
-    def __init__(self, name: str, loc: float, scale: float, c: float, group: str | None = None, ref_name: str | None = None) -> None:
-        super().__init__(name, stats.triang(loc=loc, scale=scale, c=c), group=group, ref_name=ref_name)
+    def __init__(
+        self,
+        name: str,
+        loc: float,
+        scale: float,
+        c: float,
+        group: str | None = None,
+        ref_name: str | None = None,
+    ) -> None:
+        super().__init__(
+            name,
+            stats.triang(loc=loc, scale=scale, c=c),
+            group=group,
+            ref_name=ref_name,
+        )
         self._loc = loc
         self._scale = scale
         self._c = c
@@ -146,12 +190,15 @@ class TriangDistIndex(Index):
     def __str__(self):
         return f"triang_dist_idx({self.loc}, {self.scale}, {self.c})"
 
+
 class ConstIndex(Index):
     """
     Class to represent an index as a longnorm distribution
     """
 
-    def __init__(self, name: str, v: float, group: str | None = None, ref_name: str | None = None) -> None:
+    def __init__(
+        self, name: str, v: float, group: str | None = None, ref_name: str | None = None
+    ) -> None:
         super().__init__(name, v, group=group, ref_name=ref_name)
         self._v = v
 
@@ -168,18 +215,20 @@ class ConstIndex(Index):
     def __str__(self):
         return f"const_idx({self.v})"
 
+
 class SymIndex(Index):
     """
     Class to represent an index as a symbolic value
     """
 
-    def __init__(self,
-                 name: str,
-                 value: Any,
-                 cvs: list[ContextVariable] | None = None,
-                 group: str | None = None,
-                 ref_name: str | None = None
-                ) -> None:
+    def __init__(
+        self,
+        name: str,
+        value: Any,
+        cvs: list[ContextVariable] | None = None,
+        group: str | None = None,
+        ref_name: str | None = None,
+    ) -> None:
         super().__init__(name, value, cvs, group=group, ref_name=ref_name)
         self.cvs = cvs
         if cvs is not None:

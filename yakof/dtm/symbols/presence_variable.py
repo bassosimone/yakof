@@ -51,6 +51,14 @@ class PresenceVariable(SymbolExtender):
         if cvs is not None:
             all_cvs = [cvs[cv] for cv in self.cvs if cv in cvs.keys()]
             # TODO: solve this issue of symbols vs names
-            all_cvs = list(map(lambda v: v.name if isinstance(v, Symbol) else v, all_cvs))
+            all_cvs = list(
+                map(lambda v: v.name if isinstance(v, Symbol) else v, all_cvs)
+            )
         distr: dict = self.distribution(*all_cvs)
-        return stats.truncnorm.rvs(-distr["mean"] / distr["std"], 10, loc=distr["mean"], scale=distr["std"], size=nr)
+        return stats.truncnorm.rvs(
+            -distr["mean"] / distr["std"],
+            10,
+            loc=distr["mean"],
+            scale=distr["std"],
+            size=nr,
+        )
