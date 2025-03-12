@@ -111,13 +111,12 @@ class Model:
             np.ndarray,
             np.expand_dims(grid[self.pvs[0]], axis=(0, 2)),  # x, Y, z
         )
+        y_size = grid[self.pvs[0]].shape[0]
 
         cache[self.pvs[1].node] = cast(
             np.ndarray, np.expand_dims(grid[self.pvs[1]], axis=(1, 2))  # X, y, z
         )
-
-        x_size = grid[self.pvs[0]].shape[0]
-        y_size = grid[self.pvs[1]].shape[0]
+        x_size = grid[self.pvs[1]].shape[0]
 
         # 3. Create Z-aligned tensors for the ensemble weights
         weights = np.array([c[0] for c in ensemble])
