@@ -8,6 +8,7 @@ from scipy import stats
 from .context_variable import ContextVariable
 
 from ...frontend import graph
+from ...sympyke.symbol import SymbolValue
 
 
 class PresenceVariable:
@@ -26,7 +27,7 @@ class PresenceVariable:
         self.cvs = cvs
         self.distribution = distribution
 
-    def sample(self, cvs: dict | None = None, nr: int = 1) -> np.array:
+    def sample(self, cvs: dict | None = None, nr: int = 1) -> np.ndarray:
         """
         Returns a list of values sampled from the presence variable or provided
         subset.
@@ -46,9 +47,7 @@ class PresenceVariable:
             List of sampled values.
         """
         assert nr > 0
-
-        # TODO(bassosimone): I have currently broken the mapping
-        # between a symbol and its name here...
+        assert self.distribution is not None
 
         all_cvs = []
         # TODO: check this functionality
@@ -56,13 +55,13 @@ class PresenceVariable:
             all_cvs = [cvs[cv] for cv in self.cvs if cv in cvs.keys()]
             # TODO: solve this issue of symbols vs names
             all_cvs = list(
-                map(lambda v: v.name if isinstance(v, Symbol) else v, all_cvs)
+                map(lambda v: v.name if isinstance(v, SymbolValue) else v, all_cvs)
             )
         distr: dict = self.distribution(*all_cvs)
-        return stats.truncnorm.rvs(
+        return np.asarray(stats.truncnorm.rvs(
             -distr["mean"] / distr["std"],
             10,
             loc=distr["mean"],
             scale=distr["std"],
             size=nr,
-        )
+        ))
