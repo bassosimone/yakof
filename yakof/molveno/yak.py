@@ -1,9 +1,9 @@
 """
-Original Molveno Model
-======================
+Yakof-based Molveno Model
+=========================
 
-This is the original Molveno model, using the original `dt_model`
-as its underlying execution engine.
+This is a modified Molveno model, using the `yakof.fronted` and
+`yakof.numpybackend` as its underlying execution engine.
 """
 
 # SPDX-License-Identifier: Apache-2.0
@@ -11,7 +11,7 @@ as its underlying execution engine.
 from scipy import stats
 import numpy as np
 
-from dt_model import (
+from yakof.dtyak import (
     UniformCategoricalContextVariable,
     CategoricalContextVariable,
     PresenceVariable,

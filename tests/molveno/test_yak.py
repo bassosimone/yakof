@@ -2,8 +2,8 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from dt_model import Ensemble
-from yakof.molveno import orig as mmod
+from yakof.dtyak import Ensemble
+from yakof.molveno import yak as mmod
 
 import numpy as np
 
