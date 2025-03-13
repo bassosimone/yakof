@@ -20,13 +20,13 @@ def test_cross_fixed_case():
     fixed_orig_situation = {
         orig.CV_weekday: orig.Symbol("monday"),
         orig.CV_season: orig.Symbol("high"),
-        orig.CV_weather: orig.Symbol("good")
+        orig.CV_weather: orig.Symbol("good"),
     }
 
     fixed_yak_situation = {
         yak.CV_weekday: yak.Symbol("monday"),
         yak.CV_season: yak.Symbol("high"),
-        yak.CV_weather: yak.Symbol("good")
+        yak.CV_weather: yak.Symbol("good"),
     }
 
     # Fixed tourist and excursionist values
@@ -41,14 +41,14 @@ def test_cross_fixed_case():
     random.seed(4)
     orig_result = orig_model.evaluate(
         {orig.PV_tourists: tourists, orig.PV_excursionists: excursionists},
-        [(1.0, fixed_orig_situation)]  # Single ensemble member with weight 1.0
+        [(1.0, fixed_orig_situation)],  # Single ensemble member with weight 1.0
     )
 
     np.random.seed(4)
     random.seed(4)
     yak_result = yak_model.evaluate(
         {yak.PV_tourists: tourists, yak.PV_excursionists: excursionists},
-        [(1.0, fixed_yak_situation)]  # Single ensemble member with weight 1.0
+        [(1.0, fixed_yak_situation)],  # Single ensemble member with weight 1.0
     )
 
     # Compare results with detailed output
@@ -59,10 +59,14 @@ def test_cross_fixed_case():
 
     # Build a map between a name of a constraint and the constraint
     assert yak_model.field_elements is not None
-    yak_cmap = {key.name: value for key, value in yak_model.field_elements.items() if key}
+    yak_cmap = {
+        key.name: value for key, value in yak_model.field_elements.items() if key
+    }
 
     assert orig_model.field_elements is not None
-    orig_cmap = {key.name: value for key, value in orig_model.field_elements.items() if key}
+    orig_cmap = {
+        key.name: value for key, value in orig_model.field_elements.items() if key
+    }
 
     # Ensure we have the same constraint names and that they are four
     assert set(orig_cmap.keys()) == set(yak_cmap.keys())
@@ -78,7 +82,9 @@ def test_cross_fixed_case():
 
         # Basic shape check
         if orig_c.shape != yak_c.shape:
-            failures.append(f"Shape mismatch for {key}: {orig_c.shape} vs {yak_c.shape}")
+            failures.append(
+                f"Shape mismatch for {key}: {orig_c.shape} vs {yak_c.shape}"
+            )
             continue
 
         # Check if values are close enough

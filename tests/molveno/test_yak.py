@@ -2,7 +2,7 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from .import yak
+from . import yak
 
 
 def test_molveno_yak_simple():

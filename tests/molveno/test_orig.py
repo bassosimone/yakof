@@ -2,7 +2,7 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from .import orig
+from . import orig
 
 
 def test_molveno_orig_simple():
