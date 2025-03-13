@@ -131,12 +131,14 @@ C_parking = Constraint(
     / (I_Xa_excursionists_per_vehicle * I_Xo_excursionists_parking),  # type: ignore
     capacity=I_C_parking,
 )
+setattr(C_parking, "name", "C_parking")
 
 C_beach = Constraint(
     usage=PV_tourists * I_U_tourists_beach / I_Xo_tourists_beach  # type: ignore
     + PV_excursionists * I_U_excursionists_beach / I_Xo_excursionists_beach,  # type: ignore
     capacity=I_C_beach,
 )
+setattr(C_beach, "name", "C_beach")
 
 # TODO: also capacity should be a formula
 # C_accommodation = Constraint(usage=PV_tourists * I_U_tourists_accommodation,
@@ -146,6 +148,7 @@ C_accommodation = Constraint(
     usage=PV_tourists * I_U_tourists_accommodation / I_Xa_tourists_accommodation,  # type: ignore
     capacity=I_C_accommodation,
 )
+setattr(C_accommodation, "name", "C_accommodation")
 
 # TODO: also capacity should be a formula
 # C_food = Constraint(usage=PV_tourists * I_U_tourists_food +
@@ -156,6 +159,7 @@ C_food = Constraint(
     / (I_Xa_visitors_food * I_Xo_visitors_food),  # type: ignore
     capacity=I_C_food,
 )
+setattr(C_food, "name", "C_food")
 
 
 # Models

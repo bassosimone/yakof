@@ -17,13 +17,13 @@ def test_cross_fixed_case():
     yak_model.reset()
 
     # Instead of random ensemble, create a fixed single case
-    fixed_situation = {
+    fixed_orig_situation = {
         orig.CV_weekday: orig.Symbol("monday"),
         orig.CV_season: orig.Symbol("high"),
         orig.CV_weather: orig.Symbol("good")
     }
 
-    yak_situation = {
+    fixed_yak_situation = {
         yak.CV_weekday: yak.Symbol("monday"),
         yak.CV_season: yak.Symbol("high"),
         yak.CV_weather: yak.Symbol("good")
@@ -41,14 +41,14 @@ def test_cross_fixed_case():
     random.seed(4)
     orig_result = orig_model.evaluate(
         {orig.PV_tourists: tourists, orig.PV_excursionists: excursionists},
-        [(1.0, fixed_situation)]  # Single ensemble member with weight 1.0
+        [(1.0, fixed_orig_situation)]  # Single ensemble member with weight 1.0
     )
 
     np.random.seed(4)
     random.seed(4)
     yak_result = yak_model.evaluate(
         {yak.PV_tourists: tourists, yak.PV_excursionists: excursionists},
-        [(1.0, yak_situation)]  # Single ensemble member with weight 1.0
+        [(1.0, fixed_yak_situation)]  # Single ensemble member with weight 1.0
     )
 
     # Compare results with detailed output
