@@ -4,13 +4,14 @@ from typing import Callable
 
 import numpy as np
 from scipy import stats
-from sympy import Symbol
 
-from ._base import SymbolExtender
 from .context_variable import ContextVariable
 
+from ...frontend import graph
+from ...sympyke.symbol import SymbolValue
 
-class PresenceVariable(SymbolExtender):
+
+class PresenceVariable:
     """
     Class to represent a presence variable.
     """
@@ -21,11 +22,12 @@ class PresenceVariable(SymbolExtender):
         cvs: list[ContextVariable],
         distribution: Callable | None = None,
     ) -> None:
-        super().__init__(name)
+        self.name = name
+        self.node = graph.placeholder(name)
         self.cvs = cvs
         self.distribution = distribution
 
-    def sample(self, cvs: dict | None = None, nr: int = 1) -> np.array:
+    def sample(self, cvs: dict | None = None, nr: int = 1) -> np.ndarray:
         """
         Returns a list of values sampled from the presence variable or provided
         subset.
@@ -45,6 +47,7 @@ class PresenceVariable(SymbolExtender):
             List of sampled values.
         """
         assert nr > 0
+        assert self.distribution is not None
 
         all_cvs = []
         # TODO: check this functionality
@@ -52,13 +55,15 @@ class PresenceVariable(SymbolExtender):
             all_cvs = [cvs[cv] for cv in self.cvs if cv in cvs.keys()]
             # TODO: solve this issue of symbols vs names
             all_cvs = list(
-                map(lambda v: v.name if isinstance(v, Symbol) else v, all_cvs)
+                map(lambda v: v.name if isinstance(v, SymbolValue) else v, all_cvs)
             )
         distr: dict = self.distribution(*all_cvs)
-        return stats.truncnorm.rvs(
-            -distr["mean"] / distr["std"],
-            10,
-            loc=distr["mean"],
-            scale=distr["std"],
-            size=nr,
+        return np.asarray(
+            stats.truncnorm.rvs(
+                -distr["mean"] / distr["std"],
+                10,
+                loc=distr["mean"],
+                scale=distr["std"],
+                size=nr,
+            )
         )

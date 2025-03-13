@@ -1,23 +1,29 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
+
 import random
 
 from scipy.stats import rv_continuous
 
-from ._base import SymbolExtender
+from ...frontend import graph
+from ...sympyke.symbol import SymbolValue
 
 
-class ContextVariable(SymbolExtender):
+class ContextVariable(ABC):
     """
     Class to represent a context variable.
     """
 
     def __init__(self, name: str) -> None:
-        super().__init__(name)
+        self.name = name
+        self.node = graph.placeholder(name)
 
+    @abstractmethod
     def support_size(self) -> int:
         pass
 
+    @abstractmethod
     def sample(
         self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
     ) -> list:
@@ -55,7 +61,9 @@ class UniformCategoricalContextVariable(ContextVariable):
 
     def __init__(self, name: str, values: list) -> None:
         super().__init__(name)
-        self.values = values
+        self.values = [
+            value.name if isinstance(value, SymbolValue) else value for value in values
+        ]
         self.size = len(self.values)
 
     def support_size(self) -> int:
@@ -84,7 +92,10 @@ class CategoricalContextVariable(ContextVariable):
 
     def __init__(self, name: str, distribution: dict) -> None:
         super().__init__(name)
-        self.distribution = distribution
+        self.distribution = {
+            k.name if isinstance(k, SymbolValue) else k: v
+            for k, v in distribution.items()
+        }
         self.values = list(self.distribution.keys())
         self.size = len(self.values)
         # TODO: check if distribution is, indeed, a distribution (sum = 1)
