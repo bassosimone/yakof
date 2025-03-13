@@ -13,6 +13,7 @@ from ...frontend import graph
 
 @runtime_checkable
 class Sampleable(Protocol):
+    """Protocol for classes allowing random variates sampling."""
 
     def rvs(
         self,
@@ -29,7 +30,7 @@ class Index:
     def __init__(
         self,
         name: str,
-        value: graph.Node | graph.Scalar | Sampleable,
+        value: graph.Scalar | Sampleable | graph.Node,
         cvs: list[ContextVariable] | None = None,
         group: str | None = None,
         ref_name: str | None = None,
@@ -38,15 +39,26 @@ class Index:
         self.group = group
         self.ref_name = ref_name if ref_name is not None else name
         self.cvs = cvs
+
+        # We model a sampleable index as a distribution to invoke when
+        # scheduling the model and a placeholder to fill with the result
+        # of sampling from the index's distribution.'
         if isinstance(value, Sampleable):
             self.value = value
             self.node = graph.placeholder(name)
+
+        # We model a constant-value index as a constant value and a
+        # corresponding constant node. An alternative modeling could
+        # be to use a placeholder and fill it when scheduling.
         elif isinstance(value, graph.Scalar):
             self.value = value
             self.node = graph.constant(value, name)
+
+        # Otherwise, it's just a reference to an existing node (which
+        # typically is the result of defining a formula).
         else:
             self.value = value
-            self.node = value  # TODO(bassosimone): maybe this is a bit rough
+            self.node = value
 
 
 class UniformDistIndex(Index):
