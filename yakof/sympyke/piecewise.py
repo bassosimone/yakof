@@ -67,7 +67,11 @@ def _to_tensor(clauses: list[Clause]) -> graph.Node:
     if isinstance(default_value, graph.Scalar):
         default_value = graph.constant(default_value)
 
-    # 3. Prepare the reversed clauses adapting the types
+    # 3. If no clauses remain after removing the default, just return the default value
+    if len(clauses) <= 0:
+        return default_value
+
+    # 4. Prepare the reversed clauses adapting the types
     reversed: list[tuple[graph.Node, graph.Node]] = []
     for expr, cond in clauses:
         if isinstance(expr, graph.Scalar):
@@ -76,5 +80,5 @@ def _to_tensor(clauses: list[Clause]) -> graph.Node:
             cond = graph.constant(cond)
         reversed.append((cond, expr))
 
-    # 4. We're now all set call multi_clause_where
+    # 5. We're now all set call multi_clause_where
     return graph.multi_clause_where(reversed, default_value)
