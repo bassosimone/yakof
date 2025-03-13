@@ -8,7 +8,7 @@ from yakof.molveno import yak as mmod
 import numpy as np
 
 
-def test_molveno_orig_simple():
+def test_molveno_yak_simple():
     """Simple test ensuring we can evaluate M_base."""
 
     # Load the base model
