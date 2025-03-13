@@ -55,8 +55,6 @@ def test_cross_fixed_case():
     print("Original model result:", orig_result)
     print("Yakof model result:", yak_result)
 
-    # === Constraints Comparison ===
-
     # Build a map between a name of a constraint and the constraint
     assert yak_model.field_elements is not None
     yak_cmap = {
