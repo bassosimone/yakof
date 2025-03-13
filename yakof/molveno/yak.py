@@ -123,18 +123,18 @@ I_P_excursionists_saturation_level = Index("excursionists saturation level", 100
 # TODO: add names to constraints?
 
 C_parking = Constraint(
-    usage=PV_tourists  # type: ignore
-    * I_U_tourists_parking  # type: ignore
-    / (I_Xa_tourists_per_vehicle * I_Xo_tourists_parking)  # type: ignore
-    + PV_excursionists  # type: ignore
-    * I_U_excursionists_parking  # type: ignore
-    / (I_Xa_excursionists_per_vehicle * I_Xo_excursionists_parking),  # type: ignore
+    usage=PV_tourists
+    * I_U_tourists_parking
+    / (I_Xa_tourists_per_vehicle * I_Xo_tourists_parking)
+    + PV_excursionists
+    * I_U_excursionists_parking
+    / (I_Xa_excursionists_per_vehicle * I_Xo_excursionists_parking),
     capacity=I_C_parking,
 )
 
 C_beach = Constraint(
-    usage=PV_tourists * I_U_tourists_beach / I_Xo_tourists_beach  # type: ignore
-    + PV_excursionists * I_U_excursionists_beach / I_Xo_excursionists_beach,  # type: ignore
+    usage=PV_tourists * I_U_tourists_beach / I_Xo_tourists_beach
+    + PV_excursionists * I_U_excursionists_beach / I_Xo_excursionists_beach,
     capacity=I_C_beach,
 )
 
@@ -143,7 +143,7 @@ C_beach = Constraint(
 #                              capacity=I_C_accommodation *  I_Xa_tourists_accommodation)
 
 C_accommodation = Constraint(
-    usage=PV_tourists * I_U_tourists_accommodation / I_Xa_tourists_accommodation,  # type: ignore
+    usage=PV_tourists * I_U_tourists_accommodation / I_Xa_tourists_accommodation,
     capacity=I_C_accommodation,
 )
 
@@ -152,8 +152,8 @@ C_accommodation = Constraint(
 #                              PV_excursionists * I_U_excursionists_food,
 #                     capacity=I_C_food * I_Xa_visitors_food * I_Xo_visitors_food)
 C_food = Constraint(
-    usage=(PV_tourists * I_U_tourists_food + PV_excursionists * I_U_excursionists_food)  # type: ignore
-    / (I_Xa_visitors_food * I_Xo_visitors_food),  # type: ignore
+    usage=(PV_tourists * I_U_tourists_food + PV_excursionists * I_U_excursionists_food)
+    / (I_Xa_visitors_food * I_Xo_visitors_food),
     capacity=I_C_food,
 )
 
