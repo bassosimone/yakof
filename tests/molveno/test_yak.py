@@ -2,13 +2,13 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from dt_model import Ensemble
-from yakof.molveno import orig as mmod
+from yakof.dtyak import Ensemble
+from yakof.molveno import yak as mmod
 
 import numpy as np
 
 
-def test_molveno_orig_simple():
+def test_molveno_yak_simple():
     """Simple test ensuring we can evaluate M_base."""
 
     # Load the base model
