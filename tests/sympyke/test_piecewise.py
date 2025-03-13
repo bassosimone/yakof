@@ -132,7 +132,7 @@ def test_piecewise_only_default_case():
     """Test when filtering clauses leaves only the default case."""
     # Create piecewise where all non-default clauses come after a True condition
     pw = Piecewise(
-        (1, True),    # This becomes the default case
+        (1, True),  # This becomes the default case
         (10, False),  # This gets filtered out
     )
 
