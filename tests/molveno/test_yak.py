@@ -20,6 +20,10 @@ def test_molveno_yak_simple():
     (t_sample, e_sample) = (100, 100)
     situation = mmod.S_Base
 
+    # Reset the model
+    model.reset()
+
+    # Evaluate the model
     ensemble = Ensemble(model, situation, cv_ensemble_size=ensemble_size)
     tt = np.linspace(0, t_max, t_sample + 1)
     ee = np.linspace(0, e_max, e_sample + 1)
