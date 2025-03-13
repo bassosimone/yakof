@@ -128,7 +128,6 @@ I_P_excursionists_saturation_level = Index("excursionists saturation level", 100
 
 
 # Constraints
-# TODO: add names to constraints?
 
 C_parking = Constraint(
     usage=PV_tourists.node
@@ -138,6 +137,7 @@ C_parking = Constraint(
     * I_U_excursionists_parking.node
     / (I_Xa_excursionists_per_vehicle.node * I_Xo_excursionists_parking.node),
     capacity=I_C_parking.node,
+    name="C_parking",
 )
 
 C_beach = Constraint(
@@ -146,6 +146,7 @@ C_beach = Constraint(
     * I_U_excursionists_beach.node
     / I_Xo_excursionists_beach.node,
     capacity=I_C_beach.node,
+    name="C_beach",
 )
 
 # TODO: also capacity should be a formula
@@ -157,6 +158,7 @@ C_accommodation = Constraint(
     * I_U_tourists_accommodation.node
     / I_Xa_tourists_accommodation.node,
     capacity=I_C_accommodation.node,
+    name="C_accommodation",
 )
 
 # TODO: also capacity should be a formula
@@ -170,6 +172,7 @@ C_food = Constraint(
     )
     / (I_Xa_visitors_food.node * I_Xo_visitors_food.node),
     capacity=I_C_food.node,
+    name="C_food",
 )
 
 
