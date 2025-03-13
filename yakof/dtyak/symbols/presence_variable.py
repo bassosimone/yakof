@@ -58,10 +58,12 @@ class PresenceVariable:
                 map(lambda v: v.name if isinstance(v, SymbolValue) else v, all_cvs)
             )
         distr: dict = self.distribution(*all_cvs)
-        return np.asarray(stats.truncnorm.rvs(
-            -distr["mean"] / distr["std"],
-            10,
-            loc=distr["mean"],
-            scale=distr["std"],
-            size=nr,
-        ))
+        return np.asarray(
+            stats.truncnorm.rvs(
+                -distr["mean"] / distr["std"],
+                10,
+                loc=distr["mean"],
+                scale=distr["std"],
+                size=nr,
+            )
+        )
