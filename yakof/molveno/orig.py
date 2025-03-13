@@ -8,9 +8,6 @@ as its underlying execution engine.
 
 # SPDX-License-Identifier: Apache-2.0
 
-# TODO(bassosimone): consider removing the more __main__-ish code
-# parts from this file and using them elsewhere.
-
 import math
 import random
 from scipy import stats

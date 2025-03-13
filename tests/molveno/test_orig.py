@@ -7,6 +7,7 @@ from yakof.molveno import orig
 
 import numpy as np
 
+
 def test_molveno_orig_simple():
     """Simple test ensuring we can evaluate M_base."""
 
