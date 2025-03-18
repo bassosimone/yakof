@@ -138,12 +138,12 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
     return result
 
 
-def __eval_constant_op(state: State, node: graph.Node) -> np.ndarray:
+def _eval_constant_op(state: State, node: graph.Node) -> np.ndarray:
     node = cast(graph.constant, node)
     return np.asarray(node.value)
 
 
-def __eval_placeholder_default(state: State, node: graph.Node) -> np.ndarray:
+def _eval_placeholder_default(state: State, node: graph.Node) -> np.ndarray:
     # Note: placeholders are part of the state, so, if we end up
     # here it means we didn't find anything in the state.
     node = cast(graph.placeholder, node)
@@ -154,7 +154,7 @@ def __eval_placeholder_default(state: State, node: graph.Node) -> np.ndarray:
     )
 
 
-def __eval_binary_op(state: State, node: graph.Node) -> np.ndarray:
+def _eval_binary_op(state: State, node: graph.Node) -> np.ndarray:
     node = cast(graph.BinaryOp, node)
     left = state.get_node_value(node.left)
     right = state.get_node_value(node.right)
@@ -166,7 +166,7 @@ def __eval_binary_op(state: State, node: graph.Node) -> np.ndarray:
         )
 
 
-def __eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
+def _eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
     node = cast(graph.UnaryOp, node)
     operand = state.get_node_value(node.node)
     try:
@@ -177,7 +177,7 @@ def __eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
         )
 
 
-def __eval_where_op(state: State, node: graph.Node) -> np.ndarray:
+def _eval_where_op(state: State, node: graph.Node) -> np.ndarray:
     node = cast(graph.where, node)
     return np.where(
         state.get_node_value(node.condition),
@@ -186,7 +186,7 @@ def __eval_where_op(state: State, node: graph.Node) -> np.ndarray:
     )
 
 
-def __eval_multi_clause_where_op(state: State, node: graph.Node) -> np.ndarray:
+def _eval_multi_clause_where_op(state: State, node: graph.Node) -> np.ndarray:
     node = cast(graph.multi_clause_where, node)
     conditions = []
     values = []
@@ -197,7 +197,7 @@ def __eval_multi_clause_where_op(state: State, node: graph.Node) -> np.ndarray:
     return np.select(conditions, values, default=default)
 
 
-def __eval_axis_op(state: State, node: graph.Node) -> np.ndarray:
+def _eval_axis_op(state: State, node: graph.Node) -> np.ndarray:
     node = cast(graph.AxisOp, node)
     operand = state.get_node_value(node.node)
     try:
@@ -211,13 +211,13 @@ def __eval_axis_op(state: State, node: graph.Node) -> np.ndarray:
 _EvaluatorFunc = Callable[[State, graph.Node], np.ndarray]
 
 _evaluators: tuple[tuple[type[graph.Node], _EvaluatorFunc], ...] = (
-    (graph.constant, __eval_constant_op),
-    (graph.placeholder, __eval_placeholder_default),
-    (graph.BinaryOp, __eval_binary_op),
-    (graph.UnaryOp, __eval_unary_op),
-    (graph.where, __eval_where_op),
-    (graph.multi_clause_where, __eval_multi_clause_where_op),
-    (graph.AxisOp, __eval_axis_op),
+    (graph.constant, _eval_constant_op),
+    (graph.placeholder, _eval_placeholder_default),
+    (graph.BinaryOp, _eval_binary_op),
+    (graph.UnaryOp, _eval_unary_op),
+    (graph.where, _eval_where_op),
+    (graph.multi_clause_where, _eval_multi_clause_where_op),
+    (graph.AxisOp, _eval_axis_op),
 )
 
 
