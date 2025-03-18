@@ -61,7 +61,7 @@ Add entries to this table to support more unary operations.
 """
 
 
-def __expand_dims(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
+def _expand_dims(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
     """Expand input array with a new axis at the specified position.
 
     Args:
@@ -74,7 +74,7 @@ def __expand_dims(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
     return np.expand_dims(x, axis)
 
 
-def __reduce_sum(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
+def _reduce_sum(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
     """Reduce an array by summing along the specified axis.
 
     Args:
@@ -87,7 +87,7 @@ def __reduce_sum(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
     return np.sum(x, axis=axis)
 
 
-def __reduce_mean(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
+def _reduce_mean(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
     """Reduce an array by computing the mean along the specified axis.
 
     Args:
@@ -101,9 +101,9 @@ def __reduce_mean(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
 
 
 axes_operations: dict[type[graph.AxisOp], AxisOpFunc] = {
-    graph.expand_dims: __expand_dims,
-    graph.reduce_sum: __reduce_sum,
-    graph.reduce_mean: __reduce_mean,
+    graph.expand_dims: _expand_dims,
+    graph.reduce_sum: _reduce_sum,
+    graph.reduce_mean: _reduce_mean,
 }
 """Maps an axis op in the graph domain to the corresponding numpy operation.
 
