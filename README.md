@@ -24,6 +24,35 @@ uv sync --dev
 uv pip install -e .
 ```
 
+## Interactive Plotting
+
+The Python version installed using `uv` is incompatible with matplotlib's
+`tkinter` *interactive plotting* as documented by [astral-sh/python-build-standalone#129](
+https://github.com/astral-sh/python-build-standalone/issues/129). The
+symptom is that, when calling `plt.show()` and using interactive plotting,
+you see the following warning and no figure is displayed:
+
+```
+UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+```
+
+As a workaround, install the following system dependencies:
+
+```bash
+sudo apt install libgirepository-2.0-dev libcairo2-dev
+```
+
+and then run:
+
+```bash
+uv sync --dev --group gtk
+```
+
+These commands will enable plotting using the `matplotlib` Gtk backend.
+
+We will investigate alternative solutions to reduce the friction
+required to enable interactive plotting.
+
 ## Examples
 
 The `examples/` directory contains demonstrations of key features:
