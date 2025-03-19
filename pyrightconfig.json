@@ -2,6 +2,6 @@
   "typeCheckingMode": "standard",
   "useLibraryCodeForTypes": true,
   "pythonVersion": "3.11",
-  "include": ["yakof"],
+  "include": ["benchmarks", "examples", "tests", "yakof"],
   "exclude": ["yakof/dtyak", "yakof/molveno"]
 }
