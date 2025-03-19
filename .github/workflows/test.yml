@@ -9,36 +9,45 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python_version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Set up Python
-        run: uv python install
-
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --dev --python ${{ matrix.python_version }}
 
       - name: Check formatting with black
-        run: uv run black --check .
+        if: matrix['python_version'] == '3.11'
+        run: uv run --python ${{ matrix.python_version }} black --check .
+
+      - name: Type-checking the source code with pyright
+        if: matrix['python_version'] == '3.11'
+        run: uv run --python ${{ matrix.python_version }} pyright
 
       - name: Run café example
-        run: uv run python examples/cafe.py
+        run: uv run --python ${{ matrix.python_version }} python examples/cafe.py
 
       - name: Run traffic example
-        run: uv run python examples/traffic.py
+        run: uv run --python ${{ matrix.python_version }} python examples/traffic.py
 
       - name: Run bench00.py benchmark in short mode
-        run: uv run python benchmarks/bench00.py --short
+        if: matrix['python_version'] == '3.11'
+        run: uv run --python ${{ matrix.python_version }} python benchmarks/bench00.py --short
 
       - name: Run tests with pytest
-        run: uv run pytest
+        run: uv run --python ${{ matrix.python_version }} pytest
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
+        if: matrix['python_version'] == '3.11'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
