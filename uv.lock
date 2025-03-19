@@ -454,4 +454,4 @@ dev = [
     { name = "pytest", specifier = ">=7.0.0" },
     { name = "pytest-cov", specifier = ">=4.0.0" },
 ]
-gtk = [{ name = "pygobject" }]
+gtk = [{ name = "pygobject", specifier = ">=3.52.0" }]
