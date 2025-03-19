@@ -2,8 +2,7 @@
 name = "yakof"
 version = "0.1.0"
 description = "A technology demonstrator for sustainability modeling"
-# TODO(bassosimone): use ~=3.11.0 once https://github.com/fbk-most/dt-model/pull/10
-# has been merged and has relaxed the upstream constraints.
+# TODO(bassosimone): use ~=3.11.0 once https://github.com/fbk-most/dt-model/pull/10 lands
 requires-python = "==3.11.11"
 dependencies = [
     "dt_model",
