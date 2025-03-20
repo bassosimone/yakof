@@ -12,7 +12,6 @@ from typing import Protocol, cast, runtime_checkable
 import numpy as np
 
 from ..frontend import graph
-
 from . import geometry
 
 

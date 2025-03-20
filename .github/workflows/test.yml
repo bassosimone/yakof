@@ -25,13 +25,17 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev --python ${{ matrix.python_version }}
 
-      - name: Check formatting with black
-        if: matrix['python_version'] == '3.11'
-        run: uv run --python ${{ matrix.python_version }} black --check .
-
       - name: Type-checking the source code with pyright
         if: matrix['python_version'] == '3.11'
         run: uv run --python ${{ matrix.python_version }} pyright
+
+      - name: Check formatting with ruff
+        if: matrix['python_version'] == '3.11'
+        run: uv run --python ${{ matrix.python_version }} ruff format --check .
+
+      - name: Lint with ruff
+        if: matrix['python_version'] == '3.11'
+        run: uv run --python ${{ matrix.python_version }} ruff check .
 
       - name: Run café example
         run: uv run --python ${{ matrix.python_version }} python examples/cafe.py

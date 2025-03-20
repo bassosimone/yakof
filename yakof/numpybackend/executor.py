@@ -16,7 +16,7 @@ The executor expects all placeholder values to be provided in the initial
 state and evaluates each node exactly once, storing results for later reuse.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, cast
 
 import numpy as np
@@ -82,9 +82,7 @@ class State:
         try:
             return self.values[node]
         except KeyError:
-            raise NodeValueNotFound(
-                f"executor: node '{node.name}' has not been evaluated"
-            )
+            raise NodeValueNotFound(f"executor: node '{node.name}' has not been evaluated")
 
 
 def evaluate(state: State, node: graph.Node) -> np.ndarray:
@@ -161,9 +159,7 @@ def _eval_binary_op(state: State, node: graph.Node) -> np.ndarray:
     try:
         return dispatch.binary_operations[type(node)](left, right)
     except KeyError:
-        raise UnsupportedOperation(
-            f"executor: unsupported binary operation: {type(node)}"
-        )
+        raise UnsupportedOperation(f"executor: unsupported binary operation: {type(node)}")
 
 
 def _eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
@@ -172,9 +168,7 @@ def _eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
     try:
         return dispatch.unary_operations[type(node)](operand)
     except KeyError:
-        raise UnsupportedOperation(
-            f"executor: unsupported unary operation: {type(node)}"
-        )
+        raise UnsupportedOperation(f"executor: unsupported unary operation: {type(node)}")
 
 
 def _eval_where_op(state: State, node: graph.Node) -> np.ndarray:
@@ -203,9 +197,7 @@ def _eval_axis_op(state: State, node: graph.Node) -> np.ndarray:
     try:
         return dispatch.axes_operations[type(node)](operand, node.axis)
     except KeyError:
-        raise UnsupportedOperation(
-            f"executor: unsupported axis operation: {type(node)}"
-        )
+        raise UnsupportedOperation(f"executor: unsupported axis operation: {type(node)}")
 
 
 _EvaluatorFunc = Callable[[State, graph.Node], np.ndarray]
@@ -222,7 +214,6 @@ _evaluators: tuple[tuple[type[graph.Node], _EvaluatorFunc], ...] = (
 
 
 def _evaluate(state: State, node: graph.Node) -> np.ndarray:
-
     # Attempt to match with every possible evaluator
     for node_type, evaluator in _evaluators:
         if isinstance(node, node_type):

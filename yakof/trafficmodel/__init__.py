@@ -12,7 +12,8 @@ The model operates in multiple dimensions:
 - Field: Combined time and ensemble dimensions for full modeling
 
 The traffic model captures how demand is influenced by:
-1. Price effects: Higher prices reduce demand based on price sensitivity (via formula: 1.0 - sensitivity * log(price/base_price))
+1. Price effects: Higher prices reduce demand based on price
+    sensitivity (via formula: 1.0 - sensitivity * log(price/base_price))
 2. Time-shifting: Peak-period demand partially shifts to shoulder periods while preserving total demand
 """
 
@@ -74,16 +75,12 @@ expand_ensemble_to_field = morphisms.ExpandDims(ensemble_space, field_space)
 
 # Field projections
 project_field_to_time_using_sum = morphisms.ProjectUsingSum(field_space, time_space)
-project_field_to_ensemble_using_sum = morphisms.ProjectUsingSum(
-    field_space, ensemble_space
-)
+project_field_to_ensemble_using_sum = morphisms.ProjectUsingSum(field_space, ensemble_space)
 project_field_to_scalar_using_sum = morphisms.ProjectUsingSum(field_space, scalar_space)
 
 # Time/Ensemble projections
 project_time_to_scalar_using_sum = morphisms.ProjectUsingSum(time_space, scalar_space)
-project_ensemble_to_scalar_using_sum = morphisms.ProjectUsingSum(
-    ensemble_space, scalar_space
-)
+project_ensemble_to_scalar_using_sum = morphisms.ProjectUsingSum(ensemble_space, scalar_space)
 
 
 # Inputs
@@ -100,7 +97,8 @@ class Inputs:
         base_demand (abstract.Tensor[TimeBasis]): Baseline demand over time before any modifications
         price (abstract.Tensor[TimeBasis]): Time-varying price level
         hours (abstract.Tensor[TimeBasis]): Time points for the model (hours of day)
-        price_sensitivity (abstract.Tensor[EnsembleBasis]): Sensitivity of different population segments to price changes
+        price_sensitivity (abstract.Tensor[EnsembleBasis]): Sensitivity of different population
+            segments to price changes
     """
 
     morning_peak_start: float = field(default=7.0)
@@ -121,7 +119,7 @@ class Model:
 
     Attributes:
         price_affected_demand (abstract.Tensor[FieldBasis]): Demand after applying price sensitivity effects
-                                                             following the formula: base_demand * (1 - sensitivity * log(price/base_price))
+            following the formula: base_demand * (1 - sensitivity * log(price/base_price))
         demand_after_removal (abstract.Tensor[FieldBasis]): Demand after removing the shifted portion from peak periods
         actual_demand (abstract.Tensor[FieldBasis]): Final demand after all effects (price and time-shifting)
         nodes (list[graph.Node]): Ordered execution plan for evaluating the model graph
@@ -156,16 +154,13 @@ def build(inputs: Inputs) -> Model:
     """
     # Auto-assign names to tensors to make debugging much easier
     with autonaming.context():
-
         # --- Time Space Calculations ---
 
         # Define time windows
-        is_peak = (inputs.hours >= inputs.morning_peak_start) & (
+        is_peak = (inputs.hours >= inputs.morning_peak_start) & (inputs.hours < inputs.morning_peak_end)
+        is_early_distribution_window = (inputs.hours >= (inputs.morning_peak_start - 1.0)) & (
             inputs.hours < inputs.morning_peak_end
         )
-        is_early_distribution_window = (
-            inputs.hours >= (inputs.morning_peak_start - 1.0)
-        ) & (inputs.hours < inputs.morning_peak_end)
         is_late_distribution_window = (inputs.hours >= inputs.morning_peak_start) & (
             inputs.hours < (inputs.morning_peak_end + 1.0)
         )
@@ -201,9 +196,7 @@ def build(inputs: Inputs) -> Model:
         field_price_sensitivity = expand_ensemble_to_field(inputs.price_sensitivity)
 
         # First apply price effects
-        price_effect = 1.0 - field_price_sensitivity * field_space.log(
-            field_price / inputs.base_price
-        )
+        price_effect = 1.0 - field_price_sensitivity * field_space.log(field_price / inputs.base_price)
         price_affected_demand = field_base_demand * price_effect
 
         # Then apply time shifting to the price-affected demand

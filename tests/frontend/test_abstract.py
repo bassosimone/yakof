@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
+
 from yakof.frontend import abstract, graph
 
 
@@ -34,7 +35,7 @@ def test_tensor_arithmetic():
     space = abstract.TensorSpace(DummyBasis())
     x = space.placeholder("x")
     y = space.placeholder("y")
-    c = space.constant(2.0)
+    _ = space.constant(2.0)
 
     # Test operator overloading
     add1 = x + y
@@ -682,7 +683,7 @@ def test_error_cases_with_scalar_operations():
 
     space2 = abstract.TensorSpace(OtherBasis())
 
-    x = space1.placeholder("x")
+    _ = space1.placeholder("x")
     y = space2.placeholder("y")
 
     # Create a scalar tensor in space1

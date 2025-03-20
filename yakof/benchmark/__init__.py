@@ -17,14 +17,13 @@ mean times and standard deviations to assess the performance stability.
 See the examples directory for sample benchmark scripts demonstrating usage.
 """
 
-from dataclasses import dataclass, field
-from functools import wraps
-from typing import Callable, Protocol, runtime_checkable
-
 import gc
-import numpy as np
 import timeit
 import tracemalloc
+from dataclasses import dataclass, field
+from typing import Callable
+
+import numpy as np
 
 
 @dataclass
@@ -58,9 +57,7 @@ NumericFunc = Callable[[np.ndarray, np.ndarray], np.ndarray]
 NumericFuncFactory = Callable[[], NumericFunc]
 
 
-def run(
-    x: np.ndarray, y: np.ndarray, factory: NumericFuncFactory, n_runs: int = 100
-) -> Results:
+def run(x: np.ndarray, y: np.ndarray, factory: NumericFuncFactory, n_runs: int = 100) -> Results:
     """Benchmarks the given factory function using the given x and y arrays.
 
     The factory function should return a callable that implements a numerical computation
@@ -115,7 +112,7 @@ def run(
         # Measure the computation time
         gc.collect()
         compute_start = timeit.default_timer()
-        result = numeric_func(xx, yy)
+        _ = numeric_func(xx, yy)
         compute_time = timeit.default_timer() - compute_start
         results.compute_times.append(compute_time)
 

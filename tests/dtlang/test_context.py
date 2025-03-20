@@ -2,10 +2,10 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.dtlang import context, geometry
-from yakof.frontend import graph
-
 import pytest
+
+from yakof.dtlang import context
+from yakof.frontend import graph
 
 
 def test_categorical_context_variable():
@@ -16,9 +16,7 @@ def test_categorical_context_variable():
         _ = context.CategoricalContextVariable("ccv", {})
 
     # Create a proper variable
-    ccv = context.CategoricalContextVariable(
-        "ccv", {"a": 1 / 3, "b": 1 / 3, "c": 1 / 3}
-    )
+    ccv = context.CategoricalContextVariable("ccv", {"a": 1 / 3, "b": 1 / 3, "c": 1 / 3})
 
     # Make sure the support size is correct
     assert ccv.support_size() == 3

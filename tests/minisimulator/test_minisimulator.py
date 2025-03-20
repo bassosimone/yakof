@@ -2,14 +2,12 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-
-from numpy.testing import assert_array_equal, assert_allclose
-
-import pytest
 import numpy as np
+import pytest
+from numpy.testing import assert_array_equal
 
-from yakof.frontend import graph
 from yakof import minisimulator
+from yakof.frontend import graph
 
 
 class TestLinearRange:
@@ -100,9 +98,7 @@ class TestDiscreteDistribution:
         assert dd.probabilities == [1 / 3, 1 / 3, 1 / 3]
 
     def test_with_discrete_probabilities(self):
-        dd = minisimulator.DiscreteDistribution.with_discrete_probabilities(
-            [(1, 0.2), (2, 0.3), (3, 0.5)]
-        )
+        dd = minisimulator.DiscreteDistribution.with_discrete_probabilities([(1, 0.2), (2, 0.3), (3, 0.5)])
         assert dd.choices == [1, 2, 3]
         assert dd.probabilities == [0.2, 0.3, 0.5]
 

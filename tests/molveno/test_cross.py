@@ -1,9 +1,10 @@
 """Cross comparison testing of the two models."""
 
-from yakof.molveno import orig, yak
+import random
 
 import numpy as np
-import random
+
+from yakof.molveno import orig, yak
 
 
 def test_cross_fixed_case():
@@ -57,14 +58,10 @@ def test_cross_fixed_case():
 
     # Build a map between a name of a constraint and the constraint
     assert yak_model.field_elements is not None
-    yak_cmap = {
-        key.name: value for key, value in yak_model.field_elements.items() if key
-    }
+    yak_cmap = {key.name: value for key, value in yak_model.field_elements.items() if key}
 
     assert orig_model.field_elements is not None
-    orig_cmap = {
-        key.name: value for key, value in orig_model.field_elements.items() if key
-    }
+    orig_cmap = {key.name: value for key, value in orig_model.field_elements.items() if key}
 
     # Ensure we have the same constraint names and that they are four
     assert set(orig_cmap.keys()) == set(yak_cmap.keys())
@@ -80,9 +77,7 @@ def test_cross_fixed_case():
 
         # Basic shape check
         if orig_c.shape != yak_c.shape:
-            failures.append(
-                f"Shape mismatch for {key}: {orig_c.shape} vs {yak_c.shape}"
-            )
+            failures.append(f"Shape mismatch for {key}: {orig_c.shape} vs {yak_c.shape}")
             continue
 
         # Check if values are close enough

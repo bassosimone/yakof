@@ -8,7 +8,6 @@ by the original and yakof-based Molveno models.
 
 # SPDX-License-Identifier: Apache-2.0
 
-
 import pandas as pd
 
 season_stats = pd.DataFrame(

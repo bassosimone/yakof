@@ -2,9 +2,9 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.abtesting.model5 import a, b
-
 import numpy as np
+
+from yakof.abtesting.model5 import a, b
 
 
 def test_abtesting():

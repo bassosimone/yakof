@@ -18,7 +18,7 @@ for more sophisticated implementations.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, Sequence, runtime_checkable, Optional
+from typing import Optional, Protocol, Sequence, runtime_checkable
 
 import numpy as np
 
@@ -187,7 +187,7 @@ class DiscreteDistribution:
 
     @staticmethod
     def with_discrete_probabilities(
-        values: Sequence[tuple[int, float]]
+        values: Sequence[tuple[int, float]],
     ) -> DiscreteDistribution:
         """Create a DiscreteDistribution with specified probabilities.
 

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import threading
-import pytest
+
 from yakof.atomic import Int
 
 

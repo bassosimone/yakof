@@ -3,11 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
-import pytest
 
-from yakof.frontend import graph
-from yakof.numpybackend import executor
 from yakof import trafficmodel
+from yakof.numpybackend import executor
 
 
 def test_traffic_model():
@@ -47,9 +45,7 @@ def test_traffic_model():
     expected_price_effect = np.zeros((7, 3))
     for i in range(7):
         for j in range(3):
-            expected_price_effect[i, j] = 1.0 - price_sensitivity[j] * np.log(
-                price[i] / inputs.base_price
-            )
+            expected_price_effect[i, j] = 1.0 - price_sensitivity[j] * np.log(price[i] / inputs.base_price)
 
     expected_price_affected = base_demand[:, np.newaxis] * expected_price_effect
 
@@ -60,18 +56,16 @@ def test_traffic_model():
     ), "Price affected demand has incorrect shape"
 
     # Check results match expected values (with tolerance for floating point)
-    np.testing.assert_allclose(
-        price_affected_demand, expected_price_affected, rtol=1e-5
-    )
+    np.testing.assert_allclose(price_affected_demand, expected_price_affected, rtol=1e-5)
 
     # Verify that demand is reduced at peak and increased at shoulders
     # Peak hours: 7-9 (indices 1, 2)
     # Check that actual_demand is less than price_affected_demand in peak hours
     for i in [1, 2]:  # Peak hours
         for j in range(3):  # All ensemble dimensions
-            assert (
-                demand_after_removal[i, j] < price_affected_demand[i, j]
-            ), f"Demand at peak hour {hours[i]} should be reduced"
+            assert demand_after_removal[i, j] < price_affected_demand[i, j], (
+                f"Demand at peak hour {hours[i]} should be reduced"
+            )
 
     # Check total conservation of demand (within floating point tolerance)
     total_original = np.sum(price_affected_demand)
@@ -85,11 +79,11 @@ def test_traffic_model():
 
     # Additional checks for the time-shifting effect
     # Verify early shifting: Hour 6 should have increased demand
-    assert np.all(
-        actual_demand[0, :] > price_affected_demand[0, :]
-    ), "Early shifting should increase demand in pre-peak hour"
+    assert np.all(actual_demand[0, :] > price_affected_demand[0, :]), (
+        "Early shifting should increase demand in pre-peak hour"
+    )
 
     # Verify late shifting: Hour 9 should have increased demand
-    assert np.all(
-        actual_demand[3, :] > price_affected_demand[3, :]
-    ), "Late shifting should increase demand in post-peak hour"
+    assert np.all(actual_demand[3, :] > price_affected_demand[3, :]), (
+        "Late shifting should increase demand in post-peak hour"
+    )

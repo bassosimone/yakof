@@ -2,7 +2,6 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
 from yakof.frontend import graph
 
 
@@ -220,7 +219,7 @@ def test_infix_arithmetic_operations():
     """Test infix arithmetic operations between nodes."""
     a = graph.placeholder("a")
     b = graph.placeholder("b")
-    c = graph.constant(2.0)
+    _ = graph.constant(2.0)
 
     # Test operator overloading
     add1 = a + b

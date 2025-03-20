@@ -54,11 +54,12 @@ The reference implementation provides two state classes:
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+
 from typing import Protocol, runtime_checkable
 
 import numpy as np
 
-from ..frontend import graph, pretty
+from ..frontend import graph
 from . import debug, dispatch
 
 
@@ -155,9 +156,7 @@ class StateWithCache(StateWithoutCache):
         return super().get_placeholder_value(key)
 
 
-def _print_node_evaluation(
-    node: graph.Node, value: np.ndarray, cached: bool = False
-) -> None:
+def _print_node_evaluation(node: graph.Node, value: np.ndarray, cached: bool = False) -> None:
     """Print node information and result after evaluation.
 
     This function prints comprehensive information about a node after it
@@ -232,9 +231,7 @@ def _evaluate(node: graph.Node, state: State) -> np.ndarray:
         if value is None:
             if node.default_value is not None:
                 return np.asarray(node.default_value)
-            raise ValueError(
-                f"evaluator: no value provided for placeholder '{node.name}'"
-            )
+            raise ValueError(f"evaluator: no value provided for placeholder '{node.name}'")
         return value
 
     # Binary operations

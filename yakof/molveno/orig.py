@@ -8,26 +8,23 @@ as its underlying execution engine.
 
 # SPDX-License-Identifier: Apache-2.0
 
-from scipy import stats
-import numpy as np
-
 from dt_model import (
-    UniformCategoricalContextVariable,
     CategoricalContextVariable,
-    PresenceVariable,
-    Index,
     Constraint,
-    Ensemble,
+    Index,
     Model,
+    PresenceVariable,
+    UniformCategoricalContextVariable,
 )
-from sympy import Symbol, Eq, Piecewise
+from scipy import stats
+from sympy import Eq, Piecewise, Symbol
 
 from .presence_stats import (
+    excursionist_presences_stats,
     season,
+    tourist_presences_stats,
     weather,
     weekday,
-    tourist_presences_stats,
-    excursionist_presences_stats,
 )
 
 # MODEL DEFINITION
@@ -35,29 +32,19 @@ from .presence_stats import (
 # Context variables
 
 CV_weekday = UniformCategoricalContextVariable("weekday", [Symbol(v) for v in weekday])
-CV_season = CategoricalContextVariable(
-    "season", {Symbol(v): season[v] for v in season.keys()}
-)
-CV_weather = CategoricalContextVariable(
-    "weather", {Symbol(v): weather[v] for v in weather.keys()}
-)
+CV_season = CategoricalContextVariable("season", {Symbol(v): season[v] for v in season.keys()})
+CV_weather = CategoricalContextVariable("weather", {Symbol(v): weather[v] for v in weather.keys()})
 
 # Presence variables
 
-PV_tourists = PresenceVariable(
-    "tourists", [CV_weekday, CV_season, CV_weather], tourist_presences_stats
-)
-PV_excursionists = PresenceVariable(
-    "excursionists", [CV_weekday, CV_season, CV_weather], excursionist_presences_stats
-)
+PV_tourists = PresenceVariable("tourists", [CV_weekday, CV_season, CV_weather], tourist_presences_stats)
+PV_excursionists = PresenceVariable("excursionists", [CV_weekday, CV_season, CV_weather], excursionist_presences_stats)
 
 # Capacity indexes
 
 I_C_parking = Index("parking capacity", stats.uniform(loc=350.0, scale=100.0))
 I_C_beach = Index("beach capacity", stats.uniform(loc=6000.0, scale=1000.0))
-I_C_accommodation = Index(
-    "accommodation capacity", stats.lognorm(s=0.125, loc=0.0, scale=5000.0)
-)
+I_C_accommodation = Index("accommodation capacity", stats.lognorm(s=0.125, loc=0.0, scale=5000.0))
 I_C_food = Index("food service capacity", stats.triang(loc=3000.0, scale=1000.0, c=0.5))
 
 # Usage indexes
@@ -92,20 +79,14 @@ I_U_excursionists_food = Index(
 # Conversion indexes
 
 I_Xa_tourists_per_vehicle = Index("tourists per vehicle allocation factor", 2.5)
-I_Xa_excursionists_per_vehicle = Index(
-    "excursionists per vehicle allocation factor", 2.5
-)
+I_Xa_excursionists_per_vehicle = Index("excursionists per vehicle allocation factor", 2.5)
 I_Xo_tourists_parking = Index("tourists in parking rotation factor", 1.02)
 I_Xo_excursionists_parking = Index("excursionists in parking rotation factor", 3.5)
 
-I_Xo_tourists_beach = Index(
-    "tourists on beach rotation factor", stats.uniform(loc=1.0, scale=2.0)
-)
+I_Xo_tourists_beach = Index("tourists on beach rotation factor", stats.uniform(loc=1.0, scale=2.0))
 I_Xo_excursionists_beach = Index("excursionists on beach rotation factor", 1.02)
 
-I_Xa_tourists_accommodation = Index(
-    "tourists per accommodation allocation factor", 1.05
-)
+I_Xa_tourists_accommodation = Index("tourists per accommodation allocation factor", 1.05)
 
 I_Xa_visitors_food = Index("visitors in food service allocation factor", 0.9)
 I_Xo_visitors_food = Index("visitors in food service rotation factor", 2.0)
@@ -197,13 +178,9 @@ M_Base = Model(
 )
 
 # Larger park capacity model
-I_C_parking_larger = Index(
-    "larger parking capacity", stats.uniform(loc=550.0, scale=100.0)
-)
+I_C_parking_larger = Index("larger parking capacity", stats.uniform(loc=550.0, scale=100.0))
 
-M_MoreParking = M_Base.variation(
-    "larger parking model", change_capacities={I_C_parking: I_C_parking_larger}
-)
+M_MoreParking = M_Base.variation("larger parking model", change_capacities={I_C_parking: I_C_parking_larger})
 
 # ANALYSIS SITUATIONS
 
