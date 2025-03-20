@@ -17,6 +17,7 @@ The model accounts for context-dependent factors:
 """
 
 from dataclasses import dataclass
+
 from yakof.frontend import abstract, autoenum, autonaming, graph, linearize, morphisms
 
 sitin_axis_id, takeaway_axis_id, ensemble_axis_id = morphisms.generate_canonical_axes(3)
@@ -271,9 +272,7 @@ def build(inputs: Inputs) -> Model:
         # --- Constraints ---
 
         # Seating constraint
-        seating_load = customers_sitin / (
-            seating_capacity_field * seat_turnover_rate_field
-        )
+        seating_load = customers_sitin / (seating_capacity_field * seat_turnover_rate_field)
         seating_sustainable = seating_load <= 1.0
 
         # Service constraint

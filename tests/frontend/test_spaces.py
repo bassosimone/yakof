@@ -2,9 +2,8 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
 
-from yakof.frontend import bases, spaces, abstract, morphisms
+from yakof.frontend import bases, spaces
 
 
 def test_canonical_spaces_dimensions():
@@ -63,9 +62,7 @@ def test_monotonic_axes_in_spaces():
     for space in all_spaces:
         axes = space.basis.axes
         for i in range(1, len(axes)):
-            assert (
-                axes[i] > axes[i - 1]
-            ), f"Axes not monotonic in {space.basis.__class__.__name__}"
+            assert axes[i] > axes[i - 1], f"Axes not monotonic in {space.basis.__class__.__name__}"
 
 
 def test_expansion_morphisms():

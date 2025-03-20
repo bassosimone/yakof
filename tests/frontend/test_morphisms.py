@@ -2,8 +2,8 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
 import numpy as np
+import pytest
 
 from yakof.frontend import abstract, morphisms
 from yakof.numpybackend import evaluator
@@ -292,9 +292,7 @@ def test_r4_to_r2_projections():
         expected = np.sum(fixture, axis=axes)
 
         # Compare results
-        actual = evaluator.evaluate(
-            result.node, evaluator.StateWithoutCache({"t": fixture})
-        )
+        actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
         np.testing.assert_array_equal(actual, expected)
 
 
@@ -324,9 +322,7 @@ def test_r2_to_r4_expansions():
             expected = np.expand_dims(expected, axis)
 
         # Compare results
-        actual = evaluator.evaluate(
-            result.node, evaluator.StateWithoutCache({"t": fixture})
-        )
+        actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
         np.testing.assert_array_equal(actual, expected)
 
 
@@ -345,9 +341,7 @@ def test_scalar_expansion():
     expected = np.expand_dims(fixture, 0)
 
     # Compare results
-    actual = evaluator.evaluate(
-        result.node, evaluator.StateWithoutCache({"t": fixture})
-    )
+    actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
     np.testing.assert_array_equal(actual, expected)
 
 
@@ -366,7 +360,5 @@ def test_scalar_projection():
     expected = np.sum(fixture)
 
     # Compare results
-    actual = evaluator.evaluate(
-        result.node, evaluator.StateWithoutCache({"t": fixture})
-    )
+    actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
     np.testing.assert_array_equal(actual, expected)

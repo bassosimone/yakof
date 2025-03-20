@@ -2,11 +2,10 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.dtlang import index
-
+import numpy as np
 from scipy import stats
 
-import numpy as np
+from yakof.dtlang import index
 
 
 def test_index_with_scalar():

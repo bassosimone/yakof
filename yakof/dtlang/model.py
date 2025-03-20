@@ -13,16 +13,14 @@ from typing import Sequence, cast
 
 import numpy as np
 
+from ..frontend import graph, linearize
+from ..numpybackend import executor
 from . import ensemble
-
 from .constraint import Constraint, CumulativeDistribution
 from .context import ContextVariable
 from .geometry import Tensor
 from .index import Index
 from .presence import PresenceVariable
-
-from ..frontend import graph, linearize
-from ..numpybackend import executor
 
 
 class Model:
@@ -114,7 +112,8 @@ class Model:
         y_size = grid[self.pvs[0]].shape[0]
 
         cache[self.pvs[1].node] = cast(
-            np.ndarray, np.expand_dims(grid[self.pvs[1]], axis=(1, 2))  # X, y, z
+            np.ndarray,
+            np.expand_dims(grid[self.pvs[1]], axis=(1, 2)),  # X, y, z
         )
         x_size = grid[self.pvs[1]].shape[0]
 

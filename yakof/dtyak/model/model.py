@@ -1,22 +1,17 @@
 from __future__ import annotations
 
-import numbers
-
 from functools import reduce
 
 import numpy as np
-import pandas as pd
-from sympy import lambdify
 from scipy import interpolate, ndimage, stats
-
-from ..symbols.constraint import Constraint, CumulativeDistribution
-from ..symbols.context_variable import ContextVariable
-from ..symbols.index import Index, Sampleable
-from ..symbols.presence_variable import PresenceVariable
 
 from ...frontend import graph, linearize
 from ...numpybackend import executor
 from ...sympyke import symbol
+from ..symbols.constraint import Constraint, CumulativeDistribution
+from ..symbols.context_variable import ContextVariable
+from ..symbols.index import Index, Sampleable
+from ..symbols.presence_variable import PresenceVariable
 
 
 class Model:
@@ -197,20 +192,18 @@ class Model:
             horizontal_regr = None
             vertical_regr = None
             try:
-                horizontal_regr = stats.linregress(
-                    grid[self.pvs[0]][xi], grid[self.pvs[1]][yi]
-                )
+                horizontal_regr = stats.linregress(grid[self.pvs[0]][xi], grid[self.pvs[1]][yi])
             except ValueError:
                 pass
             try:
-                vertical_regr = stats.linregress(
-                    grid[self.pvs[1]][yi], grid[self.pvs[0]][xi]
-                )
+                vertical_regr = stats.linregress(grid[self.pvs[1]][yi], grid[self.pvs[0]][xi])
             except ValueError:
                 pass
 
-            # TODO(pistore,bassosimone): find a better way to represent the lines (at the moment, we need to encode the endopoints
-            # TODO(pistore,bassosimone): even before we implement the previous TODO, avoid hardcoding of line length (10000)
+            # TODO(pistore,bassosimone): find a better way to represent the lines (at the moment, we
+            # need to encode the endpoints.
+            # TODO(pistore,bassosimone): even before we implement the previous TODO,
+            # avoid hardcoding of line length (10000)
 
             def _vertical(regr) -> tuple[tuple[float, float], tuple[float, float]]:
                 """Logic for computing the points with vertical regression"""
@@ -282,6 +275,4 @@ class Model:
                 )
             )
 
-        return Model(
-            new_name, self.cvs, self.pvs, new_indexes, new_capacities, new_constraints
-        )
+        return Model(new_name, self.cvs, self.pvs, new_indexes, new_capacities, new_constraints)

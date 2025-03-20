@@ -6,10 +6,10 @@ This module implements minimal support for sympy-like symbols
 so that we can write dt_model models.
 """
 
-from dataclasses import dataclass
-from ..frontend import graph
-
 import threading
+from dataclasses import dataclass
+
+from ..frontend import graph
 
 
 @dataclass(frozen=True)

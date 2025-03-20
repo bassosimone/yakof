@@ -12,18 +12,18 @@ from .ensemble.ensemble import Ensemble
 from .model.model import Model
 from .symbols.constraint import Constraint
 from .symbols.context_variable import (
-    ContextVariable,
-    UniformCategoricalContextVariable,
     CategoricalContextVariable,
+    ContextVariable,
     ContinuousContextVariable,
+    UniformCategoricalContextVariable,
 )
 from .symbols.index import (
-    Index,
     ConstIndex,
-    SymIndex,
-    UniformDistIndex,
+    Index,
     LognormDistIndex,
+    SymIndex,
     TriangDistIndex,
+    UniformDistIndex,
 )
 from .symbols.presence_variable import PresenceVariable
 

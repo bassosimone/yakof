@@ -2,21 +2,18 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
+import numpy as np
+import pytest
 from dt_model import Ensemble
+from scipy import stats
 
 from yakof.dtlang import (
     Constraint,
     Index,
     Model,
-    Piecewise,
     PresenceVariable,
     UniformCategoricalContextVariable,
 )
-
-from scipy import stats
-
-import numpy as np
-import pytest
 
 
 def test_model_evaluation_simple():
@@ -78,7 +75,7 @@ def test_model_evaluation_simple():
     }
 
     ensemble = Ensemble(model, {weekday: days})  # type: ignore
-    ccache: dict[Constraint, np.ndarray] = {}
+    _: dict[Constraint, np.ndarray] = {}
 
     expect = np.array(
         [

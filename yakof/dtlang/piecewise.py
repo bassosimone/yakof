@@ -7,9 +7,7 @@ a Piecewise invocation to a graph.multi_clause_where tensor in the XYZ space.
 """
 
 from ..frontend import graph
-
 from . import geometry
-
 
 Cond = geometry.Tensor | graph.Scalar
 """Condition for a piecewise clause."""

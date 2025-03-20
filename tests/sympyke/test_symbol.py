@@ -2,11 +2,11 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.sympyke import Symbol
+import numpy as np
+
 from yakof.frontend import linearize
 from yakof.numpybackend import executor
-
-import numpy as np
+from yakof.sympyke import Symbol
 
 
 def test_symbol_basics():
@@ -97,9 +97,9 @@ def test_symbol_table_values():
 
     try:
         # Create some symbols
-        a = Symbol("a")
-        b = Symbol("b")
-        c = Symbol("c")
+        _ = Symbol("a")
+        _ = Symbol("b")
+        _ = Symbol("c")
 
         # Get all symbols from the table
         all_symbols = symbol_mod.symbol_table.values()

@@ -54,7 +54,6 @@ from typing import Generic, TypeVar
 from .. import atomic
 from ..frontend import abstract
 
-
 _id_generator = atomic.Int()
 """Atomic integer generator for unique enum type IDs."""
 

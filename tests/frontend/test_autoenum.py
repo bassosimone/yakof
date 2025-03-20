@@ -5,7 +5,7 @@
 import pytest
 
 from yakof import atomic
-from yakof.frontend import abstract, autoenum, autonaming, bases, graph
+from yakof.frontend import abstract, autoenum, autonaming, graph
 
 
 # Define test bases and spaces
@@ -44,9 +44,7 @@ def test_enum_value_creation(test_space):
     enum_value = autoenum.Value(enum_type, "TestValue")
 
     assert enum_value.name == "TestValue"
-    assert (
-        enum_value.value & (enum_type.basevalue) == enum_type.basevalue
-    )  # Contains type's base value
+    assert enum_value.value & (enum_type.basevalue) == enum_type.basevalue  # Contains type's base value
     assert isinstance(enum_value.tensor, abstract.Tensor)
     assert enum_value.tensor.space is test_space
 
@@ -121,10 +119,7 @@ def test_many_enum_values():
     enum_type = autoenum.Type(test_space, "LargeEnum")
 
     # Create a moderate number of values
-    values = [
-        autoenum.Value(enum_type, f"Value{i}")
-        for i in range(autoenum.max_unscaled_enum_value)
-    ]
+    values = [autoenum.Value(enum_type, f"Value{i}") for i in range(autoenum.max_unscaled_enum_value)]
 
     # Check they're all unique
     unique_values = {v.value for v in values}

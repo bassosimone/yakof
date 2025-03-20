@@ -5,10 +5,9 @@ from typing import Callable
 import numpy as np
 from scipy import stats
 
-from .context_variable import ContextVariable
-
 from ...frontend import graph
 from ...sympyke.symbol import SymbolValue
+from .context_variable import ContextVariable
 
 
 class PresenceVariable:
@@ -54,9 +53,7 @@ class PresenceVariable:
         if cvs is not None:
             all_cvs = [cvs[cv] for cv in self.cvs if cv in cvs.keys()]
             # TODO: solve this issue of symbols vs names
-            all_cvs = list(
-                map(lambda v: v.name if isinstance(v, SymbolValue) else v, all_cvs)
-            )
+            all_cvs = list(map(lambda v: v.name if isinstance(v, SymbolValue) else v, all_cvs))
         distr: dict = self.distribution(*all_cvs)
         return np.asarray(
             stats.truncnorm.rvs(

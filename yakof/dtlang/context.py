@@ -19,15 +19,11 @@ We compile both kind of context variables to graph.placeholder tensors
 using, as for other types in this package, the XYZ space.
 """
 
+import random
 from typing import Mapping, Protocol, Sequence, runtime_checkable
 
-import numpy as np
-import random
-
+from ..frontend import autoenum
 from . import geometry
-
-from ..frontend import autoenum, graph
-
 
 SampleWeight = float
 """The weight of a value sampled from an EnsembleSampler."""
