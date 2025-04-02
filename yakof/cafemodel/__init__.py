@@ -1,5 +1,5 @@
 """
-Cafe Model
+Cafe Model.
 ==========
 
 This module models cafe operations with capacity constraints across multiple dimensions:
@@ -26,7 +26,8 @@ sitin_axis_id, takeaway_axis_id, ensemble_axis_id = morphisms.generate_canonical
 class ScalarBasis:
     """Represents a scalar value without dimensions.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Empty tuple indicating no dimensions
     """
 
@@ -36,7 +37,8 @@ class ScalarBasis:
 class SitinBasis:
     """Represents the sit-in customer dimension of the cafe model.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the sit-in axis identifier
     """
 
@@ -46,7 +48,8 @@ class SitinBasis:
 class TakeawayBasis:
     """Represents the takeaway customer dimension of the cafe model.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the takeaway axis identifier
     """
 
@@ -56,7 +59,8 @@ class TakeawayBasis:
 class EnsembleBasis:
     """Represents different scenarios (weather, time) affecting cafe operations.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the ensemble axis identifier
     """
 
@@ -66,7 +70,8 @@ class EnsembleBasis:
 class WeatherBasis:
     """Represents weather conditions affecting cafe operations.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the ensemble axis identifier
     """
 
@@ -76,7 +81,8 @@ class WeatherBasis:
 class TimeOfDayBasis:
     """Represents different times of day affecting cafe operations.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the ensemble axis identifier
     """
 
@@ -86,7 +92,8 @@ class TimeOfDayBasis:
 class FieldBasis:
     """Combined dimensions for the complete cafe modeling space.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing sit-in, takeaway and ensemble axis identifiers
     """
 
@@ -115,7 +122,8 @@ expand_ensemble_to_field = morphisms.ExpandDims(ensemble_space, field_space)
 class Inputs:
     """Input parameters for the cafe model.
 
-    Attributes:
+    Attributes
+    ----------
         customers_sitin: Number of sit-in customers across different scenarios
         customers_takeaway: Number of takeaway customers across different scenarios
         weather_enum: Enumeration type for weather conditions
@@ -171,7 +179,8 @@ class Inputs:
 class Model:
     """Ready to evaluate cafe model.
 
-    Attributes:
+    Attributes
+    ----------
         seating_sustainable: Boolean tensor indicating whether seating capacity
                             is sufficient across scenarios
         service_sustainable: Boolean tensor indicating whether service capacity
@@ -202,10 +211,10 @@ def build(inputs: Inputs) -> Model:
     Args:
         inputs: Model input parameters and placeholders
 
-    Returns:
+    Returns
+    -------
         Outputs: Model outputs including sustainability indicators
     """
-
     with autonaming.context():
         # --- context dependent variables ---
 

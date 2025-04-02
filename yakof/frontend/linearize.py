@@ -1,5 +1,5 @@
 """
-Linearization of Computation Graphs
+Linearization of Computation Graphs.
 ===================================
 
 This module provides functions to linearize computation graphs into execution
@@ -56,14 +56,17 @@ def forest(*leaves: graph.Node) -> list[graph.Node]:
         *leaves: the nodes to start the linearization process from. Use the
             unpacking operator `*` to pass a list of nodes.
 
-    Returns:
+    Returns
+    -------
         Topologically sorted list of nodes forming an execution plan
 
-    Raises:
+    Raises
+    ------
         ValueError: If a cycle is detected in the graph
         TypeError: If an unknown node type is encountered
 
-    Examples:
+    Examples
+    --------
         >>> # Single output
         >>> plan = linearize.forest(output_node)
         >>>
@@ -77,7 +80,6 @@ def forest(*leaves: graph.Node) -> list[graph.Node]:
     graphs, finding nodes within the execution plan must use object identity, as
     documented more extensively in the `graph` and in this module's docstring.
     """
-
     # plan contains the linearized output
     plan: list[graph.Node] = []
 
@@ -89,7 +91,6 @@ def forest(*leaves: graph.Node) -> list[graph.Node]:
 
     def _visit(node: graph.Node) -> None:
         """Internal function that visits a given node."""
-
         # Ensure we only visit a node at most once
         if node in visited:
             return
@@ -134,13 +135,14 @@ def _get_dependencies(node: graph.Node) -> list[graph.Node]:
     Args:
         node: The node to get dependencies for
 
-    Returns:
+    Returns
+    -------
         List of nodes that are direct dependencies
 
-    Raises:
+    Raises
+    ------
         TypeError: If the node type is unknown
     """
-
     if isinstance(node, graph.BinaryOp):
         return [node.left, node.right]
 

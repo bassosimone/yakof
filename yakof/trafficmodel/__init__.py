@@ -1,5 +1,5 @@
 """
-Traffic Model
+Traffic Model.
 =============
 
 This module models traffic demand patterns with price sensitivity and time-shifting effects.
@@ -31,7 +31,8 @@ ScalarBasis = bases.Scalar
 class TimeBasis:
     """Represents the time dimension in the traffic model.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the time axis identifier
     """
 
@@ -41,7 +42,8 @@ class TimeBasis:
 class EnsembleBasis:
     """Represents different scenarios or population segments with varying sensitivities.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing the ensemble axis identifier
     """
 
@@ -51,7 +53,8 @@ class EnsembleBasis:
 class FieldBasis:
     """Combined time and ensemble dimensions for the complete modeling space.
 
-    Attributes:
+    Attributes
+    ----------
         axes: Tuple containing both time and ensemble axis identifiers
     """
 
@@ -88,7 +91,8 @@ project_ensemble_to_scalar_using_sum = morphisms.ProjectUsingSum(ensemble_space,
 class Inputs:
     """Input parameters for the traffic model.
 
-    Attributes:
+    Attributes
+    ----------
         morning_peak_start (float): Start time of the morning peak period (hour of day)
         morning_peak_end (float): End time of the morning peak period (hour of day)
         base_price (float): Reference price level used for price sensitivity calculations
@@ -117,7 +121,8 @@ class Inputs:
 class Model:
     """Ready to evaluate traffic model.
 
-    Attributes:
+    Attributes
+    ----------
         price_affected_demand (abstract.Tensor[FieldBasis]): Demand after applying price sensitivity effects
             following the formula: base_demand * (1 - sensitivity * log(price/base_price))
         demand_after_removal (abstract.Tensor[FieldBasis]): Demand after removing the shifted portion from peak periods
@@ -149,7 +154,8 @@ def build(inputs: Inputs) -> Model:
     Args:
         inputs: Model input parameters and placeholders
 
-    Returns:
+    Returns
+    -------
         Outputs: Model outputs including the final demand pattern with all effects applied
     """
     # Auto-assign names to tensors to make debugging much easier

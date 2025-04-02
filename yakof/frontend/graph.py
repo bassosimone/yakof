@@ -1,5 +1,5 @@
 """
-Computation Graph Building
+Computation Graph Building.
 ==========================
 
 This module allows to build an abstract computation graph using TensorFlow-like
@@ -431,7 +431,8 @@ class AxisOp(Node):
 
 class expand_dims(AxisOp):
     """Adds new axes of size 1 to a tensor's shape, thus expanding the
-    tensor to a higher-dimensional space."""
+    tensor to a higher-dimensional space.
+    """
 
 
 class squeeze(AxisOp):
@@ -440,7 +441,8 @@ class squeeze(AxisOp):
 
 class project_using_sum(AxisOp):
     """Computes sum of tensor elements along specified axes, thus
-    projecting the tensor onto a lower-dimensional space."""
+    projecting the tensor onto a lower-dimensional space.
+    """
 
 
 reduce_sum = project_using_sum
@@ -451,7 +453,8 @@ the dt-model is complete."""
 
 class project_using_mean(AxisOp):
     """Computes mean of tensor elements along specified axes, thus
-    projecting the tensor onto a lower-dimensional space."""
+    projecting the tensor onto a lower-dimensional space.
+    """
 
 
 reduce_mean = project_using_mean

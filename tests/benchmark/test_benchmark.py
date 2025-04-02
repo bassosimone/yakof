@@ -47,7 +47,6 @@ def test_benchmark_run():
 
 def test_results_class():
     """Test the Results class properties with controlled values."""
-
     # Create a Results object with known values
     results = benchmark.Results()
     results.creation_times = [1.0, 2.0, 3.0]

@@ -1,5 +1,5 @@
 """
-Abstract Tensor Operations
+Abstract Tensor Operations.
 ==========================
 
 This modules defines tensors spaces and tensors within spaces. It builds on
@@ -78,7 +78,8 @@ class Basis(Protocol):
     their position in the canonical ordering. To generate the canonical
     ordering, use the morphisms.generate_canonical_axes function.
 
-    Examples:
+    Examples
+    --------
         >>> class XYBasis:
         ...     axes = (1000, 1001)  # X and Y axes
         >>> isinstance(XYBasis(), Basis)
@@ -123,7 +124,8 @@ class Tensor(Generic[B]):
     Type Parameters:
         B: Type of the basis vectors.
 
-    Attributes:
+    Attributes
+    ----------
         space: The tensor space of the tensor.
         node: The computation graph node representing the tensor.
 
@@ -149,16 +151,16 @@ class Tensor(Generic[B]):
 
     # autonaming.Namer protocol implementation
     def implements_namer(self) -> None:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
 
     @property
     def name(self) -> str:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
         return self.node.name
 
     @name.setter
     def name(self, value: str) -> None:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
         self.node.name = value
 
     # Hashing by identity - see also comment in graph.py
@@ -240,7 +242,8 @@ class TensorSpace(Generic[B]):
     Type Parameters:
         B: Type of the basis vectors.
 
-    Attributes:
+    Attributes
+    ----------
         basis: The basis of the tensor space.
 
     Args:

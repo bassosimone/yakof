@@ -10,7 +10,6 @@ from yakof.molveno import yak as mmod
 
 def test_molveno_yak_simple():
     """Simple test ensuring we can evaluate M_base."""
-
     # Load the base model
     model = mmod.M_Base
 

@@ -1,5 +1,5 @@
 """
-Café Demand Model with Price and Time Effects
+Café Demand Model with Price and Time Effects.
 ===========================================
 
 This example demonstrates:

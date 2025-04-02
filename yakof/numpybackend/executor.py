@@ -1,5 +1,5 @@
 """
-Graph Executor
+Graph Executor.
 ==============
 
 An evaluator for computation graphs that processes nodes in
@@ -52,7 +52,8 @@ class State:
     Note that, if graph.NODE_FLAG_TRACE is set, the State will print the
     nodes provided to the constructor in its __post_init__ method.
 
-    Attributes:
+    Attributes
+    ----------
         values: A dictionary caching the result of the computation.
         flags: Bitmask containing debug flags (e.g., graph.NODE_FLAG_BREAK).
     """
@@ -73,10 +74,12 @@ class State:
         Args:
             node: The node whose value to retrieve.
 
-        Returns:
+        Returns
+        -------
             The value associated with the node.
 
-        Raises:
+        Raises
+        ------
             NodeValueNotFound: If the node has not been evaluated.
         """
         try:
@@ -97,7 +100,8 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
         state: The current executor state.
         node: The node to evaluate.
 
-    Raises:
+    Raises
+    ------
         NodeValueNotFound: If a dependent node has not been evaluated
             and therefore its value cannot be found in the state.
         UnsupportedNodeType: If the executor does not support the given node type.
@@ -105,7 +109,6 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
         PlaceholderValueNotProvided: If a placeholder node has no value provided
             and no default value.
     """
-
     # 1. check whether node has been already evaluated (note that this
     # covers the case of placeholders provided via the state)
     if node in state.values:

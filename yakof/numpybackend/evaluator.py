@@ -1,5 +1,5 @@
 """
-NumPy Reference Evaluator
+NumPy Reference Evaluator.
 =========================
 
 Evaluates a `graph.Node` by calling the corresponding NumPy
@@ -71,7 +71,8 @@ class State(Protocol):
     including placeholder bindings and optional caching of intermediate
     results.
 
-    Methods:
+    Methods
+    -------
         get_node_value: Returns cached value for a node if available
         set_node_value: Caches a computed node value
         set_placeholder_value: Updates a placeholder's value
@@ -189,10 +190,12 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
         node: Root node of the computation graph to evaluate
         state: Execution state including placeholder values and cache
 
-    Returns:
+    Returns
+    -------
         Computed numpy array result
 
-    Raises:
+    Raises
+    ------
         TypeError: if we don't handle a specific node type
         ValueError: when there's no placeholder value
     """
@@ -220,7 +223,6 @@ def evaluate(node: graph.Node, state: State) -> np.ndarray:
 
 def _evaluate(node: graph.Node, state: State) -> np.ndarray:
     """Internal caching-agnostic implementation of the evaluate function."""
-
     # Constant operation
     if isinstance(node, graph.constant):
         return np.asarray(node.value)

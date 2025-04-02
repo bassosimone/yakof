@@ -1,5 +1,5 @@
 """
-Model Geometry
+Model Geometry.
 ==============
 
 This module defines the model geometry in which we operate. We use a 3d

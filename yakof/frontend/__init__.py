@@ -1,5 +1,5 @@
 """
-Tensor Language Frontend
+Tensor Language Frontend.
 ========================
 
 This package provides a type-safe, internal domain-specific language
@@ -87,7 +87,6 @@ Design Principles
 
 See Also
 --------
-
 - yakof.frontend.abstract: Type-safe tensor operations
 - yakof.frontend.bases: Basis definitions for tensor spaces
 - yakof.frontend.spaces: Pre-defined tensor spaces and transformations

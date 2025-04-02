@@ -1,5 +1,5 @@
 """
-Digital Twins Language (dtlang)
+Digital Twins Language (dtlang).
 ===============================
 
 This package provides a domain-specific language for creating and evaluating

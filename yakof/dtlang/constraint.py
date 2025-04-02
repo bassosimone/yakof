@@ -1,5 +1,5 @@
 """
-Constraints
+Constraints.
 ===========
 
 This module defines constraint types used in the digital twins model
@@ -21,7 +21,7 @@ from . import geometry
 
 @runtime_checkable
 class CumulativeDistribution(Protocol):
-    """Protocol matching scipy.stats distributions interface"""
+    """Protocol matching scipy.stats distributions interface."""
 
     def cdf(self, x: float | np.ndarray, *args, **kwds) -> float | np.ndarray: ...
 

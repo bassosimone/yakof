@@ -10,7 +10,6 @@ from yakof.frontend import graph
 
 def test_categorical_context_variable():
     """Make sure CategoricalContextVariable is working as intended."""
-
     # Make sure the construct raises if the values are empty
     with pytest.raises(ValueError):
         _ = context.CategoricalContextVariable("ccv", {})

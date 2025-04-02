@@ -206,14 +206,14 @@ class Model:
             # avoid hardcoding of line length (10000)
 
             def _vertical(regr) -> tuple[tuple[float, float], tuple[float, float]]:
-                """Logic for computing the points with vertical regression"""
+                """Logic for computing the points with vertical regression."""
                 if regr.slope != 0.00:
                     return ((regr.intercept, 0.0), (0.0, -regr.intercept / regr.slope))
                 else:
                     return ((regr.intercept, regr.intercept), (0.0, 10000.0))
 
             def _horizontal(regr) -> tuple[tuple[float, float], tuple[float, float]]:
-                """Logic for computing the points with horizontal regression"""
+                """Logic for computing the points with horizontal regression."""
                 if regr.slope != 0.0:
                     return ((0.0, -regr.intercept / regr.slope), (regr.intercept, 0.0))
                 else:

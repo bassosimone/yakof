@@ -9,7 +9,6 @@ from yakof.molveno import orig, yak
 
 def test_cross_fixed_case():
     """Cross compare with a fixed input case."""
-
     # Load models but don't run them yet
     orig_model = orig.M_Base
     yak_model = yak.M_Base

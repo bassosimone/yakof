@@ -1,5 +1,5 @@
 """
-Canonical Bases
+Canonical Bases.
 ===============
 
 This module defines the canonical bases for tensor spaces up to R⁶,

@@ -1,5 +1,5 @@
 """
-Yakof-based Molveno Model
+Yakof-based Molveno Model.
 =========================
 
 This is a modified Molveno model, using the `yakof.fronted` and

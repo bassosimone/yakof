@@ -1,5 +1,5 @@
 """
-Enumeration Support
+Enumeration Support.
 ===================
 
 This module contains code to generate automatically disjoint type-safe
@@ -85,10 +85,12 @@ def _next_id(gen: atomic.Int) -> int:
     Args:
         gen: Atomic counter to increment for generating the next ID
 
-    Returns:
+    Returns
+    -------
         The next unique ID
 
-    Raises:
+    Raises
+    ------
         ValueError: If the counter exceeds the maximum allowed value
     """
     value = gen.add(1) - 1  # start from zero but honour atomicity
@@ -103,7 +105,8 @@ class Type(Generic[E]):
     Type Parameters:
         E: The basis type of the associated tensor space.
 
-    Attributes:
+    Attributes
+    ----------
         space: The tensor space associated with this enumeration type.
         basevalue: Unique ID for this enum type.
         gen: Atomic counter for generating unique value IDs within this type.
@@ -121,16 +124,16 @@ class Type(Generic[E]):
 
     # autonaming.Namer protocol implementation
     def implements_namer(self) -> None:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
 
     @property
     def name(self) -> str:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
         return self.tensor.name
 
     @name.setter
     def name(self, value: str) -> None:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
         self.tensor.name = value
 
 
@@ -144,7 +147,8 @@ class Value(Generic[E]):
     Type Parameters:
         E: The basis type of the tensor space from the parent enum type.
 
-    Attributes:
+    Attributes
+    ----------
         value: Integer representation of this enum value.
         tensor: Constant tensor representation in the parent's tensor space.
 
@@ -160,14 +164,14 @@ class Value(Generic[E]):
 
     # autonaming.Namer protocol implementation
     def implements_namer(self) -> None:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
 
     @property
     def name(self) -> str:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
         return self.tensor.name
 
     @name.setter
     def name(self, value: str) -> None:
-        """This method is part of the autonaming.Namer protocol"""
+        """This method is part of the autonaming.Namer protocol."""
         self.tensor.name = value

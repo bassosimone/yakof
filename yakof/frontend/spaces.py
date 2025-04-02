@@ -1,5 +1,5 @@
 """
-Canonical Spaces and Morphisms
+Canonical Spaces and Morphisms.
 ==============================
 
 This module provides the definition of canonical tensor spaces, and

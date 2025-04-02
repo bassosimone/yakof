@@ -7,7 +7,6 @@ from yakof.dtlang import context, presence
 
 def test_presence_variable():
     """Ensure that the PresenceVariable is working as intended."""
-
     # Create the context variables on which we depend
     cv1 = context.UniformCategoricalContextVariable("cv1", ["a", "b", "c"])
     cv2 = context.UniformCategoricalContextVariable("cv1", ["a", "b", "c"])

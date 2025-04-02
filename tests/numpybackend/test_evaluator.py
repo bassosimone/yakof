@@ -395,7 +395,6 @@ def test_state_management():
 
 def test_type_validation():
     """Test type validation and mixing."""
-
     # Test mixing integer and float types
     state = evaluator.StateWithoutCache(
         {"x": np.array([1, 2, 3]), "y": np.array([1.0, 2.0, 3.0])}  # integers  # floats
@@ -413,7 +412,6 @@ def test_type_validation():
 
 def test_edge_cases_and_errors():
     """Test various edge cases and error conditions."""
-
     # Test incompatible broadcasting
     with pytest.raises(ValueError):
         state = evaluator.StateWithoutCache(

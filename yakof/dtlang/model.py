@@ -1,5 +1,5 @@
 """
-Model Definition
+Model Definition.
 ================
 
 This module defines the core Model class which represents a digital twins
@@ -61,7 +61,8 @@ class Model:
             constr: The constraint to evaluate
             cache: Dictionary mapping nodes to their evaluated values
 
-        Returns:
+        Returns
+        -------
             A numpy array representing the constraint satisfaction field
         """
         # TODO(bassosimone): to some extent, this could also be a method of
@@ -87,10 +88,12 @@ class Model:
             grid: Dictionary mapping presence variables to grid coordinate arrays
             ensemble: Iterator over weighted ensemble scenarios
 
-        Returns:
+        Returns
+        -------
             A 2D numpy array representing the sustainability field
 
-        Raises:
+        Raises
+        ------
             NotImplementedError: If more than 2 presence variables are specified
         """
         # TODO(bassosimone): the original implementation is also saving the

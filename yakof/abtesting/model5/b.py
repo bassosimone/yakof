@@ -1,5 +1,5 @@
 """
-B in the A/B testing
+B in the A/B testing.
 ====================
 
 This module contains the yakof-based implementation of model5, with minor
@@ -21,7 +21,6 @@ from yakof.dtlang import (
 
 def run() -> np.ndarray:
     """Runs the model and returns its result."""
-
     # === Context Variables ===
     days = [
         "monday",

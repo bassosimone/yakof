@@ -1,5 +1,5 @@
 """
-A in the A/B testing
+A in the A/B testing.
 ====================
 
 This module contains the original implementation of model5, with minor
@@ -23,7 +23,6 @@ from sympy import Symbol
 
 def run() -> np.ndarray:
     """Runs the model and returns its result."""
-
     # === Context Variables ===
     days = [
         "monday",

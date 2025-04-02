@@ -11,9 +11,7 @@ from .context_variable import ContextVariable
 
 
 class PresenceVariable:
-    """
-    Class to represent a presence variable.
-    """
+    """Class to represent a presence variable."""
 
     def __init__(
         self,

@@ -1,5 +1,5 @@
 """
-Debugging Code
+Debugging Code.
 ==============
 
 This module contains debugging code.

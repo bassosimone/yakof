@@ -1,5 +1,5 @@
 """
-A/B Testing
+A/B Testing.
 ===========
 
 This package contains code to A/B test the yakof based

@@ -10,7 +10,6 @@ from yakof.dtlang import constraint, geometry
 
 def test_constraint_assign_tensors():
     """Make sure that we can safely assign tensors to the constraint."""
-
     a = geometry.space.placeholder("a")
     b = geometry.space.placeholder("b")
     c = constraint.Constraint(a, b)

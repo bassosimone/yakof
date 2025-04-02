@@ -1,5 +1,5 @@
 """
-DT Model fork using Yakof
+DT Model fork using Yakof.
 ==========================
 
 This package contains a fork of the original DT Model codebase

@@ -1,5 +1,5 @@
 """
-Presence Variables
+Presence Variables.
 ==================
 
 This module defines presence variables which represent the spatial dimensions

@@ -1,5 +1,5 @@
 """
-Morphisms Between Tensor Spaces
+Morphisms Between Tensor Spaces.
 ===============================
 
 This module implements morphisms between tensor spaces, allowing tensors to be
@@ -73,7 +73,8 @@ def generate_canonical_axes(size: int) -> tuple[int, ...]:
     starting from zero. (Actually, using numbers around zero makes it
     very hard when debugging to set apart indexes and axes IDs.)
 
-    Examples:
+    Examples
+    --------
         >>> generate_canonical_axes(3)
         (1000, 1001, 1002)
         >>> generate_canonical_axes(2)
@@ -95,23 +96,27 @@ def axes_expansion(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
         source: Dimension(s) in source space
         dest: Dimension(s) in destination space
 
-    Returns:
+    Returns
+    -------
         Single axis position if only one dimension needs to be inserted,
         otherwise tuple of positions for inserting new dimensions
 
-    Raises:
+    Raises
+    ------
         ValueError: if source is not a subset of dest.
         ValueError: if source values are not monotonically increasing.
         ValueError: if dest values are not monotonically increasing.
 
-    Examples:
+    Examples
+    --------
         >>> x, y, z = generate_canonical_axes(3)  # Get distinct axis IDs
         >>> axes_expansion((x,), (x, y))
         1  # Position to insert Y
         >>> axes_expansion((x,), (x, y, z))
         (1, 2)  # Positions to insert Y and Z
 
-    See Also:
+    See Also
+    --------
         ExpandDims: The high-level API for dimension expansion
     """
     # Handle single axis case
@@ -151,16 +156,19 @@ def axes_projection(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
         source: Dimension(s) in source space
         dest: Dimension(s) in destination space
 
-    Returns:
+    Returns
+    -------
         Single axis to sum over if only one dimension needs to be removed,
         otherwise tuple of axes to sum over
 
-    Raises:
+    Raises
+    ------
         ValueError: if dest is not a subset of source.
         ValueError: if source values are not monotonically increasing.
         ValueError: if dest values are not monotonically increasing.
 
-    Examples:
+    Examples
+    --------
         >>> x, y, z = generate_canonical_axes(3)  # Get distinct axis IDs
         >>> axes_projection((x, y, z), (x, z))
         1  # Position of Y to sum over
@@ -169,7 +177,8 @@ def axes_projection(source: graph.Axis, dest: graph.Axis) -> graph.Axis:
         >>> axes_projection((x, y, z), (y, z))
         0  # Position of X to sum over
 
-    See Also:
+    See Also
+    --------
         ProjectUsingSum: The high-level API for dimension reduction
     """
     # Handle single axis case
@@ -213,7 +222,8 @@ class ExpandDims(Generic[A, B]):
         source: source tensor space.
         dest: destination tensor space.
 
-    Attributes:
+    Attributes
+    ----------
         source: source tensor space.
         dest: destination tensor space.
 
@@ -247,7 +257,8 @@ class ProjectUsingSum(Generic[A, B]):
         source: source tensor space.
         dest: destination tensor space.
 
-    Attributes:
+    Attributes
+    ----------
         source: source tensor space.
         dest: destination tensor space.
 

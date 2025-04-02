@@ -1,5 +1,5 @@
 """
-Automatic Naming
+Automatic Naming.
 ================
 
 Provides mechanisms to automatically name tensors for debugging purposes,
@@ -121,7 +121,8 @@ class Nameable(Protocol):
     """
     Protocol for objects with name setters and getters.
 
-    Methods:
+    Methods
+    -------
         implements_namer: adds extra methods to the expected interface to avoid
         name setting for objects that do implement name getter/setter but are
         not designed to work along with the autonaming functionality.

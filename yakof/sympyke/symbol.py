@@ -1,5 +1,5 @@
 """
-Minimal support for symbols
+Minimal support for symbols.
 ===========================
 
 This module implements minimal support for sympy-like symbols

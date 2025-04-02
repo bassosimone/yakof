@@ -1,5 +1,5 @@
 """
-Benchmarking utilities
+Benchmarking utilities.
 ======================
 
 This package provides benchmarking tools for numerical computations that operate on
@@ -76,10 +76,10 @@ def run(x: np.ndarray, y: np.ndarray, factory: NumericFuncFactory, n_runs: int =
         factory: A function that returns a callable implementing the numerical computation
         n_runs: Number of times to repeat the benchmark measurements
 
-    Returns:
+    Returns
+    -------
         A Results object containing timing and memory measurements
     """
-
     # Create the final results
     results = Results()
 

@@ -10,7 +10,6 @@ from yakof.molveno import orig as mmod
 
 def test_molveno_orig_simple():
     """Simple test ensuring we can evaluate M_base."""
-
     # Load the base model
     model = mmod.M_Base
 

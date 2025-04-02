@@ -1,5 +1,5 @@
 """
-Model 5
+Model 5.
 =======
 
 This package contains the fifth model written by Maryam. See

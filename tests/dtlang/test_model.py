@@ -19,8 +19,8 @@ from yakof.dtlang import (
 def test_model_evaluation_simple():
     """Evaluate the model is a relatively simple scenario and make
     sure the results we get are in line with the equivalent
-    model as defined using the dt-model package."""
-
+    model as defined using the dt-model package.
+    """
     # === Context Variables ===
     days = ["monday"]
     weekday = UniformCategoricalContextVariable("weekday", days)

@@ -1,5 +1,5 @@
 """
-Minimal Simulator
+Minimal Simulator.
 =================
 
 This package implements a minimal simulator for digital twins modeling. It provides
@@ -37,7 +37,8 @@ class LinearRange:
         stop: Ending value of the range (must be greater than start)
         points: Number of points to sample (default: 100, minimum: 2)
 
-    Raises:
+    Raises
+    ------
         ValueError: If stop <= start or if points < 2
     """
 
@@ -54,7 +55,8 @@ class LinearRange:
     def linspace(self) -> np.ndarray:
         """Create linear space array for this range.
 
-        Returns:
+        Returns
+        -------
             numpy.ndarray: Array of evenly spaced values from start to stop,
                           with the specified number of points.
         """
@@ -69,7 +71,8 @@ class Distribution(Protocol):
     Any class implementing this protocol can be used to generate random samples
     for parameter variation across ensemble members.
 
-    Methods:
+    Methods
+    -------
         sample: Generate random samples from the distribution with the given shape.
         support_size: Return the number of distinct values in the distribution's support,
                      or None if the support is infinite or uncountable.
@@ -100,7 +103,8 @@ class NormalDistribution:
         Args:
             size: Shape of the output array
 
-        Returns:
+        Returns
+        -------
             numpy.ndarray: Random samples with the specified shape, drawn
                           from a normal distribution with the given mean and std.
         """
@@ -109,7 +113,8 @@ class NormalDistribution:
     def support_size(self) -> Optional[int]:
         """Return the size of the distribution's support.
 
-        Returns:
+        Returns
+        -------
             None: Normal distributions have uncountable, infinite support
         """
         return None
@@ -136,7 +141,8 @@ class UniformDistribution:
         Args:
             size: Shape of the output array
 
-        Returns:
+        Returns
+        -------
             numpy.ndarray: Random samples with the specified shape, drawn
                           from a uniform distribution between low and high.
         """
@@ -145,7 +151,8 @@ class UniformDistribution:
     def support_size(self) -> Optional[int]:
         """Return the size of the distribution's support.
 
-        Returns:
+        Returns
+        -------
             None: Uniform continuous distributions have uncountable, infinite support
         """
         return None
@@ -177,7 +184,8 @@ class DiscreteDistribution:
         Args:
             values: Sequence of possible values to sample from
 
-        Returns:
+        Returns
+        -------
             DiscreteDistribution: A new discrete distribution with uniform probabilities
         """
         return DiscreteDistribution(
@@ -197,7 +205,8 @@ class DiscreteDistribution:
         Args:
             values: Sequence of (value, probability) tuples
 
-        Returns:
+        Returns
+        -------
             DiscreteDistribution: A new discrete distribution with values and probabilities
                                   extracted from the provided pairs
         """
@@ -212,7 +221,8 @@ class DiscreteDistribution:
         Args:
             size: Shape of the output array
 
-        Returns:
+        Returns
+        -------
             numpy.ndarray: Random samples with the specified shape, drawn
                           from the discrete distribution according to the
                           specified probabilities.
@@ -227,7 +237,8 @@ class DiscreteDistribution:
     def support_size(self) -> int:
         """Return the size of the distribution's support.
 
-        Returns:
+        Returns
+        -------
             int: The number of distinct possible values (choices) in this discrete distribution
         """
         return len(self.choices)
@@ -253,7 +264,8 @@ class ConstantDistribution:
         Args:
             size: Shape of the output array
 
-        Returns:
+        Returns
+        -------
             numpy.ndarray: Array of specified shape filled with the constant value
         """
         return np.full(size, self.value)
@@ -261,7 +273,8 @@ class ConstantDistribution:
     def support_size(self) -> int:
         """Return the size of the distribution's support.
 
-        Returns:
+        Returns
+        -------
             int: Always 1 for constant distributions, which have a single value
         """
         return 1
@@ -270,7 +283,8 @@ class ConstantDistribution:
 class ModelArgumentsBuilder:
     """Allows to programmatically build the model arguments.
 
-    Attributes:
+    Attributes
+    ----------
         params: A dictionary mapping nodes to distributions or linear ranges
     """
 
@@ -292,10 +306,10 @@ class ModelArgumentsBuilder:
         Args:
             space_size: The size of the ensemble space (number of samples to generate)
 
-        Returns:
+        Returns
+        -------
             dict[graph.Node, np.ndarray]: A dictionary mapping nodes to arrays of sampled values
         """
-
         # 1. create an empty dictionary to store the results
         result: dict[graph.Node, np.ndarray] = {}
 

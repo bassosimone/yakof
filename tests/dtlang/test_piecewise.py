@@ -12,7 +12,6 @@ from yakof.numpybackend import executor
 
 def test_piecewise_basics():
     """Make sure that Piecewise works as intended."""
-
     # Create the expressions
     expr1 = np.array([2, 9, 16])
     expr2 = np.array([8, 27, 64])

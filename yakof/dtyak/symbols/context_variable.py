@@ -10,9 +10,7 @@ from ...sympyke.symbol import SymbolValue
 
 
 class ContextVariable(ABC):
-    """
-    Class to represent a context variable.
-    """
+    """Class to represent a context variable."""
 
     def __init__(self, name: str) -> None:
         self.name = name
@@ -77,9 +75,7 @@ class UniformCategoricalContextVariable(ContextVariable):
 
 
 class CategoricalContextVariable(ContextVariable):
-    """
-    Class to represent a categorical context variable.
-    """
+    """Class to represent a categorical context variable."""
 
     def __init__(self, name: str, distribution: dict) -> None:
         super().__init__(name)

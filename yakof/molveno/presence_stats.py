@@ -1,5 +1,5 @@
 """
-Presence Stats
+Presence Stats.
 ==============
 
 This module contains the baseline presence statistics used

@@ -1,5 +1,5 @@
 """
-Pretty Printing for Computation Graphs
+Pretty Printing for Computation Graphs.
 ======================================
 
 This module provides facilities for converting computation graphs into
@@ -73,11 +73,13 @@ def format(node: graph.Node) -> str:
     Args:
         node: The node to format
 
-    Returns:
+    Returns
+    -------
         A string representation with appropriate parentheses
         and operator precedence.
 
-    Examples:
+    Examples
+    --------
         >>> x = graph.placeholder("x")
         >>> y = graph.add(graph.multiply(x, 2), 1)
         >>> print(pretty.format(y))
@@ -96,11 +98,11 @@ def _format(node: graph.Node, toplevel: bool, parent_precedence: int) -> str:
         node: The node to format
         parent_precedence: The precedence of the parent operation
 
-    Returns:
+    Returns
+    -------
         Formatted string with appropriate parentheses based on
         operator precedence.
     """
-
     # If we're not at top-level and we have a named node,
     # stop formatting and return the node name, which means
     # we're printing formulae aligned with what the user
