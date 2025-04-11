@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
+from dt_model.engine import atomic
+from dt_model.engine.frontend import graph
 
-from yakof import atomic
-from yakof.frontend import abstract, autoenum, autonaming, graph
+from yakof.frontend import abstract, autoenum, autonaming
 
 
 # Define test bases and spaces

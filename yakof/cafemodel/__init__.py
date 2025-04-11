@@ -18,7 +18,9 @@ The model accounts for context-dependent factors:
 
 from dataclasses import dataclass
 
-from yakof.frontend import abstract, autoenum, autonaming, graph, linearize, morphisms
+from dt_model.engine.frontend import graph, linearize
+
+from ..frontend import abstract, autoenum, autonaming, morphisms
 
 sitin_axis_id, takeaway_axis_id, ensemble_axis_id = morphisms.generate_canonical_axes(3)
 

@@ -4,9 +4,9 @@
 
 import numpy as np
 import pytest
+from dt_model.engine.numpybackend import executor
 
 from yakof.frontend import abstract, morphisms
-from yakof.numpybackend import evaluator
 
 # Generate axes to makes tests using explicit axes more readable
 x, y, z, u = morphisms.generate_canonical_axes(4)
@@ -292,7 +292,8 @@ def test_r4_to_r2_projections():
         expected = np.sum(fixture, axis=axes)
 
         # Compare results
-        actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
+        state = executor.State(values={t.node: fixture})
+        actual = executor.evaluate(state, result.node)
         np.testing.assert_array_equal(actual, expected)
 
 
@@ -322,7 +323,8 @@ def test_r2_to_r4_expansions():
             expected = np.expand_dims(expected, axis)
 
         # Compare results
-        actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
+        state = executor.State(values={t.node: fixture})
+        actual = executor.evaluate(state, result.node)
         np.testing.assert_array_equal(actual, expected)
 
 
@@ -341,7 +343,8 @@ def test_scalar_expansion():
     expected = np.expand_dims(fixture, 0)
 
     # Compare results
-    actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
+    state = executor.State(values={t.node: fixture})
+    actual = executor.evaluate(state, result.node)
     np.testing.assert_array_equal(actual, expected)
 
 
@@ -360,5 +363,6 @@ def test_scalar_projection():
     expected = np.sum(fixture)
 
     # Compare results
-    actual = evaluator.evaluate(result.node, evaluator.StateWithoutCache({"t": fixture}))
+    state = executor.State(values={t.node: fixture})
+    actual = executor.evaluate(state, result.node)
     np.testing.assert_array_equal(actual, expected)

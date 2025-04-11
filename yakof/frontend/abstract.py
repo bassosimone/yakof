@@ -67,7 +67,7 @@ from __future__ import annotations
 
 from typing import Any, Generic, Protocol, Sequence, TypeVar, runtime_checkable
 
-from . import graph
+from dt_model.engine.frontend import graph
 
 
 @runtime_checkable

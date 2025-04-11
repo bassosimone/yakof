@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
+from dt_model.engine.frontend import graph
 
-from yakof.frontend import abstract, graph
+from yakof.frontend import abstract
 
 
 class DummyBasis:

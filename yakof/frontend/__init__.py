@@ -3,7 +3,10 @@ Tensor Language Frontend.
 ========================
 
 This package provides a type-safe, internal domain-specific language
-for building tensor computations. It consists of several key components:
+for building tensor computations.
+
+It builds on top of the `dt-model` graph library. The overall architecture
+supports the following components:
 
 1. Abstract Syntax Tree (graph.py)
    - Core computation graph representation

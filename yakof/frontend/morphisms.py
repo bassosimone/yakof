@@ -61,7 +61,9 @@ Project a 3D tensor in XYZ space to a 2D tensor in XZ space:
 
 from typing import Generic, TypeVar
 
-from . import abstract, graph
+from dt_model.engine.frontend import graph
+
+from . import abstract
 
 
 def generate_canonical_axes(size: int) -> tuple[int, ...]:

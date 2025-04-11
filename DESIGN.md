@@ -2,12 +2,12 @@
 
 ## Overview
 
-YAKOF is a technology demonstrator showing how we could evolve the existing [dt-model](https://github.com/fbk-most/dt-model) package. The key improvements demonstrated are:
+YAKOF is a technology demonstrator showing how we could evolve the existing
+[dt-model](https://github.com/fbk-most/dt-model) package. The key
+improvements demonstrated are:
 
-1. A custom computation graph framework replacing SymPy
-2. Type-safe tensor spaces with enforced dimensional semantics
-3. Category-inspired morphisms between tensor spaces
-4. Debuggable execution with tracing and autonaming
+1. Type-safe tensor spaces with enforced dimensional semantics
+2. Category-inspired morphisms between tensor spaces
 
 ## Design Philosophy
 
@@ -20,22 +20,7 @@ This project follows these design principles:
 
 ## Core Design Decisions
 
-### 1. Computation Graph Framework
-
-**Problem**: The original implementation used SymPy for symbolic computation, which:
-- Created an artificial boundary between symbolic and numeric operations
-- Required complex shape manipulation to bridge domains
-- Lacked natural debugging capabilities
-
-**Solution**: Our custom computation graph framework (in `frontend/graph.py`):
-- Maps directly to backend operations (currently NumPy)
-- Supports low-level tensor operations without overhead
-- Contains built-in tracing and debugging facilities
-- Allows linearization for efficient evaluation
-
-The graph nodes capture the intent of operations without prescribing implementation details, enabling multiple backends and optimization opportunities.
-
-### 2. Type-Safe Tensor Spaces
+### 1. Type-Safe Tensor Spaces
 
 **Problem**: The original implementation required careful management of:
 - Axis semantics (what each dimension means)
@@ -47,9 +32,10 @@ The graph nodes capture the intent of operations without prescribing implementat
 - Use generics to enforce operations only between compatible spaces
 - Raise compile-time errors for dimension mismatches
 
-Tensor spaces are parameterized by their basis, ensuring that operations like addition only happen between tensors from the same space.
+Tensor spaces are parameterized by their basis, ensuring that operations
+like addition only happen between tensors from the same space.
 
-### 3. Category-Inspired Morphisms
+### 2. Category-Inspired Morphisms
 
 **Problem**: In sustainability modeling, tensors exist in different spaces:
 - Time series (1D)
@@ -63,20 +49,8 @@ Transforming between these spaces manually is error-prone.
 - Enforce correct dimensional semantics
 - Implement canonical axis ordering and transformation
 
-Key morphisms include `ExpandDims` to add dimensions and `ProjectUsingSum` to reduce dimensions while preserving semantics.
-
-### 4. Integrated Debugging
-
-**Problem**: Debugging complex numerical models is challenging, requiring:
-- Understanding the computation graph structure
-- Tracking intermediate values
-- Identifying where errors occur
-
-**Solution**: Integrated debugging facilities:
-- Automatic naming (`frontend/autonaming.py`) that preserves variable names
-- Tracepoints for inspecting intermediate values
-- Breakpoints for interactive debugging
-- Pretty printing for readable model inspection
+Key morphisms include `ExpandDims` to add dimensions and
+`ProjectUsingSum` to reduce dimensions while preserving semantics.
 
 ## Architecture
 
@@ -85,28 +59,15 @@ The architecture is composed of focused modules:
 ```
 yakof/
 │
-├── atomic/             # Thread-safe atomic operations
-│
-├── benchmark/          # Performance benchmarking utilities
-│
 ├── frontend/          # Core computational abstractions
 │   ├── abstract.py    # Tensor spaces and tensors
 │   ├── autoenum.py    # Type-safe enumeration support
 │   ├── autonaming.py  # Automatic naming utilities
 │   ├── bases.py       # Canonical tensor bases
-│   ├── graph.py       # Computation graph nodes
-│   ├── linearize.py   # Topological sorting for evaluation
 │   ├── morphisms.py   # Transformations between tensor spaces
-│   ├── pretty.py      # Human-readable graph representation
 │   └── spaces.py      # Pre-defined tensor spaces
 │
 ├── minisimulator/     # Minimal simulation utilities
-│
-├── numpybackend/     # NumPy backend implementation
-│   ├── debug.py      # Debugging utilities
-│   ├── dispatch.py   # Operation dispatch tables
-│   ├── evaluator.py  # Recursive graph evaluator
-│   └── executor.py   # Linearized graph executor
 │
 ├── cafemodel/        # Example cafe sustainability model
 │
@@ -138,22 +99,6 @@ def add(self, t1: Tensor[B], t2: Tensor[B]) -> Tensor[B]:
     return self.new_tensor(graph.add(t1.node, t2.node))
 ```
 
-## Evaluation Strategies
-
-The system supports multiple evaluation strategies:
-
-1. **Recursive evaluation** (`numpybackend/evaluator.py`):
-   - Depth-first traversal of the computation graph
-   - Optional caching of intermediate results
-   - Simpler implementation but less efficient for large graphs
-
-2. **Linearized evaluation** (`numpybackend/executor.py`):
-   - Topologically sorted execution plan
-   - Predictable execution order for debugging
-   - More efficient for large graphs
-
-Both strategies handle debugging operations like tracepoints and breakpoints.
-
 ## Example Models
 
 The package includes two example models demonstrating the framework:
@@ -172,10 +117,7 @@ The package includes two example models demonstrating the framework:
 
 To integrate into dt-model:
 
-1. Create a compatibility layer for existing models
-2. Gradually migrate components to use the new framework
-3. Introduce type-safe tensor spaces to critical components first
-4. Add debugging facilities to simplify transition
+1. Introduce type-safe tensor spaces to critical components first
 
 ## Future Work
 
@@ -189,7 +131,7 @@ To integrate into dt-model:
 YAKOF demonstrates a path forward for sustainability modeling that:
 - Makes dimension errors impossible through the type system
 - Provides clear semantics for tensor transformations
-- Makes debugging a central part of the modeling process
 - Supports multiple backends and evaluation strategies
 
-By focusing on tensor space semantics rather than just shapes, the framework enables more robust and maintainable sustainability models.
+By focusing on tensor space semantics rather than just shapes,
+the framework enables more robust and maintainable sustainability models.

@@ -9,10 +9,10 @@ This example shows how to:
 """
 
 import numpy as np
+from dt_model.engine.frontend import graph
+from dt_model.engine.numpybackend import executor
 
 from yakof import cafemodel, minisimulator
-from yakof.frontend import graph
-from yakof.numpybackend import executor
 
 
 def main():
