@@ -1,5 +1,5 @@
 """
-Ensemble
+Ensemble.
 ========
 
 Defines the types used by the `dt-model` ensemble package.

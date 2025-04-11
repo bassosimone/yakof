@@ -1,5 +1,5 @@
 """
-Context Variables
+Context Variables.
 =================
 
 This module implements context variables (i.e., variables associated
@@ -19,15 +19,11 @@ We compile both kind of context variables to graph.placeholder tensors
 using, as for other types in this package, the XYZ space.
 """
 
+import random
 from typing import Mapping, Protocol, Sequence, runtime_checkable
 
-import numpy as np
-import random
-
+from ..frontend import autoenum
 from . import geometry
-
-from ..frontend import autoenum, graph
-
 
 SampleWeight = float
 """The weight of a value sampled from an EnsembleSampler."""
@@ -41,7 +37,8 @@ class EnsembleSampler(Protocol):
     """A protocol that generalizes over categorical and continuous distributions
     to provide a unified interface for sampling.
 
-    Methods:
+    Methods
+    -------
         support_size: Returns the size of the support of the distribution.
         sample: Samples weighted values from the distribution.
     """
@@ -76,7 +73,6 @@ class CategoricalContextVariable(geometry.Tensor):
             name: The name of the context variable.
             values: A mapping from value names to their probabilities.
         """
-
         # 1. Ensure that we have at least one value in this context variable
         if len(values) <= 0:
             raise ValueError("values must be a non-empty sequence")
@@ -121,7 +117,8 @@ class CategoricalContextVariable(geometry.Tensor):
             subset: Optional subset of values to draw from.
             force_sample: Whether to force sampling even if nr >= support_size.
 
-        Returns:
+        Returns
+        -------
             A list of (probability, value) tuples.
         """
         # TODO: subset (if defined) should be a subset of the support (also: with repetitions?)

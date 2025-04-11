@@ -1,5 +1,5 @@
 """
-Computation Graph Building
+Computation Graph Building.
 ==========================
 
 This module allows to build an abstract computation graph using TensorFlow-like
@@ -115,7 +115,6 @@ from __future__ import annotations
 from typing import Sequence
 
 from .. import atomic
-
 
 Axis = int | tuple[int, ...]
 """Type alias for axis specifications in shape operations."""
@@ -403,9 +402,7 @@ class multi_clause_where(Node):
         default_value: Value to use when no condition is met
     """
 
-    def __init__(
-        self, clauses: Sequence[tuple[Node, Node]], default_value: Node
-    ) -> None:
+    def __init__(self, clauses: Sequence[tuple[Node, Node]], default_value: Node) -> None:
         super().__init__()
         self.clauses = clauses
         self.default_value = default_value
@@ -434,7 +431,8 @@ class AxisOp(Node):
 
 class expand_dims(AxisOp):
     """Adds new axes of size 1 to a tensor's shape, thus expanding the
-    tensor to a higher-dimensional space."""
+    tensor to a higher-dimensional space.
+    """
 
 
 class squeeze(AxisOp):
@@ -443,7 +441,8 @@ class squeeze(AxisOp):
 
 class project_using_sum(AxisOp):
     """Computes sum of tensor elements along specified axes, thus
-    projecting the tensor onto a lower-dimensional space."""
+    projecting the tensor onto a lower-dimensional space.
+    """
 
 
 reduce_sum = project_using_sum
@@ -454,7 +453,8 @@ the dt-model is complete."""
 
 class project_using_mean(AxisOp):
     """Computes mean of tensor elements along specified axes, thus
-    projecting the tensor onto a lower-dimensional space."""
+    projecting the tensor onto a lower-dimensional space.
+    """
 
 
 reduce_mean = project_using_mean

@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from typing import Protocol, cast, runtime_checkable
 
+import numpy as np
 from scipy import stats
 
-import numpy as np
-
-from .context_variable import ContextVariable
-
 from ...frontend import graph
+from .context_variable import ContextVariable
 
 
 @runtime_checkable
@@ -23,9 +21,7 @@ class Sampleable(Protocol):
 
 
 class Index:
-    """
-    Class to represent an index variable.
-    """
+    """Class to represent an index variable."""
 
     def __init__(
         self,
@@ -62,9 +58,7 @@ class Index:
 
 
 class UniformDistIndex(Index):
-    """
-    Class to represent an index as a uniform distribution
-    """
+    """Class to represent an index as a uniform distribution."""
 
     def __init__(
         self,
@@ -111,9 +105,7 @@ class UniformDistIndex(Index):
 
 
 class LognormDistIndex(Index):
-    """
-    Class to represent an index as a longnorm distribution
-    """
+    """Class to represent an index as a longnorm distribution."""
 
     def __init__(
         self,
@@ -172,9 +164,7 @@ class LognormDistIndex(Index):
 
 
 class TriangDistIndex(Index):
-    """
-    Class to represent an index as a longnorm distribution
-    """
+    """Class to represent an index as a longnorm distribution."""
 
     def __init__(
         self,
@@ -233,13 +223,9 @@ class TriangDistIndex(Index):
 
 
 class ConstIndex(Index):
-    """
-    Class to represent an index as a longnorm distribution
-    """
+    """Class to represent an index as a longnorm distribution."""
 
-    def __init__(
-        self, name: str, v: float, group: str | None = None, ref_name: str | None = None
-    ) -> None:
+    def __init__(self, name: str, v: float, group: str | None = None, ref_name: str | None = None) -> None:
         super().__init__(name, v, group=group, ref_name=ref_name)
         self._v = v
 
@@ -259,9 +245,7 @@ class ConstIndex(Index):
 
 
 class SymIndex(Index):
-    """
-    Class to represent an index as a symbolic value
-    """
+    """Class to represent an index as a symbolic value."""
 
     def __init__(
         self,

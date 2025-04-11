@@ -1,5 +1,5 @@
 """
-Canonical Bases
+Canonical Bases.
 ===============
 
 This module defines the canonical bases for tensor spaces up to R⁶,
@@ -23,9 +23,7 @@ Bases
 from . import morphisms
 
 # Get canonical axes
-x_axis_id, y_axis_id, z_axis_id, u_axis_id, v_axis_id, w_axis_id = (
-    morphisms.generate_canonical_axes(6)
-)
+x_axis_id, y_axis_id, z_axis_id, u_axis_id, v_axis_id, w_axis_id = morphisms.generate_canonical_axes(6)
 
 
 # R⁰ basis

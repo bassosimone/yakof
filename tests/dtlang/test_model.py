@@ -2,28 +2,25 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
+import numpy as np
+import pytest
 from dt_model import Ensemble
+from scipy import stats
 
 from yakof.dtlang import (
     Constraint,
     Index,
     Model,
-    Piecewise,
     PresenceVariable,
     UniformCategoricalContextVariable,
 )
-
-from scipy import stats
-
-import numpy as np
-import pytest
 
 
 def test_model_evaluation_simple():
     """Evaluate the model is a relatively simple scenario and make
     sure the results we get are in line with the equivalent
-    model as defined using the dt-model package."""
-
+    model as defined using the dt-model package.
+    """
     # === Context Variables ===
     days = ["monday"]
     weekday = UniformCategoricalContextVariable("weekday", days)
@@ -78,7 +75,7 @@ def test_model_evaluation_simple():
     }
 
     ensemble = Ensemble(model, {weekday: days})  # type: ignore
-    ccache: dict[Constraint, np.ndarray] = {}
+    _: dict[Constraint, np.ndarray] = {}
 
     expect = np.array(
         [

@@ -1,5 +1,5 @@
 """
-Yakof-based Molveno Model
+Yakof-based Molveno Model.
 =========================
 
 This is a modified Molveno model, using the `yakof.fronted` and
@@ -8,29 +8,25 @@ This is a modified Molveno model, using the `yakof.fronted` and
 
 # SPDX-License-Identifier: Apache-2.0
 
-from scipy import stats
-import numpy as np
-
 from yakof.dtyak import (
-    UniformCategoricalContextVariable,
     CategoricalContextVariable,
-    PresenceVariable,
-    Index,
     Constraint,
-    Ensemble,
-    Model,
-    UniformDistIndex,
+    Index,
     LognormDistIndex,
+    Model,
+    PresenceVariable,
     TriangDistIndex,
+    UniformCategoricalContextVariable,
+    UniformDistIndex,
 )
-from yakof.sympyke import Symbol, Eq, Piecewise
+from yakof.sympyke import Eq, Piecewise, Symbol
 
 from .presence_stats import (
+    excursionist_presences_stats,
     season,
+    tourist_presences_stats,
     weather,
     weekday,
-    tourist_presences_stats,
-    excursionist_presences_stats,
 )
 
 # MODEL DEFINITION
@@ -38,21 +34,13 @@ from .presence_stats import (
 # Context variables
 
 CV_weekday = UniformCategoricalContextVariable("weekday", [Symbol(v) for v in weekday])
-CV_season = CategoricalContextVariable(
-    "season", {Symbol(v): season[v] for v in season.keys()}
-)
-CV_weather = CategoricalContextVariable(
-    "weather", {Symbol(v): weather[v] for v in weather.keys()}
-)
+CV_season = CategoricalContextVariable("season", {Symbol(v): season[v] for v in season.keys()})
+CV_weather = CategoricalContextVariable("weather", {Symbol(v): weather[v] for v in weather.keys()})
 
 # Presence variables
 
-PV_tourists = PresenceVariable(
-    "tourists", [CV_weekday, CV_season, CV_weather], tourist_presences_stats
-)
-PV_excursionists = PresenceVariable(
-    "excursionists", [CV_weekday, CV_season, CV_weather], excursionist_presences_stats
-)
+PV_tourists = PresenceVariable("tourists", [CV_weekday, CV_season, CV_weather], tourist_presences_stats)
+PV_excursionists = PresenceVariable("excursionists", [CV_weekday, CV_season, CV_weather], excursionist_presences_stats)
 
 # Capacity indexes
 
@@ -98,9 +86,7 @@ I_U_excursionists_food = Index(
 # Conversion indexes
 
 I_Xa_tourists_per_vehicle = Index("tourists per vehicle allocation factor", 2.5)
-I_Xa_excursionists_per_vehicle = Index(
-    "excursionists per vehicle allocation factor", 2.5
-)
+I_Xa_excursionists_per_vehicle = Index("excursionists per vehicle allocation factor", 2.5)
 I_Xo_tourists_parking = Index("tourists in parking rotation factor", 1.02)
 I_Xo_excursionists_parking = Index("excursionists in parking rotation factor", 3.5)
 
@@ -111,9 +97,7 @@ I_Xo_tourists_beach = UniformDistIndex(
 )
 I_Xo_excursionists_beach = Index("excursionists on beach rotation factor", 1.02)
 
-I_Xa_tourists_accommodation = Index(
-    "tourists per accommodation allocation factor", 1.05
-)
+I_Xa_tourists_accommodation = Index("tourists per accommodation allocation factor", 1.05)
 
 I_Xa_visitors_food = Index("visitors in food service allocation factor", 0.9)
 I_Xo_visitors_food = Index("visitors in food service rotation factor", 2.0)
@@ -130,9 +114,7 @@ I_P_excursionists_saturation_level = Index("excursionists saturation level", 100
 # Constraints
 
 C_parking = Constraint(
-    usage=PV_tourists.node
-    * I_U_tourists_parking.node
-    / (I_Xa_tourists_per_vehicle.node * I_Xo_tourists_parking.node)
+    usage=PV_tourists.node * I_U_tourists_parking.node / (I_Xa_tourists_per_vehicle.node * I_Xo_tourists_parking.node)
     + PV_excursionists.node
     * I_U_excursionists_parking.node
     / (I_Xa_excursionists_per_vehicle.node * I_Xo_excursionists_parking.node),
@@ -142,9 +124,7 @@ C_parking = Constraint(
 
 C_beach = Constraint(
     usage=PV_tourists.node * I_U_tourists_beach.node / I_Xo_tourists_beach.node
-    + PV_excursionists.node
-    * I_U_excursionists_beach.node
-    / I_Xo_excursionists_beach.node,
+    + PV_excursionists.node * I_U_excursionists_beach.node / I_Xo_excursionists_beach.node,
     capacity=I_C_beach.node,
     name="C_beach",
 )
@@ -154,9 +134,7 @@ C_beach = Constraint(
 #                              capacity=I_C_accommodation *  I_Xa_tourists_accommodation)
 
 C_accommodation = Constraint(
-    usage=PV_tourists.node
-    * I_U_tourists_accommodation.node
-    / I_Xa_tourists_accommodation.node,
+    usage=PV_tourists.node * I_U_tourists_accommodation.node / I_Xa_tourists_accommodation.node,
     capacity=I_C_accommodation.node,
     name="C_accommodation",
 )
@@ -166,10 +144,7 @@ C_accommodation = Constraint(
 #                              PV_excursionists * I_U_excursionists_food,
 #                     capacity=I_C_food * I_Xa_visitors_food * I_Xo_visitors_food)
 C_food = Constraint(
-    usage=(
-        PV_tourists.node * I_U_tourists_food.node
-        + PV_excursionists.node * I_U_excursionists_food.node
-    )
+    usage=(PV_tourists.node * I_U_tourists_food.node + PV_excursionists.node * I_U_excursionists_food.node)
     / (I_Xa_visitors_food.node * I_Xo_visitors_food.node),
     capacity=I_C_food.node,
     name="C_food",
@@ -219,10 +194,8 @@ I_C_parking_larger = UniformDistIndex(
 
 # TODO(bassosimone): this is not working yet
 try:
-    M_MoreParking = M_Base.variation(
-        "larger parking model", change_capacities={I_C_parking: I_C_parking_larger}
-    )
-except:
+    M_MoreParking = M_Base.variation("larger parking model", change_capacities={I_C_parking: I_C_parking_larger})
+except Exception:
     pass
 
 # ANALYSIS SITUATIONS

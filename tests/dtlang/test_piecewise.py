@@ -2,18 +2,16 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
+import numpy as np
+import pytest
+
 from yakof.dtlang import geometry, piecewise
 from yakof.frontend import linearize
 from yakof.numpybackend import executor
 
-import numpy as np
-
-import pytest
-
 
 def test_piecewise_basics():
     """Make sure that Piecewise works as intended."""
-
     # Create the expressions
     expr1 = np.array([2, 9, 16])
     expr2 = np.array([8, 27, 64])
@@ -65,9 +63,7 @@ def test_piecewise_basics():
 def test_piecewise_with_scalars():
     """Test Piecewise with scalar values."""
     # Simple case with scalar values
-    result = piecewise.Piecewise(
-        (1, geometry.space.constant(True)), (2, geometry.space.constant(False))
-    )
+    result = piecewise.Piecewise((1, geometry.space.constant(True)), (2, geometry.space.constant(False)))
 
     # Linearize
     plan = linearize.forest(result.node)

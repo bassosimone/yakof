@@ -10,12 +10,11 @@ approaches across different input sizes. Results consistently show that Yakof
 achieves reasonably similar performance compared to SymPy-generated NumPy code.
 """
 
-from typing import Callable
-
 import getopt
+import sys
+
 import numpy as np
 import sympy
-import sys
 
 from yakof.benchmark import NumericFunc, NumericFuncFactory, Results, run
 from yakof.frontend import abstract, bases
@@ -88,33 +87,17 @@ def build_sympy_model() -> NumericFuncFactory:
 def print_comparison(yakof_results: Results, sympy_results: Results) -> None:
     """Print comparative benchmark results between Yakof and SymPy implementations."""
     print("\nPure computation times:")
-    print(
-        f"Yakof: {yakof_results.mean_compute_time:.6f} ± "
-        f"{yakof_results.std_compute_time:.6f} seconds"
-    )
-    print(
-        f"SymPy: {sympy_results.mean_compute_time:.6f} ± "
-        f"{sympy_results.std_compute_time:.6f} seconds"
-    )
+    print(f"Yakof: {yakof_results.mean_compute_time:.6f} ± {yakof_results.std_compute_time:.6f} seconds")
+    print(f"SymPy: {sympy_results.mean_compute_time:.6f} ± {sympy_results.std_compute_time:.6f} seconds")
 
     print("\nModel creation times:")
-    print(
-        f"Yakof: {yakof_results.mean_creation_time:.6f} ± "
-        f"{yakof_results.std_creation_time:.6f} seconds"
-    )
-    print(
-        f"SymPy: {sympy_results.mean_creation_time:.6f} ± "
-        f"{sympy_results.std_creation_time:.6f} seconds"
-    )
+    print(f"Yakof: {yakof_results.mean_creation_time:.6f} ± {yakof_results.std_creation_time:.6f} seconds")
+    print(f"SymPy: {sympy_results.mean_creation_time:.6f} ± {sympy_results.std_creation_time:.6f} seconds")
 
     print("\nMemory usage:")
-    print(
-        f"Yakof creation: {yakof_results.creation_memory_peak / (1024 * 1024):.2f} MiB"
-    )
+    print(f"Yakof creation: {yakof_results.creation_memory_peak / (1024 * 1024):.2f} MiB")
     print(f"Yakof compute: {yakof_results.compute_memory_peak / (1024 * 1024):.2f} MiB")
-    print(
-        f"SymPy creation: {sympy_results.creation_memory_peak / (1024 * 1024):.2f} MiB"
-    )
+    print(f"SymPy creation: {sympy_results.creation_memory_peak / (1024 * 1024):.2f} MiB")
     print(f"SymPy compute: {sympy_results.compute_memory_peak / (1024 * 1024):.2f} MiB")
 
 
@@ -127,7 +110,7 @@ def main() -> None:
     usage_string = "usage: bench00.py [--help] [--short]"
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", ["help", "short"])
-    except getopt.GetoptError as err:
+    except getopt.GetoptError:
         sys.stderr.write(f"{usage_string}\n")
         sys.exit(2)
 

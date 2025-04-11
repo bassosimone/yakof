@@ -1,5 +1,5 @@
 """
-A in the A/B testing
+A in the A/B testing.
 ====================
 
 This module contains the original implementation of model5, with minor
@@ -8,23 +8,21 @@ changes required to adapt it for A/B testing.
 See https://github.com/maryamsajedi/coffee_dt/blob/master/coffee_dt_5.py.
 """
 
+import numpy as np
 from dt_model import (
-    UniformCategoricalContextVariable,
-    PresenceVariable,
     Constraint,
     Ensemble,
-    Model,
     Index,
+    Model,
+    PresenceVariable,
+    UniformCategoricalContextVariable,
 )
 from scipy.stats import triang
-
-import numpy as np
 from sympy import Symbol
 
 
 def run() -> np.ndarray:
     """Runs the model and returns its result."""
-
     # === Context Variables ===
     days = [
         "monday",

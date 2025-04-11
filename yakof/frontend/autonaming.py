@@ -1,5 +1,5 @@
 """
-Automatic Naming
+Automatic Naming.
 ================
 
 Provides mechanisms to automatically name tensors for debugging purposes,
@@ -110,11 +110,10 @@ DON'T:
 - Create tensors in comprehensions or nested functions
 """
 
-from typing import Any, Protocol, runtime_checkable
-
 import inspect
 import logging
 import types
+from typing import Any, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -122,7 +121,8 @@ class Nameable(Protocol):
     """
     Protocol for objects with name setters and getters.
 
-    Methods:
+    Methods
+    -------
         implements_namer: adds extra methods to the expected interface to avoid
         name setting for objects that do implement name getter/setter but are
         not designed to work along with the autonaming functionality.
@@ -152,7 +152,7 @@ def _maybe_autoname(var: Any, name: str) -> None:
     if var.name and var.name != name:
         logging.warning(f"autonaming: attempting to rename {var.name} to {name}")
         logging.warning(f"autonaming: debugging code will use {var.name}")
-        logging.warning(f"autonaming: adjust your code to avoid aliasing tensors")
+        logging.warning("autonaming: adjust your code to avoid aliasing tensors")
         return
     var.name = name
 
@@ -221,9 +221,7 @@ def decorator(method):
         result = method(self, *args, **kwargs)
 
         # Find new attributes
-        new_attrs = (
-            set(vars(self).keys() if hasattr(self, "__dict__") else []) - initial_attrs
-        )
+        new_attrs = set(vars(self).keys() if hasattr(self, "__dict__") else []) - initial_attrs
 
         # Apply naming to new attributes
         for attr_name in new_attrs:

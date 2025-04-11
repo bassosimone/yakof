@@ -1,5 +1,5 @@
 """
-Model Definition
+Model Definition.
 ================
 
 This module defines the core Model class which represents a digital twins
@@ -13,16 +13,14 @@ from typing import Sequence, cast
 
 import numpy as np
 
+from ..frontend import graph, linearize
+from ..numpybackend import executor
 from . import ensemble
-
 from .constraint import Constraint, CumulativeDistribution
 from .context import ContextVariable
 from .geometry import Tensor
 from .index import Index
 from .presence import PresenceVariable
-
-from ..frontend import graph, linearize
-from ..numpybackend import executor
 
 
 class Model:
@@ -63,7 +61,8 @@ class Model:
             constr: The constraint to evaluate
             cache: Dictionary mapping nodes to their evaluated values
 
-        Returns:
+        Returns
+        -------
             A numpy array representing the constraint satisfaction field
         """
         # TODO(bassosimone): to some extent, this could also be a method of
@@ -89,10 +88,12 @@ class Model:
             grid: Dictionary mapping presence variables to grid coordinate arrays
             ensemble: Iterator over weighted ensemble scenarios
 
-        Returns:
+        Returns
+        -------
             A 2D numpy array representing the sustainability field
 
-        Raises:
+        Raises
+        ------
             NotImplementedError: If more than 2 presence variables are specified
         """
         # TODO(bassosimone): the original implementation is also saving the
@@ -114,7 +115,8 @@ class Model:
         y_size = grid[self.pvs[0]].shape[0]
 
         cache[self.pvs[1].node] = cast(
-            np.ndarray, np.expand_dims(grid[self.pvs[1]], axis=(1, 2))  # X, y, z
+            np.ndarray,
+            np.expand_dims(grid[self.pvs[1]], axis=(1, 2)),  # X, y, z
         )
         x_size = grid[self.pvs[1]].shape[0]
 

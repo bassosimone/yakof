@@ -2,10 +2,7 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any
-
 import logging
-import pytest
 
 from yakof.frontend import autonaming
 
@@ -60,7 +57,7 @@ def test_non_nameable_objects():
     with autonaming.context():
         x = NameableObject()
         y = HasNameButNotNameable()
-        z = "not_an_object"
+        _ = "not_an_object"
     assert x.name == "x"  # Should be named
     assert y.name == ""  # Should be untouched
 
@@ -149,7 +146,7 @@ def test_exception_handling():
 
     try:
         with autonaming.context():
-            x = obj
+            _ = obj
             raise ValueError("test error")
     except ValueError:
         pass

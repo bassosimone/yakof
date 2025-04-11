@@ -1,5 +1,5 @@
 """
-Piecewise Emulation
+Piecewise Emulation.
 ===================
 
 This module emulates sympy.Piecewise using the tensor language frontend, by mapping
@@ -7,9 +7,7 @@ a Piecewise invocation to a graph.multi_clause_where tensor in the XYZ space.
 """
 
 from ..frontend import graph
-
 from . import geometry
-
 
 Cond = geometry.Tensor | graph.Scalar
 """Condition for a piecewise clause."""
@@ -28,10 +26,12 @@ def Piecewise(*clauses: Clause) -> geometry.Tensor:
     Args:
         *clauses: The clauses to be converted.
 
-    Returns:
+    Returns
+    -------
         The computation tensor representing the piecewise function.
 
-    Raises:
+    Raises
+    ------
         ValueError: If no clauses are provided.
     """
     return _to_tensor(_filter_clauses(clauses))
@@ -44,7 +44,8 @@ def _filter_clauses(clauses: tuple[Clause, ...]) -> list[Clause]:
     Args:
         clauses: The clauses to be filtered.
 
-    Returns:
+    Returns
+    -------
         The filtered clauses.
     """
     filtered: list[Clause] = []

@@ -17,7 +17,6 @@ from yakof.numpybackend import executor
 
 def main():
     """Run ensemble phase space analysis of café model."""
-
     # --- Symbolic Model Setup ---
 
     # Create the model with default inputs

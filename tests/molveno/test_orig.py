@@ -2,15 +2,14 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from dt_model import Ensemble
-from yakof.molveno import orig as mmod
-
 import numpy as np
+from dt_model import Ensemble
+
+from yakof.molveno import orig as mmod
 
 
 def test_molveno_orig_simple():
     """Simple test ensuring we can evaluate M_base."""
-
     # Load the base model
     model = mmod.M_Base
 
@@ -28,4 +27,4 @@ def test_molveno_orig_simple():
     tt = np.linspace(0, t_max, t_sample + 1)
     ee = np.linspace(0, e_max, e_sample + 1)
     xx, yy = np.meshgrid(tt, ee)
-    zz = model.evaluate({mmod.PV_tourists: tt, mmod.PV_excursionists: ee}, ensemble)
+    _ = model.evaluate({mmod.PV_tourists: tt, mmod.PV_excursionists: ee}, ensemble)

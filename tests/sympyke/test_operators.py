@@ -2,11 +2,11 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.sympyke import Eq, Symbol
+import numpy as np
+
 from yakof.frontend import linearize
 from yakof.numpybackend import executor
-
-import numpy as np
+from yakof.sympyke import Eq, Symbol
 
 
 def test_eq_basics():

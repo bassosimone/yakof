@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-
 import random
+from abc import ABC, abstractmethod
 
 from scipy.stats import rv_continuous
 
@@ -11,9 +10,7 @@ from ...sympyke.symbol import SymbolValue
 
 
 class ContextVariable(ABC):
-    """
-    Class to represent a context variable.
-    """
+    """Class to represent a context variable."""
 
     def __init__(self, name: str) -> None:
         self.name = name
@@ -24,9 +21,7 @@ class ContextVariable(ABC):
         pass
 
     @abstractmethod
-    def sample(
-        self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
-    ) -> list:
+    def sample(self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False) -> list:
         """
         Returns a list of tuples (probability, value)  from the support variable or provided
         subset.
@@ -61,22 +56,16 @@ class UniformCategoricalContextVariable(ContextVariable):
 
     def __init__(self, name: str, values: list) -> None:
         super().__init__(name)
-        self.values = [
-            value.name if isinstance(value, SymbolValue) else value for value in values
-        ]
+        self.values = [value.name if isinstance(value, SymbolValue) else value for value in values]
         self.size = len(self.values)
 
     def support_size(self) -> int:
         return self.size
 
-    def sample(
-        self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
-    ) -> list:
+    def sample(self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False) -> list:
         # TODO: subset (if defined) should be a subset of the support (also: with repetitions?)
 
-        (values, size) = (
-            (self.values, self.size) if subset is None else (subset, len(subset))
-        )
+        (values, size) = (self.values, self.size) if subset is None else (subset, len(subset))
 
         if force_sample or nr < size:
             assert nr > 0
@@ -86,16 +75,11 @@ class UniformCategoricalContextVariable(ContextVariable):
 
 
 class CategoricalContextVariable(ContextVariable):
-    """
-    Class to represent a categorical context variable.
-    """
+    """Class to represent a categorical context variable."""
 
     def __init__(self, name: str, distribution: dict) -> None:
         super().__init__(name)
-        self.distribution = {
-            k.name if isinstance(k, SymbolValue) else k: v
-            for k, v in distribution.items()
-        }
+        self.distribution = {k.name if isinstance(k, SymbolValue) else k: v for k, v in distribution.items()}
         self.values = list(self.distribution.keys())
         self.size = len(self.values)
         # TODO: check if distribution is, indeed, a distribution (sum = 1)
@@ -103,31 +87,19 @@ class CategoricalContextVariable(ContextVariable):
     def support_size(self) -> int:
         return self.size
 
-    def sample(
-        self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
-    ) -> list:
-        (values, size) = (
-            (self.values, self.size) if subset is None else (subset, len(subset))
-        )
+    def sample(self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False) -> list:
+        (values, size) = (self.values, self.size) if subset is None else (subset, len(subset))
 
         if force_sample or nr < size:
             assert nr > 0
-            return [
-                (1 / nr, r)
-                for r in random.choices(
-                    values, k=nr, weights=[self.distribution[v] for v in values]
-                )
-            ]
+            return [(1 / nr, r) for r in random.choices(values, k=nr, weights=[self.distribution[v] for v in values])]
 
         if subset is None:
             return [(self.distribution[v], v) for v in values]
 
         subset_probability = [self.distribution[v] for v in values]
         subset_probability_sum = sum(subset_probability)
-        return [
-            (p / subset_probability_sum, v)
-            for (p, v) in zip(subset_probability, subset)
-        ]
+        return [(p / subset_probability_sum, v) for (p, v) in zip(subset_probability, subset)]
 
 
 class ContinuousContextVariable(ContextVariable):
@@ -144,16 +116,11 @@ class ContinuousContextVariable(ContextVariable):
     def support_size(self) -> int:
         return -1  # TODO: do better
 
-    def sample(
-        self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False
-    ) -> list:
+    def sample(self, nr: int = 1, *, subset: list | None = None, force_sample: bool = False) -> list:
         if force_sample or subset is None or nr < len(subset):
             assert nr > 0
             return [(1 / nr, r) for r in list(self.rvc.rvs(size=nr))]
 
         subset_probability = list(self.rvc.pdf(subset))
         subset_probability_sum = sum(subset_probability)
-        return [
-            (p / subset_probability_sum, v)
-            for (p, v) in zip(subset_probability, subset)
-        ]
+        return [(p / subset_probability_sum, v) for (p, v) in zip(subset_probability, subset)]

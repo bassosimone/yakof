@@ -1,5 +1,5 @@
 """
-Graph Executor
+Graph Executor.
 ==============
 
 An evaluator for computation graphs that processes nodes in
@@ -16,7 +16,7 @@ The executor expects all placeholder values to be provided in the initial
 state and evaluates each node exactly once, storing results for later reuse.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, cast
 
 import numpy as np
@@ -52,7 +52,8 @@ class State:
     Note that, if graph.NODE_FLAG_TRACE is set, the State will print the
     nodes provided to the constructor in its __post_init__ method.
 
-    Attributes:
+    Attributes
+    ----------
         values: A dictionary caching the result of the computation.
         flags: Bitmask containing debug flags (e.g., graph.NODE_FLAG_BREAK).
     """
@@ -73,18 +74,18 @@ class State:
         Args:
             node: The node whose value to retrieve.
 
-        Returns:
+        Returns
+        -------
             The value associated with the node.
 
-        Raises:
+        Raises
+        ------
             NodeValueNotFound: If the node has not been evaluated.
         """
         try:
             return self.values[node]
         except KeyError:
-            raise NodeValueNotFound(
-                f"executor: node '{node.name}' has not been evaluated"
-            )
+            raise NodeValueNotFound(f"executor: node '{node.name}' has not been evaluated")
 
 
 def evaluate(state: State, node: graph.Node) -> np.ndarray:
@@ -99,7 +100,8 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
         state: The current executor state.
         node: The node to evaluate.
 
-    Raises:
+    Raises
+    ------
         NodeValueNotFound: If a dependent node has not been evaluated
             and therefore its value cannot be found in the state.
         UnsupportedNodeType: If the executor does not support the given node type.
@@ -107,7 +109,6 @@ def evaluate(state: State, node: graph.Node) -> np.ndarray:
         PlaceholderValueNotProvided: If a placeholder node has no value provided
             and no default value.
     """
-
     # 1. check whether node has been already evaluated (note that this
     # covers the case of placeholders provided via the state)
     if node in state.values:
@@ -161,9 +162,7 @@ def _eval_binary_op(state: State, node: graph.Node) -> np.ndarray:
     try:
         return dispatch.binary_operations[type(node)](left, right)
     except KeyError:
-        raise UnsupportedOperation(
-            f"executor: unsupported binary operation: {type(node)}"
-        )
+        raise UnsupportedOperation(f"executor: unsupported binary operation: {type(node)}")
 
 
 def _eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
@@ -172,9 +171,7 @@ def _eval_unary_op(state: State, node: graph.Node) -> np.ndarray:
     try:
         return dispatch.unary_operations[type(node)](operand)
     except KeyError:
-        raise UnsupportedOperation(
-            f"executor: unsupported unary operation: {type(node)}"
-        )
+        raise UnsupportedOperation(f"executor: unsupported unary operation: {type(node)}")
 
 
 def _eval_where_op(state: State, node: graph.Node) -> np.ndarray:
@@ -203,9 +200,7 @@ def _eval_axis_op(state: State, node: graph.Node) -> np.ndarray:
     try:
         return dispatch.axes_operations[type(node)](operand, node.axis)
     except KeyError:
-        raise UnsupportedOperation(
-            f"executor: unsupported axis operation: {type(node)}"
-        )
+        raise UnsupportedOperation(f"executor: unsupported axis operation: {type(node)}")
 
 
 _EvaluatorFunc = Callable[[State, graph.Node], np.ndarray]
@@ -222,7 +217,6 @@ _evaluators: tuple[tuple[type[graph.Node], _EvaluatorFunc], ...] = (
 
 
 def _evaluate(state: State, node: graph.Node) -> np.ndarray:
-
     # Attempt to match with every possible evaluator
     for node_type, evaluator in _evaluators:
         if isinstance(node, node_type):

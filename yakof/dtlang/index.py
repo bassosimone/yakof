@@ -1,5 +1,5 @@
 """
-Index Implementation
+Index Implementation.
 ====================
 
 This module implements the `Index` type, which represents either a constant
@@ -12,7 +12,6 @@ from typing import Protocol, cast, runtime_checkable
 import numpy as np
 
 from ..frontend import graph
-
 from . import geometry
 
 
@@ -21,7 +20,8 @@ class Distribution(Protocol):
     """Protocol representing the distribution from which to sample the
     index value inside the ensemble space.
 
-    Methods:
+    Methods
+    -------
         rvs: Sample random variates from the distribution.
     """
 

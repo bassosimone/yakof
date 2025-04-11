@@ -1,5 +1,5 @@
 """
-Café Demand Model with Price and Time Effects
+Café Demand Model with Price and Time Effects.
 ===========================================
 
 This example demonstrates:
@@ -92,8 +92,8 @@ def main():
         executor.evaluate(state, node)
 
     # Extract results
-    price_affected_demand = state.values[model.price_affected_demand.node]
-    demand_after_removal = state.values[model.demand_after_removal.node]
+    _ = state.values[model.price_affected_demand.node]
+    _ = state.values[model.demand_after_removal.node]
     actual_demand = state.values[model.actual_demand.node]
 
     # Collapse the ensemble dimension

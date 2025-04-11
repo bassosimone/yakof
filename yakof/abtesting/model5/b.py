@@ -1,28 +1,26 @@
 """
-B in the A/B testing
+B in the A/B testing.
 ====================
 
 This module contains the yakof-based implementation of model5, with minor
 changes from the original, required to use yakof.
 """
 
+import numpy as np
 from dt_model import Ensemble
-from yakof.dtlang import (
-    UniformCategoricalContextVariable,
-    PresenceVariable,
-    Constraint,
-    Model,
-    Index,
-)
 from scipy.stats import triang
 
-import numpy as np
-from sympy import Symbol
+from yakof.dtlang import (
+    Constraint,
+    Index,
+    Model,
+    PresenceVariable,
+    UniformCategoricalContextVariable,
+)
 
 
 def run() -> np.ndarray:
     """Runs the model and returns its result."""
-
     # === Context Variables ===
     days = [
         "monday",

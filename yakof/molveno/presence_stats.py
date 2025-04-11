@@ -1,5 +1,5 @@
 """
-Presence Stats
+Presence Stats.
 ==============
 
 This module contains the baseline presence statistics used
@@ -7,7 +7,6 @@ by the original and yakof-based Molveno models.
 """
 
 # SPDX-License-Identifier: Apache-2.0
-
 
 import pandas as pd
 

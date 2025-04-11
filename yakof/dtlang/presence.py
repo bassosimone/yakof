@@ -1,5 +1,5 @@
 """
-Presence Variables
+Presence Variables.
 ==================
 
 This module defines presence variables which represent the spatial dimensions
@@ -13,7 +13,6 @@ dimensions to be influenced by uncertainty factors.
 from typing import Sequence
 
 from ..frontend import graph
-
 from . import geometry
 from .context import ContextVariable
 

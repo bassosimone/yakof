@@ -14,9 +14,7 @@ def test_constant_evaluation():
     # Scalar constants
     state = evaluator.StateWithoutCache({})
     assert np.array_equal(evaluator.evaluate(graph.constant(1.0), state), np.array(1.0))
-    assert np.array_equal(
-        evaluator.evaluate(graph.constant(True), state), np.array(True)
-    )
+    assert np.array_equal(evaluator.evaluate(graph.constant(True), state), np.array(True))
     assert np.array_equal(evaluator.evaluate(graph.constant(42), state), np.array(42))
 
 
@@ -26,12 +24,8 @@ def test_placeholder_evaluation():
     y = graph.placeholder("y", default_value=3.14)
 
     # Test with binding
-    state = evaluator.StateWithoutCache(
-        {"x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])}
-    )
-    assert np.array_equal(
-        evaluator.evaluate(x, state), np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-    )
+    state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])})
+    assert np.array_equal(evaluator.evaluate(x, state), np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]))
 
     # Test default value
     state = evaluator.StateWithoutCache({})
@@ -168,9 +162,7 @@ def test_where_operation():
     test_cases = [
         # 3x3 matrix selection
         {
-            "cond": np.array(
-                [[True, False, True], [False, True, False], [True, False, True]]
-            ),
+            "cond": np.array([[True, False, True], [False, True, False], [True, False, True]]),
             "x": np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]),
             "y": np.array([[9.0, 8.0, 7.0], [6.0, 5.0, 4.0], [3.0, 2.0, 1.0]]),
             "desc": "3x3 matrices",
@@ -193,13 +185,9 @@ def test_where_operation():
 
     for case in test_cases:
         print(f"\nTesting where with {case['desc']}:")
-        state = evaluator.StateWithoutCache(
-            {"cond": case["cond"], "x": case["x"], "y": case["y"]}
-        )
+        state = evaluator.StateWithoutCache({"cond": case["cond"], "x": case["x"], "y": case["y"]})
 
-        node = graph.where(
-            graph.placeholder("cond"), graph.placeholder("x"), graph.placeholder("y")
-        )
+        node = graph.where(graph.placeholder("cond"), graph.placeholder("x"), graph.placeholder("y"))
         result = evaluator.evaluate(node, state)
         expected = np.where(case["cond"], case["x"], case["y"])
 
@@ -261,9 +249,7 @@ def test_multi_clause_where():
     nested_where = graph.where(
         graph.placeholder("cond1"),
         graph.constant(val1),
-        graph.where(
-            graph.placeholder("cond2"), graph.constant(val2), graph.constant(default)
-        ),
+        graph.where(graph.placeholder("cond2"), graph.constant(val2), graph.constant(default)),
     )
     expected_nested = evaluator.evaluate(nested_where, state)
 
@@ -356,18 +342,14 @@ def test_unknown_operations():
         pass
 
     with pytest.raises(TypeError, match="unknown unary operation"):
-        evaluator.evaluate(
-            unknown_unary(graph.constant(1.0)), evaluator.StateWithoutCache({})
-        )
+        evaluator.evaluate(unknown_unary(graph.constant(1.0)), evaluator.StateWithoutCache({}))
 
     # Unknown axis operation
     class unknown_axis(graph.AxisOp):
         pass
 
     with pytest.raises(TypeError, match="unknown axis operation"):
-        evaluator.evaluate(
-            unknown_axis(graph.constant(1.0), 0), evaluator.StateWithoutCache({})
-        )
+        evaluator.evaluate(unknown_axis(graph.constant(1.0), 0), evaluator.StateWithoutCache({}))
 
 
 def test_breakpoint_operation(monkeypatch):
@@ -386,7 +368,7 @@ def test_breakpoint_operation(monkeypatch):
     broken = graph.breakpoint(x)
 
     state = evaluator.StateWithoutCache({"x": np.array([[1.0, 2.0], [3.0, 4.0]])})
-    result = evaluator.evaluate(broken, state)
+    _ = evaluator.evaluate(broken, state)
 
     # Verify breakpoint was triggered
     assert len(mock_input_calls) == 1
@@ -413,7 +395,6 @@ def test_state_management():
 
 def test_type_validation():
     """Test type validation and mixing."""
-
     # Test mixing integer and float types
     state = evaluator.StateWithoutCache(
         {"x": np.array([1, 2, 3]), "y": np.array([1.0, 2.0, 3.0])}  # integers  # floats
@@ -423,9 +404,7 @@ def test_type_validation():
     assert result.dtype == np.float64  # Should promote to float
 
     # Test boolean operations with numeric types
-    state = evaluator.StateWithoutCache(
-        {"x": np.array([True, False, True]), "y": np.array([1.0, 0.0, 2.0])}
-    )
+    state = evaluator.StateWithoutCache({"x": np.array([True, False, True]), "y": np.array([1.0, 0.0, 2.0])})
     node = graph.logical_and(graph.placeholder("x"), graph.placeholder("y"))
     result = evaluator.evaluate(node, state)
     assert result.dtype == np.bool_
@@ -433,7 +412,6 @@ def test_type_validation():
 
 def test_edge_cases_and_errors():
     """Test various edge cases and error conditions."""
-
     # Test incompatible broadcasting
     with pytest.raises(ValueError):
         state = evaluator.StateWithoutCache(
@@ -453,9 +431,7 @@ def test_edge_cases_and_errors():
 
     # Test division by zero
     with pytest.warns(RuntimeWarning):
-        state = evaluator.StateWithoutCache(
-            {"x": np.array([1.0, 2.0]), "y": np.array([0.0, 0.0])}
-        )
+        state = evaluator.StateWithoutCache({"x": np.array([1.0, 2.0]), "y": np.array([0.0, 0.0])})
         node = graph.divide(graph.placeholder("x"), graph.placeholder("y"))
         evaluator.evaluate(node, state)
 

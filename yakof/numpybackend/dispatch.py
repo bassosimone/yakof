@@ -1,5 +1,5 @@
 """
-Dispatch Operations
+Dispatch Operations.
 ===================
 
 This module contains the dispatch tables mapping frontend graph
@@ -68,7 +68,8 @@ def _expand_dims(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
         x: The input array to expand
         axis: The position where the new axis is placed
 
-    Returns:
+    Returns
+    -------
         Array with the expanded dimension
     """
     return np.expand_dims(x, axis)
@@ -81,7 +82,8 @@ def _reduce_sum(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
         x: The input array to reduce
         axis: The axis along which to perform the sum
 
-    Returns:
+    Returns
+    -------
         Array with the specified axis reduced by summation
     """
     return np.sum(x, axis=axis)
@@ -94,7 +96,8 @@ def _reduce_mean(x: np.ndarray, axis: graph.Axis) -> np.ndarray:
         x: The input array to reduce
         axis: The axis along which to compute the mean
 
-    Returns:
+    Returns
+    -------
         Array with the specified axis reduced by averaging
     """
     return np.mean(x, axis=axis)

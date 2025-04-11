@@ -2,18 +2,16 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from yakof.sympyke import Piecewise, Symbol
+import numpy as np
+import pytest
+
 from yakof.frontend import linearize
 from yakof.numpybackend import executor
-
-import numpy as np
-
-import pytest
+from yakof.sympyke import Piecewise, Symbol
 
 
 def test_piecewise_basics():
     """Make sure that Piecewise works as intended with Symbol."""
-
     # Create the placeholders as symbols
     x = Symbol("x")
     y = Symbol("y")
