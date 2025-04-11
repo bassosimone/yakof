@@ -4,9 +4,9 @@
 
 import numpy as np
 import pytest
+from dt_model.engine.numpybackend import executor
 
 from yakof.frontend import abstract, morphisms
-from dt_model.engine.numpybackend import executor
 
 # Generate axes to makes tests using explicit axes more readable
 x, y, z, u = morphisms.generate_canonical_axes(4)

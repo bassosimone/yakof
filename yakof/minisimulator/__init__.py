@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from typing import Optional, Protocol, Sequence, runtime_checkable
 
 import numpy as np
-
 from dt_model.engine.frontend import graph
 
 

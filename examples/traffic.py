@@ -16,10 +16,10 @@ The model represents a café where:
 """
 
 import numpy as np
-
-from yakof import trafficmodel
 from dt_model.engine.frontend import graph
 from dt_model.engine.numpybackend import executor
+
+from yakof import trafficmodel
 
 
 def generate_base_demand(n_intervals, start_hour=6.0):

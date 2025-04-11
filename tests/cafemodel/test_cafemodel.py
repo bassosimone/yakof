@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
+from dt_model.engine.numpybackend import executor
 
 from yakof import cafemodel
-from dt_model.engine.numpybackend import executor
 
 
 def test_cafe_model():

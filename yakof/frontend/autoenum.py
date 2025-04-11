@@ -52,6 +52,7 @@ from __future__ import annotations
 from typing import Generic, TypeVar
 
 from dt_model.engine import atomic
+
 from ..frontend import abstract
 
 _id_generator = atomic.Int()
