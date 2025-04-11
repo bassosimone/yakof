@@ -4,12 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "yakof"
-version = "0.8.0"
+version = "0.9.0"
 description = "A technology demonstrator for sustainability modeling"
 readme = "README.md"
-authors = [
-    { name = "Simone Basso", email = "sibasso@fbk.eu" },
-]
+authors = [{ name = "Simone Basso", email = "sibasso@fbk.eu" }]
 license = "Apache-2.0"
 classifiers = [
     "License :: OSI Approved :: Apache Software License",
