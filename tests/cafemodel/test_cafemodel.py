@@ -5,7 +5,7 @@
 import numpy as np
 
 from yakof import cafemodel
-from yakof.numpybackend import executor
+from dt_model.engine.numpybackend import executor
 
 
 def test_cafe_model():

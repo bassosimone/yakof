@@ -18,8 +18,8 @@ The model represents a café where:
 import numpy as np
 
 from yakof import trafficmodel
-from yakof.frontend import graph
-from yakof.numpybackend import executor
+from dt_model.engine.frontend import graph
+from dt_model.engine.numpybackend import executor
 
 
 def generate_base_demand(n_intervals, start_hour=6.0):

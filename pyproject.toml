@@ -3,14 +3,7 @@ name = "yakof"
 version = "0.8.0"
 description = "A technology demonstrator for sustainability modeling"
 requires-python = ">=3.11.0"
-dependencies = [
-    "dt_model",
-    "matplotlib>=3.10.0",
-    "numpy>=2.2.0",
-    "pandas>=2.2.0",
-    "scipy>=1.15.0",
-    "sympy>=1.13.0",
-]
+dependencies = ["civic-digital-twins", "numpy>=2.2.0"]
 license = { file = "LICENSE" }
 
 [build-system]
@@ -26,7 +19,7 @@ python_files = ["test_*.py"]
 addopts = "--cov=yakof --cov-report=xml --cov-report=term-missing"
 
 [tool.uv.sources]
-dt-model = { git = "https://github.com/fbk-most/dt-model", rev = "main" }
+civic-digital-twins = { git = "https://github.com/fbk-most/dt-model", rev = "main" }
 
 [tool.ruff]
 target-version = "py311"

@@ -4,7 +4,8 @@
 
 import pytest
 
-from yakof.frontend import abstract, graph
+from yakof.frontend import abstract
+from dt_model.engine.frontend import graph
 
 
 class DummyBasis:

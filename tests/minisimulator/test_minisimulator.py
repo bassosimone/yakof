@@ -7,7 +7,7 @@ import pytest
 from numpy.testing import assert_array_equal
 
 from yakof import minisimulator
-from yakof.frontend import graph
+from dt_model.engine.frontend import graph
 
 
 class TestLinearRange:

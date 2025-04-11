@@ -5,7 +5,7 @@
 import numpy as np
 
 from yakof import trafficmodel
-from yakof.numpybackend import executor
+from dt_model.engine.numpybackend import executor
 
 
 def test_traffic_model():

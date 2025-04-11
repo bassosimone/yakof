@@ -19,7 +19,8 @@ The traffic model captures how demand is influenced by:
 
 from dataclasses import dataclass, field
 
-from ..frontend import abstract, autonaming, bases, graph, linearize, morphisms
+from ..frontend import abstract, autonaming, bases, morphisms
+from dt_model.engine.frontend import graph, linearize
 
 # Axes
 time_axis_id, ensemble_axis_id = morphisms.generate_canonical_axes(2)

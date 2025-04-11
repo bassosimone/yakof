@@ -22,7 +22,7 @@ from typing import Optional, Protocol, Sequence, runtime_checkable
 
 import numpy as np
 
-from ..frontend import graph
+from dt_model.engine.frontend import graph
 
 
 @dataclass(frozen=True)

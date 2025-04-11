@@ -4,8 +4,9 @@
 
 import pytest
 
-from yakof import atomic
-from yakof.frontend import abstract, autoenum, autonaming, graph
+from dt_model.engine import atomic
+from dt_model.engine.frontend import graph
+from yakof.frontend import abstract, autoenum, autonaming
 
 
 # Define test bases and spaces
