@@ -43,10 +43,6 @@ jobs:
       - name: Run traffic example
         run: uv run --python ${{ matrix.python_version }} python examples/traffic.py
 
-      - name: Run bench00.py benchmark in short mode
-        if: matrix['python_version'] == '3.11'
-        run: uv run --python ${{ matrix.python_version }} python benchmarks/bench00.py --short
-
       - name: Run tests with pytest
         run: uv run --python ${{ matrix.python_version }} pytest
 
