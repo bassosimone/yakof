@@ -8,7 +8,6 @@ This is a modified Molveno model, using the `yakof.fronted` and
 
 # SPDX-License-Identifier: Apache-2.0
 
-
 from yakof.dtyak import (
     CategoricalContextVariable,
     Constraint,

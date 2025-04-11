@@ -10,7 +10,6 @@ approaches across different input sizes. Results consistently show that Yakof
 achieves reasonably similar performance compared to SymPy-generated NumPy code.
 """
 
-
 import getopt
 import sys
 
