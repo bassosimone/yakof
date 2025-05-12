@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-from areaverde_yak import *
+from yakof.areaverde.indexes import *
 
 
 def to_time(seconds):

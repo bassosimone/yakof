@@ -143,17 +143,14 @@ I_average_emissions = Index('average emissions (per vehicle, per km)',
                             euro_class_emission["euro_5"] * euro_class_split['euro_5'] +
                             euro_class_emission["euro_6"] * euro_class_split['euro_6']
                         )
-I_average_emissions.node.name = 'average emissions (per vehicle, per km)'
     
 
 I_reduced_average_emissions = Index('reduced average emissions (per vehicle, per km)',
                                     sum(euro_class_emission[f"euro_{i}"] * I_reduced_euro_class_split[i].node for i in range(7)))
-I_reduced_average_emissions.node.name = 'reduced average emissions (per vehicle, per km)'
 
 # TODO: improve - at the moment, the conversion factor is 2,5 km per 5 minutes
 I_emissions = Index('emissions', 2.5 * I_average_emissions.node * I_traffic.node)
-I_emissions.node.name = 'emissions'
-I_emissions.name = 'emissions'  
+
 
 
 # TODO: The average emissions is probably different outside regulated hours
@@ -163,11 +160,9 @@ I_reduced_emissions = Index('reduced emissions',
                                        (TS.node >= I_P_start_time.node) & (TS.node <= I_P_end_time.node)),
                                       (2.5 * I_average_emissions.node * I_reduced_traffic.node, True)))
 
-I_total_emissions = Index('total emissions', I_emissions.node) # when we set I_emissions.node as a velue it sets I_emissions.node.name as 'total emissions'
-I_total_emissions.node.name = 'total emissions'
+I_total_emissions = Index('total emissions', I_emissions.node) 
 
 I_total_reduced_emissions = Index('total reduced emissions', I_reduced_emissions.node)
-I_total_reduced_emissions.node.name = 'total reduced emissions'
 
 indexes = [TS, TS_inflow, TS_starting,
            I_P_start_time, I_P_end_time, *I_P_cost, I_P_fraction_exempted,
@@ -184,3 +179,4 @@ indexes = [TS, TS_inflow, TS_starting,
            I_modified_starting, I_traffic, I_reduced_traffic,
            I_average_emissions, I_reduced_average_emissions,
            I_emissions, I_reduced_emissions, I_total_emissions, I_total_reduced_emissions ]
+    
